@@ -102,6 +102,9 @@ jobs:
           file: Containerfile
           push: true
           tags: ${{ env.TAGS_CONCAT }}
+          build-args: |
+            FEDORA_VERSION=${{ matrix.fedora-version }}
+            FEDORA_EDITION=${{ matrix.fedora-edition }}
 
   build-nvidia:
     runs-on: ubuntu-latest
@@ -196,3 +199,8 @@ jobs:
           file: Containerfile.nvidia
           push: true
           tags: ${{ env.TAGS_CONCAT }}
+          build-args: |
+            FEDORA_VERSION=${{ matrix.fedora-version }}
+            FEDORA_EDITION=${{ matrix.fedora-edition }}
+            NVIDIA_VERSION=${{ matrix.nvidia-version }}
+            BASE_TAG=${{ env.BASE_TAG }}

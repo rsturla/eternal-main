@@ -50,9 +50,9 @@ jobs:
           TAGS=()
 
           # Add PR number as a tag
-          TAGS+=("pr-${{ github.event.number }}-${{ matrix.fedora-version }}")
+          TAGS+=("${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:pr-${{ github.event.number }}-${{ matrix.fedora-version }}")
           # Add short commit hash with PR number as a tag
-          TAGS+=("pr-${{ github.event.number }}-$(git rev-parse --short HEAD)-${{ matrix.fedora-version }}")
+          TAGS+=("${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:pr-${{ github.event.number }}-$(git rev-parse --short HEAD)-${{ matrix.fedora-version }}")
 
           echo "TAGS=${TAGS[*]}" >> $GITHUB_ENV
           echo "TAGS_CONCAT=$(IFS=, ; echo "${TAGS[*]}")" >> $GITHUB_ENV

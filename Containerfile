@@ -35,3 +35,16 @@ RUN rpm-ostree override remove \
   && \
   rm -rf /var/* /tmp/* && \
   ostree container commit
+
+# Install packages
+RUN rpm-ostree install \
+  htop \
+  distrobox \
+  just \
+  neofetch \
+  tmux \
+  zsh \
+  openssl \
+  && \
+  rm -rf /var/* /tmp/* && \
+  ostree container commit

@@ -27,3 +27,11 @@ RUN rpm-ostree install \
   && \
   rm -rf /var/* /tmp/* && \
   ostree container commit
+
+# Remove unwanted packages
+RUN rpm-ostree override remove \
+  firefox \
+  firefox-langpacks \
+  && \
+  rm -rf /var/* /tmp/* && \
+  ostree container commit

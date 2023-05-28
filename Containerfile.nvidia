@@ -16,7 +16,7 @@ FROM ${BASE_IMAGE}:${BASE_TAG} as base-nvidia
 
 COPY --from=akmods-nvidia /var/cache /var/cache
 COPY --from=akmods-nvidia /tmp/nvidia-addons /tmp/nvidia-addons
-COPY scripts/nvidia-* /tmp/scripts
+COPY scripts /tmp/scripts
 
 RUN rpm-ostree install \
   https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \

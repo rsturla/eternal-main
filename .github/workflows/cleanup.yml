@@ -1,11 +1,7 @@
 name: Cleanup Images
 
 on:
-  pull_request:
-    branches:
-      - main
   schedule:
-    # Every 6 hours
     - cron: "0 */6 * * *"
 
 jobs:

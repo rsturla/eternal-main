@@ -6,6 +6,9 @@ They include basic configuration and tools which will be inherited by all other 
 
 ## Features
 
+- Automated Upgrades
+  - [x] OS Packages
+  - [x] Flatpaks
 - Proprietary Drivers
   - [x] Nvidia
 

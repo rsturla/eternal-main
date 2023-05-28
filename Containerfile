@@ -14,3 +14,38 @@ RUN systemctl enable rpm-ostreed-automatic.timer && \
   && \
   rm -rf /var/* /tmp/* && \
   ostree container commit
+
+# Install RPMFusion repositories
+RUN rpm-ostree install \
+  https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
+  https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm && \
+  rpm-ostree install \
+  rpmfusion-nonfree-release  \
+  rpmfusion-free-release  \
+  --uninstall=rpmfusion-free-release-$(rpm -E %fedora)-1.noarch  \
+  --uninstall=rpmfusion-nonfree-release-$(rpm -E %fedora)-1.noarch \
+  && \
+  rm -rf /var/* /tmp/* && \
+  ostree container commit
+
+# Remove unwanted packages
+RUN rpm-ostree override remove \
+  firefox \
+  firefox-langpacks \
+  && \
+  rm -rf /var/* /tmp/* && \
+  ostree container commit
+
+# Install packages
+RUN rpm-ostree install \
+  chromium \
+  distrobox \
+  just \
+  neofetch \
+  openssl \
+  tmux \
+  zsh \
+  htop \
+  && \
+  rm -rf /var/* /tmp/* && \
+  ostree container commit

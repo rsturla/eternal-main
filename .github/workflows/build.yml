@@ -136,6 +136,7 @@ jobs:
 
           echo "TAGS=${TAGS[*]}" >> $GITHUB_ENV
           echo "TAGS_CONCAT=$(IFS=, ; echo "${TAGS[*]}")" >> $GITHUB_ENV
+          echo "BASE_TAG=$(git rev-parse --short HEAD)-${{ matrix.fedora-version }}" >> $GITHUB_ENV
 
       - name: Generate Image Metadata (Pull Request)
         if: github.event_name == 'pull_request'
@@ -150,7 +151,7 @@ jobs:
 
           echo "TAGS=${TAGS[*]}" >> $GITHUB_ENV
           echo "TAGS_CONCAT=$(IFS=, ; echo "${TAGS[*]}")" >> $GITHUB_ENV
-          echo "BASE_TAG=${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.fedora-version }}" >> $GITHUB_ENV
+          echo "BASE_TAG=pr${{ github.event.number }}-$(git rev-parse --short HEAD)-${{ matrix.fedora-version }}" >> $GITHUB_ENV
 
       - name: Login to GHCR
         uses: docker/login-action@v2

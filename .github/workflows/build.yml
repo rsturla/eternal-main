@@ -74,23 +74,12 @@ jobs:
         with:
           context: .
           file: Containerfile
-          push: false
-          load: true
-          tags: local
-          build-args: |
-            FEDORA_VERSION=${{ matrix.fedora-version }}
-            FEDORA_EDITION=${{ matrix.fedora-edition }}
-
-      - name: Push Image
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          file: Containerfile
           push: true
           tags: ${{ env.TAGS_CONCAT }}
           build-args: |
             FEDORA_VERSION=${{ matrix.fedora-version }}
             FEDORA_EDITION=${{ matrix.fedora-edition }}
+
 
   build-nvidia:
     runs-on: ubuntu-latest
@@ -169,20 +158,6 @@ jobs:
         with:
           context: .
           file: Containerfile.nvidia
-          push: false
-          load: true
-          tags: local
-          build-args: |
-            FEDORA_VERSION=${{ matrix.fedora-version }}
-            FEDORA_EDITION=${{ matrix.fedora-edition }}
-            NVIDIA_VERSION=${{ matrix.nvidia-version }}
-            BASE_TAG=${{ env.BASE_TAG }}
-
-      - name: Push Image
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          file: Containerfile.nvidia
           push: true
           tags: ${{ env.TAGS_CONCAT }}
           build-args: |
@@ -190,6 +165,7 @@ jobs:
             FEDORA_EDITION=${{ matrix.fedora-edition }}
             NVIDIA_VERSION=${{ matrix.nvidia-version }}
             BASE_TAG=${{ env.BASE_TAG }}
+
 
   check:
     runs-on: ubuntu-latest

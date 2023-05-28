@@ -1,0 +1,30 @@
+name: Cleanup Images
+
+on:
+  pull_request:
+    branches:
+      - main
+  schedule:
+    # Every 6 hours
+    - cron: "0 */6 * * *"
+
+jobs:
+  cleanup-images:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [base, silverblue]
+
+    steps:
+      - name: Delete PR images
+        uses: actions/delete-package-versions@v4
+        with:
+          package-name: eternal-linux/main/${{ matrix.image }}
+          package-type: container
+          min-versions-to-keep: 10
+          # Regex to match everything except "pr*"
+          ignore-versions: "^(?!pr).*$"
+          token: ${{ secrets.GITHUB_TOKEN }}

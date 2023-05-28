@@ -193,3 +193,7 @@ jobs:
   check:
     runs-on: ubuntu-latest
     needs: [build-base, build-nvidia]
+    steps:
+      - name: Exit
+        shell: bash
+        run: exit 0

@@ -19,6 +19,10 @@ jobs:
       matrix:
         fedora-version: [37, 38]
         fedora-edition: [base, silverblue]
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
     env:
       TAGS: ""
       TAGS_CONCAT: ""

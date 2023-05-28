@@ -50,9 +50,9 @@ jobs:
           TAGS=()
 
           # Add PR number as a tag
-          TAGS+=("${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:pr-${{ github.event.number }}-${{ matrix.fedora-version }}")
+          TAGS+=("${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:pr${{ github.event.number }}-${{ matrix.fedora-version }}")
           # Add short commit hash with PR number as a tag
-          TAGS+=("${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:pr-${{ github.event.number }}-$(git rev-parse --short HEAD)-${{ matrix.fedora-version }}")
+          TAGS+=("${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:pr${{ github.event.number }}-$(git rev-parse --short HEAD)-${{ matrix.fedora-version }}")
 
           echo "TAGS=${TAGS[*]}" >> $GITHUB_ENV
           echo "TAGS_CONCAT=$(IFS=, ; echo "${TAGS[*]}")" >> $GITHUB_ENV
@@ -91,11 +91,96 @@ jobs:
           push: false
           load: true
           tags: local
+          build-args: |
+            FEDORA_VERSION=${{ matrix.fedora-version }}
+            FEDORA_EDITION=${{ matrix.fedora-edition }}
 
       - name: Push Image
         uses: docker/build-push-action@v4
         with:
           context: .
           file: Containerfile
+          push: true
+          tags: ${{ env.TAGS_CONCAT }}
+
+  build-nvidia:
+    runs-on: ubuntu-latest
+    needs: build-base
+    strategy:
+      fail-fast: false
+      matrix:
+        fedora-version: [37, 38]
+        fedora-edition: [base, silverblue]
+        nvidia-version: [530]
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    env:
+      TAGS: ""
+      TAGS_CONCAT: ""
+      BASE_TAG: ""
+      IMAGE_NAME: eternal-linux/main/${{ matrix.fedora-edition }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Generate Image Metadata
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          TAGS=()
+
+          TAGS+=("${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.fedora-version }}-nvidia${{ matrix.nvidia-version }}")
+          TAGS+=("${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:$(git rev-parse --short HEAD)-${{ matrix.fedora-version }}-nvidia${{ matrix.nvidia-version }}")
+
+          echo "TAGS=${TAGS[*]}" >> $GITHUB_ENV
+          echo "TAGS_CONCAT=$(IFS=, ; echo "${TAGS[*]}")" >> $GITHUB_ENV
+
+      - name: Generate Image Metadata (Pull Request)
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          TAGS=()
+
+          # Add PR number as a tag
+          TAGS+=("${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:pr${{ github.event.number }}-${{ matrix.fedora-version }}-nvidia")
+          # Add short commit hash with PR number as a tag
+          TAGS+=("${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:pr${{ github.event.number }}-$(git rev-parse --short HEAD)-${{ matrix.fedora-version }}-nvidia")
+
+          echo "TAGS=${TAGS[*]}" >> $GITHUB_ENV
+          echo "TAGS_CONCAT=$(IFS=, ; echo "${TAGS[*]}")" >> $GITHUB_ENV
+          echo "BASE_TAG=${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.fedora-version }}" >> $GITHUB_ENV
+
+      - name: Login to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build Image
+        id: build
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: Containerfile.nvidia
+          push: false
+          load: true
+          tags: local
+          build-args: |
+            FEDORA_VERSION=${{ matrix.fedora-version }}
+            FEDORA_EDITION=${{ matrix.fedora-edition }}
+            NVIDIA_VERSION=${{ matrix.nvidia-version }}
+            BASE_TAG=${{ env.BASE_TAG }}
+
+      - name: Push Image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: Containerfile.nvidia
           push: true
           tags: ${{ env.TAGS_CONCAT }}

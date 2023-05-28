@@ -1,0 +1,37 @@
+ARG FEDORA_VERSION
+ARG FEDORA_EDITION
+
+ARG BASE_IMAGE=ghcr.io/rsturla/eternal-linux/main/${FEDORA_EDITION}
+ARG BASE_TAG
+
+ARG NVIDIA_VERSION
+ARG NVIDIA_AKMODS_IMAGE=ghcr.io/rsturla/akmods-nvidia
+ARG NVIDIA_AKMODS_TAG=${FEDORA_VERSION}-${NVIDIA_VERSION}
+
+
+FROM ${NVIDIA_AKMODS_IMAGE}:${NVIDIA_AKMODS_TAG} as akmods-nvidia
+
+
+FROM ${BASE_IMAGE}:${BASE_TAG} as base-nvidia
+
+COPY --from=akmods-nvidia /var/cache /var/cache
+COPY --from=akmods-nvidia /tmp/nvidia-addons /tmp/nvidia-addons
+COPY scripts /tmp/scripts
+
+RUN rpm-ostree install \
+  https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm \
+  https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm && \
+  rpm-ostree install \
+  rpmfusion-nonfree-release  \
+  rpmfusion-free-release  \
+  --uninstall=rpmfusion-free-release-$(rpm -E %fedora)-1.noarch  \
+  --uninstall=rpmfusion-nonfree-release-$(rpm -E %fedora)-1.noarch
+
+RUN /tmp/scripts/nvidia-install.sh
+RUN /tmp/scripts/nvidia-postinstall.sh
+
+RUN rpm-ostree override remove \
+  rpmfusion-nonfree-release \
+  rpmfusion-free-release && \
+  rm -rf /tmp/* /var/* && \
+  ostree container commit

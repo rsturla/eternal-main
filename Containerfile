@@ -36,6 +36,15 @@ RUN rpm-ostree override remove \
   rm -rf /var/* /tmp/* && \
   ostree container commit
 
+# Install Mesa VA drivers
+RUN rpm-ostree override remove \
+  mesa-va-drivers && \
+  rpm-ostree install \
+  mesa-va-drivers-freeworld \
+  && \
+  rm -rf /var/* /tmp/* && \
+  ostree container commit
+
 # Install packages
 RUN rpm-ostree install \
   chromium \

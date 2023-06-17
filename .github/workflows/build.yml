@@ -116,7 +116,7 @@ jobs:
 
           TAGS+=("${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.fedora-version }}-nvidia${{ matrix.nvidia-version }}")
           TAGS+=("${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:$(git rev-parse --short HEAD)-${{ matrix.fedora-version }}-nvidia${{ matrix.nvidia-version }}")
-          if ${{ matrix.nvidia-is-stable }}; then
+          if ${{ matrix.nvidia-is-stable == 'true' }}; then
             TAGS+=("${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.fedora-version }}-nvidia")
             TAGS+=("${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:$(git rev-parse --short HEAD)-${{ matrix.fedora-version }}-nvidia")
           fi

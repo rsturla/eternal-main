@@ -23,3 +23,5 @@ RUN /tmp/scripts/nvidia-install.sh && \
   && \
   rm -rf /var/* /tmp/* && \
   ostree container commit
+
+RUN echo "!include /usr/share/eternal/nvidia.just >> /usr/share/eternal/justfile"

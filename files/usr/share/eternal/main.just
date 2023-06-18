@@ -4,10 +4,10 @@ default:
 bios:
   systemctl reboot --firmware-setup
 
-flatpak-update:
+update-flatpak:
   flatpak update -y
 
-system-update:
+update-system:
   rpm-ostree update
 
 update:

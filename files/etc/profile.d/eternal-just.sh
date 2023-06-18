@@ -1,1 +1,1 @@
-alias eternal="just --unstable --justfile /usr/share/eternal/main.just"
+alias eternal="just --unstable --justfile /usr/share/eternal/justfile"

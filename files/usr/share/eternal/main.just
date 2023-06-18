@@ -11,5 +11,5 @@ update-system:
   rpm-ostree update
 
 update:
-  @just flatpak-update
-  @just system-update
+  @just --unstable update-flatpak
+  @just --unstable update-system

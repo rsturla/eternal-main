@@ -1,9 +1,15 @@
+nvidia-setup:
+  @echo "Configuring NVIDIA drivers..."
+  @just --unstable nvidia-disable-nouveau
+  @just --unstable nvidia-secure-boot-enable
+  @just --unstable nvidia-firefox-vaapi
+  @echo "Configuring NVIDIA drivers... done"
+
 nvidia-disable-nouveau:
   rpm-ostree kargs \
     --append-if-missing=rd.driver.blacklist=nouveau \
     --append-if-missing=modprobe.blacklist=nouveau \
-    --append-if-missing=nvidia-drm.modeset=1 \
-    --delete=nomodeset
+    --append-if-missing=nvidia-drm.modeset=1
 
 nvidia-secure-boot-enable:
   sudo mokutil --import /etc/pki/akmods/certs/eternal-akmods.der

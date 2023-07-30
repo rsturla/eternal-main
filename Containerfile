@@ -7,7 +7,7 @@ FROM ${FEDORA_IMAGE} as base
 COPY files/usr /usr
 COPY files/etc /etc
 
-# Create /tmp directory
+# Create /var/tmp directory
 RUN mkdir -p /var/tmp && chmod -R 1777 /var/tmp
 
 # Enable automatic updates

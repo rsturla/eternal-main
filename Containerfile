@@ -7,12 +7,15 @@ FROM ${FEDORA_IMAGE} as base
 COPY files/usr /usr
 COPY files/etc /etc
 
+# Create /tmp directory
+RUN mkdir -p /var/tmp && chmod -R 1777 /var/tmp
+
 # Enable automatic updates
 RUN systemctl enable rpm-ostreed-automatic.timer && \
   systemctl enable flatpak-system-update.timer && \
   systemctl --global enable flatpak-user-update.timer \
   && \
-  rm -rf /var/* /tmp/* && \
+  rm -rf /tmp/* && \
   ostree container commit
 
 # Install RPMFusion repositories
@@ -25,7 +28,7 @@ RUN rpm-ostree install \
   --uninstall=rpmfusion-free-release-$(rpm -E %fedora)-1.noarch  \
   --uninstall=rpmfusion-nonfree-release-$(rpm -E %fedora)-1.noarch \
   && \
-  rm -rf /var/* /tmp/* && \
+  rm -rf /tmp/* && \
   ostree container commit
 
 # Remove unwanted packages
@@ -33,7 +36,7 @@ RUN rpm-ostree override remove \
   firefox \
   firefox-langpacks \
   && \
-  rm -rf /var/* /tmp/* && \
+  rm -rf /tmp/* && \
   ostree container commit
 
 # Install Mesa VA drivers
@@ -42,7 +45,7 @@ RUN rpm-ostree override remove \
   rpm-ostree install \
   mesa-va-drivers-freeworld \
   && \
-  rm -rf /var/* /tmp/* && \
+  rm -rf /tmp/* && \
   ostree container commit
 
 # Install packages
@@ -56,5 +59,5 @@ RUN rpm-ostree install \
   zsh \
   htop \
   && \
-  rm -rf /var/* /tmp/* && \
+  rm -rf /tmp/* && \
   ostree container commit

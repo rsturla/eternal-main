@@ -14,6 +14,8 @@ FROM ${NVIDIA_AKMODS_IMAGE}:${NVIDIA_AKMODS_TAG} as akmods-nvidia
 
 FROM ${BASE_IMAGE}:${BASE_TAG} as base-nvidia
 
+ARG FEDORA_VERSION
+
 COPY --from=akmods-nvidia /var/cache /var/cache
 COPY --from=akmods-nvidia /tmp/nvidia-addons /tmp/nvidia-addons
 COPY scripts /tmp/scripts

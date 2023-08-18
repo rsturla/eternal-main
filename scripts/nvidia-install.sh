@@ -2,7 +2,7 @@
 
 set -ouex pipefail
 
-sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/fedora-{cisco-openh264,modular,updates-modular}.repo
+sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/fedora-cisco-openh264.repo
 
 install -D /tmp/nvidia-addons/rpmbuild/SOURCES/nvidia-container-runtime.repo \
     /etc/yum.repos.d/nvidia-container-runtime.repo

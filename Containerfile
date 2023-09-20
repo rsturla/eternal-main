@@ -37,7 +37,6 @@ RUN rpm-ostree override remove \
 
 # Install packages
 RUN rpm-ostree install \
-  chromium \
   distrobox \
   just \
   neofetch \

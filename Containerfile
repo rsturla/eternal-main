@@ -5,7 +5,6 @@ ARG FEDORA_IMAGE=quay.io/fedora-ostree-desktops/${FEDORA_EDITION}:${FEDORA_VERSI
 FROM ${FEDORA_IMAGE} as base
 
 COPY files/usr /usr
-COPY files/etc /etc
 
 # Enable automatic updates
 RUN systemctl enable rpm-ostreed-automatic.timer && \
@@ -38,7 +37,6 @@ RUN rpm-ostree override remove \
 
 # Install packages
 RUN rpm-ostree install \
-  chromium \
   distrobox \
   just \
   neofetch \

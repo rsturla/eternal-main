@@ -8,7 +8,7 @@ COPY files/usr /usr
 
 # Setup /etc/bashrc.d
 RUN cp /etc/bashrc /usr/etc/bashrc && \
-  echo -e "\nfor file in /usr/etc/bashrc.d/*.sh; do\n  source \"\$file\"\ndone\n" >> /usr/etc/bashrc && \
+  echo -e "\nfor file in /etc/bashrc.d/*.sh; do\n  source \"\$file\"\ndone\n" >> /usr/etc/bashrc && \
   mkdir -p /usr/etc/bashrc.d \
   && \
   rm -rf /var/* /tmp/* && \

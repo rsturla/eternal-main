@@ -1,14 +1,22 @@
 #!/usr/bin/env bash
 
-# Script Version
-VER=1
-VER_FILE="$HOME/.flatpak_manager_version"
-VER_RAN=$(cat $VER_FILE)
+# Create hash of files so we can decide if we need to run this script
+HASHED_FILES=(
+  /etc/flatpak/user/install
+  /etc/flatpak/user/remove
+  /usr/bin/flatpak-user-manager
+  /usr/lib/systemd/user/flatpak-user-manager.service
+)
+CURRENT_HASH=$(sha256sum ${HASHED_FILES[@]} | sha256sum | awk '{print $1}')
+HASH_FILE=$HOME/.config/flatpak-manager/lastrun
 
-# Run script if updated
-if [[ -f $VER_FILE && $VER = $VER_RAN ]]; then
-  echo "Flatpak manager v$VER has already ran. Exiting..."
-  exit 0
+# Compare hash to last run
+if [[ -f $HASH_FILE ]]; then
+  PREVIOUS_HASH=$(cat $HASH_FILE)
+  if [[ $HASH = $PREVIOUS_HASH ]]; then
+    echo "Flatpak manager has already ran. Exiting..."
+    exit 0
+  fi
 fi
 
 # Setup Flathub
@@ -37,4 +45,4 @@ if [[ -n $REMOVE_LIST ]]; then
   done
 fi
 
-echo $VER > $VER_FILE
+echo $HASH > $HASH_FILE

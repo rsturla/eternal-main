@@ -1,0 +1,12 @@
+[Unit]
+Description=Manage user flatpaks
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/flatpak-user-manager
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

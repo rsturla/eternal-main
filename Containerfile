@@ -35,6 +35,16 @@ RUN rpm-ostree install \
   rm -rf /var/* /tmp/* && \
   ostree container commit
 
+# Configure Flatpak
+RUN mkdir -p /usr/etc/flatpak/remotes.d && \
+  wget -q https://dl.flathub.org/repo/flathub.flatpakrepo -P /usr/etc/flatpak/remotes.d \
+  && \
+  systemctl enable flatpak-system-manager.service && \
+  systemctl --global enable flatpak-user-manager.service \
+  && \
+  rm -rf /var/* /tmp/* && \
+  ostree container commit
+
 # Remove unwanted packages
 RUN rpm-ostree override remove \
   firefox \

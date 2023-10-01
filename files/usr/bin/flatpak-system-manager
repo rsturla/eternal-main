@@ -19,7 +19,7 @@ if grep -qz 'fedora' <<< $(flatpak remotes); then
 
   FEDORA_FLATPAKS=$(flatpak list --columns=application,origin | grep -w 'fedora' | awk '{print $1}')
   for flatpak in $FEDORA_FLATPAKS; do
-    flatpak remove --noninteractive $flatpak
+    flatpak remove --system --noninteractive $flatpak
   done
 fi
 

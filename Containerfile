@@ -14,10 +14,15 @@ RUN cp /etc/bashrc /usr/etc/bashrc && \
   rm -rf /var/* /tmp/* && \
   ostree container commit
 
-# Enable automatic updates
-RUN systemctl enable rpm-ostreed-automatic.timer && \
+# Configure Flatpak
+RUN mkdir -p /usr/etc/flatpak/remotes.d && \
+  wget -q https://dl.flathub.org/repo/flathub.flatpakrepo -P /usr/etc/flatpak/remotes.d \
+  && \
+  systemctl enable rpm-ostreed-automatic.timer && \
   systemctl enable flatpak-system-update.timer && \
-  systemctl --global enable flatpak-user-update.timer \
+  systemctl enable flatpak-system-manager.service && \
+  systemctl --global enable flatpak-user-update.timer && \
+  systemctl --global enable flatpak-user-manager.service \
   && \
   rm -rf /var/* /tmp/* && \
   ostree container commit
@@ -31,16 +36,6 @@ RUN rpm-ostree install \
   rpmfusion-free-release  \
   --uninstall=rpmfusion-free-release-$(rpm -E %fedora)-1.noarch  \
   --uninstall=rpmfusion-nonfree-release-$(rpm -E %fedora)-1.noarch \
-  && \
-  rm -rf /var/* /tmp/* && \
-  ostree container commit
-
-# Configure Flatpak
-RUN mkdir -p /usr/etc/flatpak/remotes.d && \
-  wget -q https://dl.flathub.org/repo/flathub.flatpakrepo -P /usr/etc/flatpak/remotes.d \
-  && \
-  systemctl enable flatpak-system-manager.service && \
-  systemctl --global enable flatpak-user-manager.service \
   && \
   rm -rf /var/* /tmp/* && \
   ostree container commit

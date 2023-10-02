@@ -32,7 +32,7 @@ IS_ERROR=0
 if [[ -n "$INSTALL_LIST" ]]; then
   for flatpak in $INSTALL_LIST; do
     if ! grep -qz "$flatpak" <<< "$FLATPAK_LIST"; then
-      if ! flatpak install --system --noninteractive "$flatpak"; then
+      if ! flatpak install --system --noninteractive flathub "$flatpak"; then
         IS_ERROR=1
       fi
     fi

@@ -32,7 +32,7 @@ jobs:
       IMAGE_NAME: eternal-linux/main/${{ matrix.fedora-edition }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4
 
       - name: Generate Image Metadata
         if: github.event_name != 'pull_request'
@@ -106,7 +106,7 @@ jobs:
       IMAGE_NAME: eternal-linux/main/${{ matrix.fedora-edition }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4
 
       - name: Generate Image Metadata
         if: github.event_name != 'pull_request'

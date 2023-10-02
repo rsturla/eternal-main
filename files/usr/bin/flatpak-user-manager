@@ -55,5 +55,6 @@ fi
 
 # If there were no errors, update the hash file
 if [[ $IS_ERROR -eq 0 ]]; then
+  mkdir -p "$(dirname "$HASH_FILE")"
   echo "$CURRENT_HASH" > "$HASH_FILE"
 fi

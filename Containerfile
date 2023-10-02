@@ -58,5 +58,7 @@ RUN rpm-ostree install \
   zsh \
   htop \
   && \
+  rm /usr/share/applications/htop.desktop \
+  && \
   rm -rf /var/* /tmp/* && \
   ostree container commit

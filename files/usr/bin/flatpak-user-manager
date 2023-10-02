@@ -27,11 +27,15 @@ FLATPAK_LIST=$(flatpak list --columns=application)
 INSTALL_LIST=$(cat /etc/flatpak/user/install)
 REMOVE_LIST=$(cat /etc/flatpak/user/remove)
 
+IS_ERROR=0
+
 # Install flatpaks in list
 if [[ -n $INSTALL_LIST ]]; then
   for flatpak in $INSTALL_LIST; do
     if grep -qvz $flatpak <<< $FLATPAK_LIST; then
-      flatpak install --user --noninteractive flathub $flatpak
+      if ! flatpak install --user --noninteractive flathub $flatpak; then
+        IS_ERROR=1
+      fi
     fi
   done
 fi
@@ -40,9 +44,13 @@ fi
 if [[ -n $REMOVE_LIST ]]; then
   for flatpak in $REMOVE_LIST; do
     if grep -qz $flatpak <<< $FLATPAK_LIST; then
-      flatpak remove --user --noninteractive $flatpak
+      if ! flatpak remove --user --noninteractive $flatpak; then
+        IS_ERROR=1
+      fi
     fi
   done
 fi
 
-echo $HASH > $HASH_FILE
+if [[ $IS_ERROR -eq 0 ]]; then
+  echo $CURRENT_HASH > $HASH_FILE
+fi

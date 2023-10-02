@@ -58,3 +58,5 @@ if [[ $IS_ERROR -eq 0 ]]; then
   mkdir -p "$(dirname "$HASH_FILE")"
   echo "$CURRENT_HASH" > "$HASH_FILE"
 fi
+
+exit $IS_ERROR

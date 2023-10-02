@@ -8,6 +8,8 @@ declare -a HASHED_FILES=(
   "/usr/lib/systemd/system/flatpak-system-manager.service"
 )
 
+IS_ERROR=0
+
 # Calculate the current hash
 CURRENT_HASH=$(sha256sum "${HASHED_FILES[@]}" | sha256sum | awk '{print $1}')
 HASH_FILE="/etc/flatpak/system/flatpak-manager/lastrun"
@@ -21,12 +23,24 @@ if [[ -f "$HASH_FILE" ]]; then
   fi
 fi
 
+# Opt out of and remove Fedora's flatpak repo
+if grep -qz 'fedora' <<< "$(flatpak remotes)"; then
+  FEDORA_FLATPAKS=$(flatpak list --columns=application,origin | grep -w 'fedora' | awk '{print $1}')
+  for flatpak in $FEDORA_FLATPAKS; do
+    if ! flatpak remove --system --noninteractive --force-remove fedora "$flatpak"; then
+      IS_ERROR=1
+    fi
+  done
+
+  /usr/lib/fedora-third-party/fedora-third-party-opt-out
+  /usr/bin/fedora-third-party disable
+  flatpak remote-delete fedora --force
+fi
+
 # Lists of flatpaks
 FLATPAK_LIST=$(flatpak list --columns=application)
 INSTALL_LIST=$(cat "/etc/flatpak/system/install")
 REMOVE_LIST=$(cat "/etc/flatpak/system/remove")
-
-IS_ERROR=0
 
 # Install flatpaks in the list
 if [[ -n "$INSTALL_LIST" ]]; then
@@ -48,20 +62,6 @@ if [[ -n "$REMOVE_LIST" ]]; then
       fi
     fi
   done
-fi
-
-# Opt out of and remove Fedora's flatpak repo
-if grep -qz 'fedora' <<< "$(flatpak remotes)"; then
-  FEDORA_FLATPAKS=$(flatpak list --columns=application,origin | grep -w 'fedora' | awk '{print $1}')
-  for flatpak in $FEDORA_FLATPAKS; do
-    if ! flatpak remove --system --noninteractive --force-remove fedora "$flatpak"; then
-      IS_ERROR=1
-    fi
-  done
-
-  /usr/lib/fedora-third-party/fedora-third-party-opt-out
-  /usr/bin/fedora-third-party disable
-  flatpak remote-delete fedora --force
 fi
 
 # If there were no errors, update the hash file

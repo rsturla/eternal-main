@@ -10,7 +10,7 @@ declare -a HASHED_FILES=(
 
 # Calculate the current hash
 CURRENT_HASH=$(sha256sum "${HASHED_FILES[@]}" | sha256sum | awk '{print $1}')
-HASH_FILE="/etc/flatpak/lastrun"
+HASH_FILE="/etc/flatpak/flatpak-manager/lastrun"
 
 # Compare hash to the last run
 if [[ -f "$HASH_FILE" ]]; then

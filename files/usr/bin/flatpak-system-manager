@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+
+# Define hashed files
+declare -a HASHED_FILES=(
+  "/etc/flatpak/system/install"
+  "/etc/flatpak/system/remove"
+  "/usr/bin/flatpak-system-manager"
+  "/usr/lib/systemd/system/flatpak-system-manager.service"
+)
+
+IS_ERROR=0
+
+# Calculate the current hash
+CURRENT_HASH=$(sha256sum "${HASHED_FILES[@]}" | sha256sum | awk '{print $1}')
+HASH_FILE="/etc/flatpak/system/flatpak-manager/lastrun"
+
+# Compare hash to the last run
+if [[ -f "$HASH_FILE" ]]; then
+  PREVIOUS_HASH=$(cat "$HASH_FILE")
+  if [[ "$CURRENT_HASH" == "$PREVIOUS_HASH" ]]; then
+    echo "Flatpak manager has already run. Exiting..."
+    exit 0
+  fi
+fi
+
+# Opt out of and remove Fedora's flatpak repo
+if grep -qz 'fedora' <<< "$(flatpak remotes)"; then
+  FEDORA_FLATPAKS=$(flatpak list --columns=application,origin | grep -w 'fedora' | awk '{print $1}')
+  for flatpak in $FEDORA_FLATPAKS; do
+    if ! flatpak remove --system --noninteractive --force-remove "$flatpak"; then
+      IS_ERROR=1
+    fi
+  done
+
+  /usr/lib/fedora-third-party/fedora-third-party-opt-out
+  /usr/bin/fedora-third-party disable
+  flatpak remote-delete fedora --force
+fi
+
+# Lists of flatpaks
+FLATPAK_LIST=$(flatpak list --columns=application)
+INSTALL_LIST=$(cat "/etc/flatpak/system/install")
+REMOVE_LIST=$(cat "/etc/flatpak/system/remove")
+
+# Install flatpaks in the list
+if [[ -n "$INSTALL_LIST" ]]; then
+  for flatpak in $INSTALL_LIST; do
+    if ! grep -qz "$flatpak" <<< "$FLATPAK_LIST"; then
+      if ! flatpak install --system --noninteractive flathub "$flatpak"; then
+        IS_ERROR=1
+      fi
+    fi
+  done
+fi
+
+# Remove flatpaks in the list
+if [[ -n "$REMOVE_LIST" ]]; then
+  for flatpak in $REMOVE_LIST; do
+    if grep -qz "$flatpak" <<< "$FLATPAK_LIST"; then
+      if ! flatpak remove --system --noninteractive "$flatpak"; then
+        IS_ERROR=1
+      fi
+    fi
+  done
+fi
+
+# If there were no errors, update the hash file
+if [[ $IS_ERROR -eq 0 ]]; then
+  mkdir -p "$(dirname "$HASH_FILE")"
+  echo "$CURRENT_HASH" > "$HASH_FILE"
+fi
+
+exit $IS_ERROR

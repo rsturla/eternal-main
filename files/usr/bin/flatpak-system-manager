@@ -52,16 +52,16 @@ fi
 
 # Opt out of and remove Fedora's flatpak repo
 if grep -qz 'fedora' <<< "$(flatpak remotes)"; then
-  /usr/lib/fedora-third-party/fedora-third-party-opt-out
-  /usr/bin/fedora-third-party disable
-  flatpak remote-delete fedora --force
-
   FEDORA_FLATPAKS=$(flatpak list --columns=application,origin | grep -w 'fedora' | awk '{print $1}')
   for flatpak in $FEDORA_FLATPAKS; do
-    if ! flatpak remove --system --noninteractive --force-remove "$flatpak"; then
+    if ! flatpak remove --system --noninteractive --force-remove fedora "$flatpak"; then
       IS_ERROR=1
     fi
   done
+
+  /usr/lib/fedora-third-party/fedora-third-party-opt-out
+  /usr/bin/fedora-third-party disable
+  flatpak remote-delete fedora --force
 fi
 
 # If there were no errors, update the hash file

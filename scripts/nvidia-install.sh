@@ -9,8 +9,8 @@ else
     sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/fedora-cisco-openh264.repo
 fi
 
-install -D /tmp/nvidia-addons/rpmbuild/SOURCES/nvidia-container-runtime.repo \
-    /etc/yum.repos.d/nvidia-container-runtime.repo
+install -D /tmp/nvidia-addons/rpmbuild/SOURCES/nvidia-container-toolkit.repo \
+    /etc/yum.repos.d/nvidia-container-toolkit.repo
 
 source /var/cache/akmods/nvidia-vars
 

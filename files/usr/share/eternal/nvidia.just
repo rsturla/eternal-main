@@ -20,7 +20,8 @@ test-cuda:
     --security-opt=no-new-privileges \
     --cap-drop=ALL \
     --security-opt label=type:nvidia_container_t  \
-    docker.io/mirrorgooglecontainers/cuda-vector-add:v0.1
+    --device=nvidia.com/gpu=all \
+    docker.io/nvidia/samples:vectoradd-cuda11.2.1
 
 nvidia-firefox-vaapi:
   flatpak override \

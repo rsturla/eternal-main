@@ -15,7 +15,7 @@ RUN cp /etc/bashrc /usr/etc/bashrc && \
   ostree container commit
 
 # Enable cliwrap - wrapper for interfacing with rpm-ostree using dnf/yum/grubby/rpm 
-RUN rpm-ostree deploy --ex-cliwrap=true \
+RUN rpm-ostree cliwrap install-to-root / \
   && \
   rm -rf /var/* /tmp/* && \
   ostree container commit

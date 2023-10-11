@@ -14,6 +14,12 @@ RUN cp /etc/bashrc /usr/etc/bashrc && \
   rm -rf /var/* /tmp/* && \
   ostree container commit
 
+# Enable cliwrap - wrapper for interfacing with rpm-ostree using dnf/yum/grubby/rpm 
+RUN rpm-ostree deploy --ex-cliwrap=true \
+  && \
+  rm -rf /var/* /tmp/* && \
+  ostree container commit
+
 # Configure Flatpak
 RUN mkdir -p /usr/etc/flatpak/remotes.d && \
   wget -q https://dl.flathub.org/repo/flathub.flatpakrepo -P /usr/etc/flatpak/remotes.d \

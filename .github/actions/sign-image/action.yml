@@ -24,9 +24,9 @@ runs:
     - name: Sign OCI Image
       shell: bash
       run: |
-        cosign sign -y --key env://COSIGN_PRIVATE_KEY $IMAGE@$DIGEST
+        cosign sign -y --key env://COSIGN_PRIVATE_KEY $REGISTRY@$DIGEST
       env:
-        IMAGE: ${{ inputs.image }}
+        REGISTRY: ${{ inputs.registry }}
         DIGEST: ${{ inputs.digest }}
         COSIGN_PRIVATE_KEY: ${{ inputs.private-key }}
         COSIGN_PASSWORD: ${{ inputs.private-key-passphrase }}

@@ -1,4 +1,5 @@
 name: Sign OCI Image
+description: Signs an OCI image using cosign
 
 inputs:
   private-key:
@@ -14,13 +15,15 @@ inputs:
     description: 'The digest of the image to sign'
     required: true
 
-steps:
-  - name: Setup Cosign
-    uses: sigstore/cosign-installer@v3
+runs:
+  using: composite
+  steps:
+    - name: Setup Cosign
+      uses: sigstore/cosign-installer@v3
 
-  - name: Sign OCI Image
-    run: |
-      cosign sign -y --key env://COSIGN_PRIVATE_KEY ${{ inputs.image }}:${{ inputs.digest }}
-    env:
-      COSIGN_PRIVATE_KEY: ${{ inputs.private-key }}
-      COSIGN_PASSWORD: ${{ inputs.private-key-passphrase }}
+    - name: Sign OCI Image
+      run: |
+        cosign sign -y --key env://COSIGN_PRIVATE_KEY ${{ inputs.image }}:${{ inputs.digest }}
+      env:
+        COSIGN_PRIVATE_KEY: ${{ inputs.private-key }}
+        COSIGN_PASSWORD: ${{ inputs.private-key-passphrase }}

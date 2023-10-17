@@ -1,7 +1,7 @@
 {
   "default": [
       {
-          "type": "insecureAcceptAnything"
+          "type": "reject"
       }
   ],
   "transports": {
@@ -27,6 +27,46 @@
                   "signedIdentity": {
                       "type": "matchRepository"
                   }
+              }
+          ],
+          "": [
+              {
+                  "type": "insecureAcceptAnything"
+              }
+          ]
+      },
+      "docker-daemon": {
+          "": [
+              {
+                  "type": "insecureAcceptAnything"
+              }
+          ]
+      },
+      "atomic": {
+          "": [
+              {
+                  "type": "insecureAcceptAnything"
+              }
+          ]
+      },
+      "dir": {
+          "": [
+              {
+                  "type": "insecureAcceptAnything"
+              }
+          ]
+      },
+      "oci": {
+          "": [
+              {
+                  "type": "insecureAcceptAnything"
+              }
+          ]
+      },
+      "tarball": {
+          "": [
+              {
+                  "type": "insecureAcceptAnything"
               }
           ]
       }

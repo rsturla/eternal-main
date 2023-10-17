@@ -5,7 +5,7 @@ inputs:
   cosign-version:
     description: 'The version of cosign to use'
     required: false
-    default: null
+    default: 'v2.2.0'
   registry:
     description: 'The registry to push the signed image to'
     required: true

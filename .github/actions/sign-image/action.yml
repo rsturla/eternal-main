@@ -1,0 +1,38 @@
+name: Sign OCI Image
+description: Signs an OCI image using cosign
+
+inputs:
+  cosign-version:
+    description: 'The version of cosign to use'
+    required: false
+    default: 'v2.2.0'
+  registry:
+    description: 'The registry to push the signed image to'
+    required: true
+  digest:
+    description: 'The digest of the image to sign'
+    required: true
+  private-key:
+    description: 'The private key to use for signing'
+    required: true
+  private-key-passphrase:
+    description: 'The passphrase for the private key'
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Cosign
+      uses: sigstore/cosign-installer@v3.1.2
+      with:
+        cosign-release: ${{ inputs.cosign-version }}
+
+    - name: Sign OCI Image
+      shell: bash
+      run: |
+        cosign sign -y --key env://COSIGN_PRIVATE_KEY $REGISTRY@$DIGEST
+      env:
+        REGISTRY: ${{ inputs.registry }}
+        DIGEST: ${{ inputs.digest }}
+        COSIGN_PRIVATE_KEY: ${{ inputs.private-key }}
+        COSIGN_PASSWORD: ${{ inputs.private-key-passphrase }}

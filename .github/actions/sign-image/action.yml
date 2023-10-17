@@ -4,6 +4,9 @@ inputs:
   private-key:
     description: 'The private key to use for signing'
     required: true
+  private-key-passphrase:
+    description: 'The passphrase for the private key'
+    required: false
   registry:
     description: 'The registry to push the signed image to'
     required: true
@@ -17,6 +20,7 @@ steps:
 
   - name: Sign OCI Image
     run: |
-      cosign sign -y --key env://COSIGN_PRIVATE_KEY ${{ inputs.IMAGE }}
+      cosign sign -y --key env://COSIGN_PRIVATE_KEY ${{ inputs.image }}:${{ inputs.digest }}
     env:
-      COSIGN_PRIVATE_KEY: ${{ inputs.PRIVATE_KEY }}
+      COSIGN_PRIVATE_KEY: ${{ inputs.private-key }}
+      COSIGN_PASSWORD: ${{ inputs.private-key-passphrase }}

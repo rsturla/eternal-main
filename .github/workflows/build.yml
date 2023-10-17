@@ -87,6 +87,7 @@ jobs:
         with:
           image: ${{ steps.build.outputs.imageid }}
           private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
+          private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
           digest: ${{ steps.build.outputs.digest }}
 
 

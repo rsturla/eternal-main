@@ -85,10 +85,10 @@ jobs:
       - name: Sign Image
         uses: ./.github/actions/sign-image
         with:
-          image: ${{ steps.build.outputs.imageid }}
+          image: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}
+          digest: ${{ steps.build.outputs.digest }}
           private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
           private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
-          digest: ${{ steps.build.outputs.digest }}
 
 
   build-nvidia:

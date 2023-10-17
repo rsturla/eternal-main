@@ -22,6 +22,7 @@ runs:
       uses: sigstore/cosign-installer@v3
 
     - name: Sign OCI Image
+      shell: bash
       run: |
         cosign sign -y --key env://COSIGN_PRIVATE_KEY $IMAGE:$DIGEST
       env:

@@ -1,0 +1,22 @@
+name: Sign OCI Image
+
+inputs:
+  private-key:
+    description: 'The private key to use for signing'
+    required: true
+  registry:
+    description: 'The registry to push the signed image to'
+    required: true
+  digest:
+    description: 'The digest of the image to sign'
+    required: true
+
+steps:
+  - name: Setup Cosign
+    uses: sigstore/cosign-installer@v3
+
+  - name: Sign OCI Image
+    run: |
+      cosign sign -y --key env://COSIGN_PRIVATE_KEY ${{ inputs.IMAGE }}
+    env:
+      COSIGN_PRIVATE_KEY: ${{ inputs.PRIVATE_KEY }}

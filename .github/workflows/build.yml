@@ -82,6 +82,13 @@ jobs:
             FEDORA_VERSION=${{ matrix.fedora-version }}
             FEDORA_EDITION=${{ matrix.fedora-edition }}
 
+      - name: Sign Image
+        uses: ./.github/actions/sign-image
+        with:
+          image: ${{ steps.build.outputs.imageid }}
+          private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
+          digest: ${{ steps.build.outputs.digest }}
+
 
   build-nvidia:
     runs-on: ubuntu-latest

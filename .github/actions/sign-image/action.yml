@@ -2,11 +2,8 @@ name: Sign OCI Image
 description: Signs an OCI image using cosign
 
 inputs:
-  private-key:
-    description: 'The private key to use for signing'
-    required: true
-  private-key-passphrase:
-    description: 'The passphrase for the private key'
+  cosign-version:
+    description: 'The version of cosign to use'
     required: false
   registry:
     description: 'The registry to push the signed image to'
@@ -14,12 +11,20 @@ inputs:
   digest:
     description: 'The digest of the image to sign'
     required: true
+  private-key:
+    description: 'The private key to use for signing'
+    required: true
+  private-key-passphrase:
+    description: 'The passphrase for the private key'
+    required: false
 
 runs:
   using: composite
   steps:
     - name: Setup Cosign
       uses: sigstore/cosign-installer@v3.1.2
+      with:
+        cosign-release: ${{ inputs.cosign-version }}
 
     - name: Sign OCI Image
       shell: bash

@@ -1,1 +1,1 @@
-alias open='xdg-open &>/dev/null'
+alias open="xdg-open &>/dev/null"

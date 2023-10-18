@@ -51,6 +51,7 @@ RUN rpm-ostree override remove \
   firefox \
   firefox-langpacks \
   libavcodec-free \
+  libavfilter-free \
   libavformat-free \
   libavutil-free \
   && \

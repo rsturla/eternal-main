@@ -50,6 +50,13 @@ RUN rpm-ostree install \
 RUN rpm-ostree override remove \
   firefox \
   firefox-langpacks \
+  libavcodec-free \
+  libavfilter-free \
+  libavformat-free \
+  libavutil-free \
+  libpostproc-free \
+  libswresample-free \
+  libswscale-free \
   && \
   rm -rf /var/* /tmp/* && \
   ostree container commit
@@ -57,12 +64,14 @@ RUN rpm-ostree override remove \
 # Install packages
 RUN rpm-ostree install \
   distrobox \
+  ffmpeg \
+  ffmpeg-libs \
+  htop \
   just \
   neofetch \
   openssl \
   tmux \
   zsh \
-  htop \
   && \
   rm /usr/share/applications/htop.desktop \
   && \

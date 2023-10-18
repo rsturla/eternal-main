@@ -51,6 +51,9 @@ RUN rpm-ostree override remove \
   firefox \
   firefox-langpacks \
   libavcodec-free \
+  libavdevice-free \
+  libavformat-free \
+  libavutil-free \
   && \
   rm -rf /var/* /tmp/* && \
   ostree container commit

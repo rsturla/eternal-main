@@ -58,6 +58,7 @@ RUN rpm-ostree override remove \
 RUN rpm-ostree install \
   distrobox \
   ffmpeg \
+  ffmpeg-libs \
   htop \
   just \
   neofetch \

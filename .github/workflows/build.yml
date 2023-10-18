@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        fedora-version: [37, 38, 39]
+        fedora-version: [38, 39]
         fedora-edition: [base, silverblue]
     permissions:
       contents: read
@@ -98,7 +98,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        fedora-version: [37, 38, 39]
+        fedora-version: [38, 39]
         fedora-edition: [base, silverblue]
         nvidia-version: [535]
         include:

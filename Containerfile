@@ -57,12 +57,13 @@ RUN rpm-ostree override remove \
 # Install packages
 RUN rpm-ostree install \
   distrobox \
+  ffmpeg \
+  htop \
   just \
   neofetch \
   openssl \
   tmux \
   zsh \
-  htop \
   && \
   rm /usr/share/applications/htop.desktop \
   && \

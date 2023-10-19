@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        fedora-version: [37, 38, 39]
+        fedora-version: [38, 39]
         fedora-edition: [base, silverblue, kinoite]
     permissions:
       contents: read
@@ -32,7 +32,7 @@ jobs:
       IMAGE_NAME: eternal-linux/main/${{ matrix.fedora-edition }}
     steps:
       - name: Checkout
-        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
 
       - name: Generate Image Metadata
         if: github.event_name != 'pull_request'
@@ -82,6 +82,15 @@ jobs:
             FEDORA_VERSION=${{ matrix.fedora-version }}
             FEDORA_EDITION=${{ matrix.fedora-edition }}
 
+      - name: Sign Image
+        uses: ./.github/actions/sign-image
+        if: github.event_name != 'pull_request'
+        with:
+          registry: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}
+          digest: ${{ steps.build.outputs.digest }}
+          private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
+          private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
+
 
   build-nvidia:
     runs-on: ubuntu-latest
@@ -89,7 +98,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        fedora-version: [37, 38, 39]
+        fedora-version: [38, 39]
         fedora-edition: [base, silverblue, kinoite]
         nvidia-version: [535]
         include:
@@ -106,7 +115,7 @@ jobs:
       IMAGE_NAME: eternal-linux/main/${{ matrix.fedora-edition }}
     steps:
       - name: Checkout
-        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
 
       - name: Generate Image Metadata
         if: github.event_name != 'pull_request'
@@ -167,6 +176,15 @@ jobs:
             FEDORA_EDITION=${{ matrix.fedora-edition }}
             NVIDIA_VERSION=${{ matrix.nvidia-version }}
             BASE_TAG=${{ env.BASE_TAG }}
+
+      - name: Sign Image
+        uses: ./.github/actions/sign-image
+        if: github.event_name != 'pull_request'
+        with:
+          registry: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}
+          digest: ${{ steps.build.outputs.digest }}
+          private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
+          private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
 
 
   check:

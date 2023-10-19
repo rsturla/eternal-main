@@ -1,0 +1,3 @@
+docker:
+  ghcr.io/rsturla/eternal-linux:
+    use-sigstore-attachments: true

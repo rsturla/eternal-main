@@ -38,8 +38,8 @@ fi
 
 # Lists of flatpaks
 FLATPAK_LIST=$(flatpak list --columns=application)
-INSTALL_LIST=$(cat "/etc/flatpak/system/install")
-REMOVE_LIST=$(cat "/etc/flatpak/system/remove")
+INSTALL_LIST=$(cat "/etc/eternal/flatpak-manager/system/install")
+REMOVE_LIST=$(cat "/etc/eternal/flatpak-manager/system/remove")
 
 # Install flatpaks in the list
 if [[ -n "$INSTALL_LIST" ]]; then

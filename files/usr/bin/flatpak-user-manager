@@ -7,6 +7,9 @@ declare -a HASHED_FILES=(
   "/usr/bin/flatpak-user-manager"
   "/usr/lib/systemd/user/flatpak-user-manager.service"
 )
+
+IS_ERROR=0
+
 CURRENT_HASH=$(sha256sum "${HASHED_FILES[@]}" | sha256sum | awk '{print $1}')
 HASH_FILE="$HOME/.config/flatpak-manager/lastrun"
 
@@ -28,8 +31,6 @@ fi
 FLATPAK_LIST=$(flatpak list --columns=application)
 INSTALL_LIST=$(cat "/etc/flatpak/user/install")
 REMOVE_LIST=$(cat "/etc/flatpak/user/remove")
-
-IS_ERROR=0
 
 # Install flatpaks in the list
 if [[ -n "$INSTALL_LIST" ]]; then

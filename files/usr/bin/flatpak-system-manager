@@ -10,7 +10,6 @@ declare -a HASHED_FILES=(
 
 IS_ERROR=0
 
-# Calculate the current hash
 CURRENT_HASH=$(sha256sum "${HASHED_FILES[@]}" | sha256sum | awk '{print $1}')
 HASH_FILE="/etc/flatpak/system/flatpak-manager/lastrun"
 

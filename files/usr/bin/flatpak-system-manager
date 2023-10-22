@@ -2,8 +2,8 @@
 
 # Define hashed files
 declare -a HASHED_FILES=(
-  "/etc/flatpak/system/install"
-  "/etc/flatpak/system/remove"
+  "/etc/eternal/flatpak-manager/system/install"
+  "/etc/eternal/flatpak-manager/system/remove"
   "/usr/bin/flatpak-system-manager"
   "/usr/lib/systemd/system/flatpak-system-manager.service"
 )
@@ -11,7 +11,7 @@ declare -a HASHED_FILES=(
 IS_ERROR=0
 
 CURRENT_HASH=$(sha256sum "${HASHED_FILES[@]}" | sha256sum | awk '{print $1}')
-HASH_FILE="/etc/flatpak/system/flatpak-manager/lastrun"
+HASH_FILE="/etc/eternal/flatpak-manager/system-lastrun"
 
 # Compare hash to the last run
 if [[ -f "$HASH_FILE" ]]; then

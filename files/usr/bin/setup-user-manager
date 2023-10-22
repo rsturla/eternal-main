@@ -2,18 +2,18 @@
 
 # Create a hash of files so we can decide if we need to run this script
 declare -a HASHED_FILES=(
-  "/usr/bin/eternal-user-setup"
-  "/usr/lib/systemd/user/eternal-user-setup.service"
-  "/etc/eternal/user-setup.d"
+  "/usr/bin/setup-user-manager"
+  "/usr/lib/systemd/user/setup-user-manager.service"
+  "/etc/eternal/setup-manager/user.d"
 )
 
 IS_ERROR=0
 
 CURRENT_HASH=$(sha256sum "${HASHED_FILES[@]}" | sha256sum | awk '{print $1}')
-HASH_FILE="$HOME/.config/user-setup/lastrun"
+HASH_FILE="$HOME/.config/setup-manager/user-lastrun"
 
-# Execute all scripts in /etc/eteranl/user-setup.d
-for script in /etc/eternal/user-setup.d/*; do
+# Execute all scripts in /etc/eternal/setup-manager/user.d/*
+for script in /etc/eternal/setup-manager/user.d/*; do
   if [[ -x "$script" ]]; then
     if ! "$script"; then
       IS_ERROR=1

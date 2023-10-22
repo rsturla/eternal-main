@@ -2,8 +2,8 @@
 
 # Create a hash of files so we can decide if we need to run this script
 declare -a HASHED_FILES=(
-  "/etc/flatpak/user/install"
-  "/etc/flatpak/user/remove"
+  "/etc/eternal/flatpak-manager/user/install"
+  "/etc/eternal/flatpak-manager/user/remove"
   "/usr/bin/flatpak-user-manager"
   "/usr/lib/systemd/user/flatpak-user-manager.service"
 )
@@ -11,7 +11,7 @@ declare -a HASHED_FILES=(
 IS_ERROR=0
 
 CURRENT_HASH=$(sha256sum "${HASHED_FILES[@]}" | sha256sum | awk '{print $1}')
-HASH_FILE="$HOME/.config/flatpak-manager/lastrun"
+HASH_FILE="$HOME/.config/eternal/flatpak-manager/user-lastrun"
 
 # Compare the hash to the last run
 if [[ -f "$HASH_FILE" ]]; then

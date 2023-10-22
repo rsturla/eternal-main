@@ -1,12 +1,12 @@
 [Unit]
-Description=Manage the user configuration
+Description=Manage the system configuration
 Wants=network-online.target
 After=network-online.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/eternal-user-setup
+ExecStart=/usr/bin/setup-system-manager
 Restart=on-failure
 
 [Install]
-WantedBy=default.target
+WantedBy=multi-user.target

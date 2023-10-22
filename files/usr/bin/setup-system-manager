@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
 # Create a hash of files so we can decide if we need to run this script
-declare -a HASHED_FILES=(
+declare -a HASHED_LOCATIONS=(
   "/usr/bin/setup-system-manager"
   "/usr/lib/systemd/user/setup-system-manager.service"
-  "/etc/eternal/setup-manager/system.d/*"
+  "/etc/eternal/setup-manager/system.d"
 )
 
 IS_ERROR=0
 
-CURRENT_HASH=$(sha256sum "${HASHED_FILES[@]}" | sha256sum | awk '{print $1}')
+CURRENT_HASH=$(find "${HASHED_LOCATIONS[@]}" -type f -exec sha256sum {} \; | sha256sum | awk '{print $1}')
 HASH_FILE="/etc/eternal/setup-manager/system-lastrun"
 
 # Execute all scripts in /etc/eternal/setup-manager/system.d/*

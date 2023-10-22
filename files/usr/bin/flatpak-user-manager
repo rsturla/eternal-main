@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Create a hash of files so we can decide if we need to run this script
-declare -a HASHED_FILES=(
+declare -a HASHED_LOCATIONS=(
   "/etc/eternal/flatpak-manager/user/install"
   "/etc/eternal/flatpak-manager/user/remove"
   "/usr/bin/flatpak-user-manager"
@@ -10,7 +10,7 @@ declare -a HASHED_FILES=(
 
 IS_ERROR=0
 
-CURRENT_HASH=$(sha256sum "${HASHED_FILES[@]}" | sha256sum | awk '{print $1}')
+CURRENT_HASH=$(find "${HASHED_LOCATIONS[@]}" -type f -exec sha256sum {} \; | sha256sum | awk '{print $1}')
 HASH_FILE="$HOME/.config/eternal/flatpak-manager/user-lastrun"
 
 # Compare the hash to the last run

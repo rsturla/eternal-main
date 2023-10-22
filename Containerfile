@@ -14,7 +14,7 @@ RUN cp /etc/bashrc /usr/etc/bashrc && \
   rm -rf /var/* /tmp/* && \
   ostree container commit
 
-# Enable cliwrap - wrapper for interfacing with rpm-ostree using dnf/yum/grubby/rpm 
+# Enable cliwrap - wrapper for interfacing with rpm-ostree using dnf/yum/grubby/rpm
 RUN rpm-ostree cliwrap install-to-root / \
   && \
   rm -rf /var/* /tmp/* && \
@@ -27,8 +27,10 @@ RUN mkdir -p /usr/etc/flatpak/remotes.d && \
   systemctl enable rpm-ostreed-automatic.timer && \
   systemctl enable flatpak-system-update.timer && \
   systemctl enable flatpak-system-manager.service && \
+  systemctl enable eternal-system-setup.service && \
   systemctl --global enable flatpak-user-update.timer && \
-  systemctl --global enable flatpak-user-manager.service \
+  systemctl --global enable flatpak-user-manager.service && \
+  systemctl --global enable eternal-user-setup.service \
   && \
   rm -rf /var/* /tmp/* && \
   ostree container commit

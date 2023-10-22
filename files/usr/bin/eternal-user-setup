@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+# Create a hash of files so we can decide if we need to run this script
+declare -a HASHED_FILES=(
+  "/usr/bin/eternal-user-setup"
+  "/usr/lib/systemd/user/eternal-user-setup.service"
+  "/etc/eternal/user-setup.d"
+)
+
+IS_ERROR=0
+
+CURRENT_HASH=$(sha256sum "${HASHED_FILES[@]}" | sha256sum | awk '{print $1}')
+HASH_FILE="$HOME/.config/user-setup/lastrun"
+
+# Execute all scripts in /etc/eteranl/user-setup.d
+for script in /etc/eternal/user-setup.d/*; do
+  if [[ -x "$script" ]]; then
+    if ! "$script"; then
+      IS_ERROR=1
+    fi
+  fi
+done
+
+# If there were no errors, update the hash file
+if [[ $IS_ERROR -eq 0 ]]; then
+  mkdir -p "$(dirname "$HASH_FILE")"
+  echo "$CURRENT_HASH" > "$HASH_FILE"
+fi
+
+exit $IS_ERROR

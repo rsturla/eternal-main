@@ -1,0 +1,12 @@
+[Unit]
+Description=Manage the system configuration
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/eternal-system-setup
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

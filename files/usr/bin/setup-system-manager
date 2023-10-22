@@ -4,7 +4,7 @@
 declare -a HASHED_FILES=(
   "/usr/bin/setup-system-manager"
   "/usr/lib/systemd/user/setup-system-manager.service"
-  "/etc/eternal/setup-manager/system.d"
+  "/etc/eternal/setup-manager/system.d/*"
 )
 
 IS_ERROR=0

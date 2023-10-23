@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+# Create a hash of files so we can decide if we need to run this script
+declare -a HASHED_LOCATIONS=(
+  "/usr/bin/setup-system-manager"
+  "/usr/lib/systemd/system/setup-system-manager.service"
+  "/etc/eternal/setup-manager/system.d"
+)
+
+IS_ERROR=0
+
+CURRENT_HASH=$(find "${HASHED_LOCATIONS[@]}" -type f -exec sha256sum {} \; | sha256sum | awk '{print $1}')
+HASH_FILE="/etc/eternal/setup-manager/system-lastrun"
+
+# Execute all scripts in /etc/eternal/setup-manager/system.d/*
+for script in /etc/eternal/setup-manager/system.d/*; do
+  if [[ -x "$script" ]]; then
+    if ! "$script"; then
+      IS_ERROR=1
+    fi
+  fi
+done
+
+# If there were no errors, update the hash file
+if [[ $IS_ERROR -eq 0 ]]; then
+  mkdir -p "$(dirname "$HASH_FILE")"
+  echo "$CURRENT_HASH" > "$HASH_FILE"
+fi
+
+exit $IS_ERROR

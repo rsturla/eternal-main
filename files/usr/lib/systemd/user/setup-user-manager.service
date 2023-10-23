@@ -9,4 +9,4 @@ ExecStart=/usr/bin/setup-user-manager
 Restart=on-failure
 
 [Install]
-WantedBy=default.target
+WantedBy=multi-user.target

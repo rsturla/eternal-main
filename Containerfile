@@ -96,3 +96,5 @@ RUN rpm-ostree install \
   && \
   rm -rf /var/* /tmp/* && \
   ostree container commit
+
+COPY files/usr /usr

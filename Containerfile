@@ -62,8 +62,6 @@ RUN rpm-ostree install clamav clamd clamav-data clamav-update && \
   systemctl enable clamav-freshclam.service && \
   systemctl enable clamav-clamonacc.service \
   && \
-  useradd -r -s /sbin/nologin clamav \
-  && \
   rm -rf /var/* /tmp/* && \
   ostree container commit
 

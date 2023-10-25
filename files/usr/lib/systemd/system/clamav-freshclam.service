@@ -8,7 +8,8 @@ After=network-online.target
 
 [Service]
 # Hint: The database directory must be writable for UID 0 or GID 0
-ExecStartPre=-/usr/bin/mkdir -p /var/lib/clamav && /usr/bin/chown -R 0:0 /var/lib/clamav
+ExecStartPre=-/usr/bin/mkdir -p /var/lib/clamav
+ExecStartPre=-/usr/bin/chown -R 0:0 /var/lib/clamav
 ExecStart=/usr/bin/freshclam -d --foreground=true
 
 [Install]

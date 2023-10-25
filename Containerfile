@@ -57,6 +57,14 @@ RUN rpm-ostree override remove \
   rm -rf /var/* /tmp/* && \
   ostree container commit
 
+# Configure ClamAV
+RUN rpm-ostree install clamav clamd clamav-update && \
+  systemctl enable clamav-daemon && \
+  systemctl enable clamav-freshclam \
+  && \
+  rm -rf /var/* /tmp/* && \
+  ostree container commit
+
 # Remove unwanted packages
 RUN rpm-ostree override remove \
   firefox \

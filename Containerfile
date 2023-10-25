@@ -58,9 +58,10 @@ RUN rpm-ostree override remove \
   ostree container commit
 
 # Configure ClamAV
-RUN rpm-ostree install clamav clamd clamav-update && \
-  systemctl enable clamav-daemon && \
+RUN rpm-ostree install clamav clamd clamav-data clamav-update && \
   systemctl enable clamav-freshclam \
+  && \
+  useradd -r -s /sbin/nologin clamav \
   && \
   rm -rf /var/* /tmp/* && \
   ostree container commit

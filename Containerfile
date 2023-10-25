@@ -59,7 +59,8 @@ RUN rpm-ostree override remove \
 
 # Configure ClamAV
 RUN rpm-ostree install clamav clamd clamav-data clamav-update && \
-  systemctl enable clamav-freshclam \
+  systemctl enable clamav-freshclam.service && \
+  systemctl enable clamav-clamonacc.service \
   && \
   useradd -r -s /sbin/nologin clamav \
   && \

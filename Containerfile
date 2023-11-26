@@ -57,6 +57,9 @@ RUN rpm-ostree override remove \
   rm -rf /var/* /tmp/* && \
   ostree container commit
 
+# Disable RPMFusion repositories
+RUN sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/rpmfusion-{,non}free{,-updates,-updates-testing}.repo
+
 # Remove unwanted packages
 RUN rpm-ostree override remove \
   firefox \

@@ -18,7 +18,7 @@ ARG FEDORA_VERSION
 
 COPY --from=akmods-nvidia /var/cache /var/cache
 COPY --from=akmods-nvidia /tmp/nvidia-addons /tmp/nvidia-addons
-COPY scripts /tmp/scripts
+COPY --from=akmods-nvidia /tmp/scripts /tmp/scripts
 
 RUN /tmp/scripts/nvidia-install.sh && \
   /tmp/scripts/nvidia-postinstall.sh \

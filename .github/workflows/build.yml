@@ -191,7 +191,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Exit on failure
-        if: ${{ needs.build-base.results == 'failure' && needs.build-nvidia.results == 'failure' }}
+        if: ${{ needs.build-base.results == 'failure' || needs.build-nvidia.results == 'failure' }}
         shell: bash
         run: exit 1
 

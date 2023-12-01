@@ -91,7 +91,6 @@ jobs:
           private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
           private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
 
-
   build-nvidia:
     runs-on: ubuntu-latest
     needs: build-base
@@ -100,7 +99,7 @@ jobs:
       matrix:
         fedora-version: [38, 39]
         fedora-edition: [base, silverblue, kinoite]
-        nvidia-version: [535]
+        nvidia-version: [535, 545]
         include:
           - nvidia-version: 535
             nvidia-is-stable: true
@@ -186,11 +185,16 @@ jobs:
           private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
           private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
 
-
   check:
-    runs-on: ubuntu-latest
     needs: [build-base, build-nvidia]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
     steps:
-      - name: Exit
+      - name: Exit on failure
+        if: ${{ needs.build-base.results == 'failure' || needs.build-nvidia.results == 'failure' }}
+        shell: bash
+        run: exit 1
+
+      - name: Exit on success
         shell: bash
         run: exit 0

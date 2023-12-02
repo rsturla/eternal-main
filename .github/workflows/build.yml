@@ -99,9 +99,9 @@ jobs:
       matrix:
         fedora-version: [38, 39]
         fedora-edition: [base, silverblue, kinoite]
-        nvidia-version: [535, 545]
+        nvidia-version: [545]
         include:
-          - nvidia-version: 535
+          - nvidia-version: 545
             nvidia-is-stable: true
     permissions:
       contents: read

@@ -46,7 +46,7 @@ RUN rpm-ostree install \
   --uninstall=rpmfusion-nonfree-release-$(rpm -E %fedora)-1.noarch \
   && \
   sed -i 's@enabled=0@enabled=1@g' /etc/yum.repos.d/fedora-updates-archive.repo && \
-  sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/fedora-cisco-openh264.repo && \
+  sed -i 's@enabled=1@enabled=0@g' /etc/yum.repos.d/fedora-cisco-openh264.repo \
   && \
   rm -rf /var/* /tmp/* && \
   ostree container commit

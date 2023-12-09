@@ -10,9 +10,16 @@ update-flatpak:
 update-system:
   rpm-ostree update
 
+[no-exit-message]
+update-firmware:
+    fwupdmgr refresh --force
+    fwupdmgr get-updates
+    fwupdmgr update
+
 update:
   @just --unstable update-flatpak
   @just --unstable update-system
+  @just --unstable update-firmware
 
 sign:
   #!/usr/bin/env bash

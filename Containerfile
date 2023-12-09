@@ -14,6 +14,16 @@ RUN cp /etc/bashrc /usr/etc/bashrc && \
   rm -rf /var/* /tmp/* && \
   ostree container commit
 
+# Add udev rules from https://codeberg.org/fabiscafe/game-devices-udev/archive/main.zip
+RUN curl -sL https://codeberg.org/fabiscafe/game-devices-udev/archive/main.zip -o /tmp/game-devices-udev.zip && \
+  unzip -q /tmp/game-devices-udev.zip -d /tmp && \
+  cp -r /tmp/game-devices-udev/* /usr/lib/udev/rules.d/ && \
+  mkdir /usr/etc/modules-load.d && \
+  echo "uinput" >> /usr/etc/modules-load.d/uinput.conf \
+  && \
+  rm -rf /var/* /tmp/* && \
+  ostree container commit
+
 # Enable cliwrap - wrapper for interfacing with rpm-ostree using dnf/yum/grubby/rpm
 RUN rpm-ostree cliwrap install-to-root / \
   && \

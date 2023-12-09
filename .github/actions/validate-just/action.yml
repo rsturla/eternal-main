@@ -1,0 +1,31 @@
+name: Validate Justfile
+
+inputs:
+  justfile_path:
+    description: "Path to Justfile"
+    required: false
+    default: "./justfile"
+  justfile_dir:
+    description: "Path to Justfile directory"
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install Just
+      uses: extractions/setup-just@v1
+
+    - name: Validate Justfile (single)
+      if: ${{ inputs.justfile_dir == '' }}
+      shell: bash
+      run: |
+        just --unstable --fmt --check -f ${{ inputs.justfile }}
+
+    - name: Validate Justfile (directory)
+      if: ${{ inputs.justfile_dir != '' }}
+      shell: bash
+      run: |
+        # Iterate over all "*.just" or "justfile" files in the directory
+        for file in ${{ inputs.justfile_dir }}/*.just ${{ inputs.justfile_dir }}/justfile; do
+          just --unstable --fmt --check -f $file || exit 1
+        done

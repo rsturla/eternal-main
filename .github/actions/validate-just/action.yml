@@ -19,7 +19,7 @@ runs:
       if: ${{ inputs.justfile_dir == '' }}
       shell: bash
       run: |
-        just --unstable --fmt --check -f ${{ inputs.justfile }}
+        just --unstable --fmt --check -f ${{ inputs.justfile_path }}
 
     - name: Validate Justfile (directory)
       if: ${{ inputs.justfile_dir != '' }}

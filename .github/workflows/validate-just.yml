@@ -1,0 +1,26 @@
+name: Validate just configuration
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate (single)
+        uses: ./.github/actions/validate-just
+        with:
+          justfile_path: ./files/usr/share/eternal/justfile
+
+      - name: Validate (directory)
+        uses: ./.github/actions/validate-just
+        with:
+          justfile_dir: ./files/usr/share/eternal

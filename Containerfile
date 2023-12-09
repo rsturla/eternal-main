@@ -17,7 +17,8 @@ RUN cp /etc/bashrc /usr/etc/bashrc && \
 # Add udev rules from https://codeberg.org/fabiscafe/game-devices-udev/archive/main.zip
 RUN curl -sL https://codeberg.org/fabiscafe/game-devices-udev/archive/main.zip -o /tmp/game-devices-udev.zip && \
   unzip -q /tmp/game-devices-udev.zip -d /tmp && \
-  cp -r /tmp/game-devices-udev-main/udev-rules/* /usr/lib/udev/rules.d/ && \
+  cp -r /tmp/game-devices-udev/* /usr/lib/udev/rules.d/ && \
+  mkdir /usr/etc/modules-load.d && \
   echo "uinput" >> /usr/etc/modules-load.d/uinput.conf \
   && \
   rm -rf /var/* /tmp/* && \

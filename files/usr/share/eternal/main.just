@@ -1,15 +1,19 @@
+[private]
 default:
   @just --unstable --list
 
 bios:
   systemctl reboot --firmware-setup
 
+[private]
 update-flatpak:
   flatpak update -y
 
+[private]
 update-system:
   rpm-ostree update
 
+[private]
 update-firmware:
   fwupdmgr refresh --force
   fwupdmgr get-updates || true

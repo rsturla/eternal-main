@@ -10,11 +10,10 @@ update-flatpak:
 update-system:
   rpm-ostree update
 
-[no-exit-message]
 update-firmware:
-    fwupdmgr refresh --force
-    fwupdmgr get-updates
-    fwupdmgr update
+  fwupdmgr refresh --force
+  fwupdmgr get-updates || true
+  fwupdmgr update
 
 update:
   @just --unstable update-flatpak

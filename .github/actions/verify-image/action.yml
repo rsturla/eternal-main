@@ -1,0 +1,31 @@
+name: Verify OCI Image
+description: Verify an OCI image against a public key using cosign
+
+inputs:
+  cosign-version:
+    description: 'The version of cosign to use'
+    required: false
+    default: 'main'
+  public-key:
+    description: 'The location of the public key to verify against'
+    default: 'https://raw.githubusercontent.com/rsturla/eternal-main/main/files/usr/etc/pki/containers/eternal-linux.pub'
+    required: false
+  image:
+    description: 'The image to verify - e.g. ghcr.io/rsturla/eternal-linux/main/silverblue:latest'
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Setup Cosign
+      uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
+      with:
+        cosign-release: ${{ inputs.cosign-version }}
+
+    - name: Verify OCI Image
+      shell: bash
+      run: |
+        cosign verify --key $COSIGN_PUBLIC_KEY $IMAGE
+      env:
+        IMAGE: ${{ inputs.image }}
+        COSIGN_PUBLIC_KEY: ${{ inputs.public-key }}

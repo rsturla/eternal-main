@@ -5,7 +5,7 @@ inputs:
   cosign-version:
     description: 'The version of cosign to use'
     required: false
-    default: 'main'
+    default: 'v2.2.2'
   public-key:
     description: 'The location of the public key to verify against'
     default: 'https://raw.githubusercontent.com/rsturla/eternal-main/main/files/usr/etc/pki/containers/eternal-linux.pub'

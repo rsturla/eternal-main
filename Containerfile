@@ -60,15 +60,6 @@ RUN rpm-ostree install \
   rm -rf /var/* /tmp/* && \
   ostree container commit
 
-# Install Mesa VA drivers
-RUN rpm-ostree override remove \
-  mesa-va-drivers && \
-  rpm-ostree install \
-  mesa-va-drivers-freeworld \
-  && \
-  rm -rf /var/* /tmp/* && \
-  ostree container commit
-
 # Remove unwanted packages
 RUN rpm-ostree override remove \
   firefox \

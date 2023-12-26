@@ -94,6 +94,7 @@ jobs:
   build-nvidia:
     runs-on: ubuntu-latest
     needs: build-base
+    if: ${{ !cancelled() }}
     strategy:
       fail-fast: false
       matrix:

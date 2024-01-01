@@ -8,10 +8,10 @@ inputs:
     description: 'Major version of the image'
     required: true
   is-release:
-    description: 'Is this a release image?'
+    description: 'Is this a release version of the Docker image?'
     default: false
   nvidia-driver-version:
-    description: 'NVIDIA driver version'
+    description: 'Version of the NVIDIA driver (if applicable)'
     required: false
     default: ''
   nvidia-driver-is-stable:
@@ -20,22 +20,22 @@ inputs:
 
 outputs:
   tags:
-    description: 'Tags to apply to the image'
+    description: 'Generated tags for the OCI image'
     value: ${{ steps.set-outputs.outputs.TAGS }}
   tags-concat:
-    description: 'Tags to apply to the image (comma separated)'
+    description: 'Generated tags for the OCI image (comma separated)'
     value: ${{ steps.set-outputs.outputs.TAGS_CONCAT }}
   names-full:
-    description: 'Full name of the image'
+    description: 'Full names of the OCI image tags'
     value: ${{ steps.set-outputs.outputs.NAMES_FULL }}
   names-full-concat:
-    description: 'Full name of the image (comma separated)'
+    description: 'Full names of the OCI image tags (comma separated)'
     value: ${{ steps.set-outputs.outputs.NAMES_FULL_CONCAT }}
   primary-tag:
-    description: 'Primary tag to apply to the image'
+    description: 'Primary tag for the OCI image'
     value: ${{ steps.set-outputs.outputs.PRIMARY_TAG }}
   primary-name-full:
-    description: 'Full name of the image with primary tag'
+    description: 'Full name of the OCI image with primary tag'
     value: ${{ steps.set-outputs.outputs.PRIMARY_NAME_FULL }}
 
 runs:

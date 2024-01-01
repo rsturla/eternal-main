@@ -128,7 +128,7 @@ jobs:
             FEDORA_VERSION=${{ matrix.fedora-version }}
             FEDORA_EDITION=${{ matrix.fedora-edition }}
             NVIDIA_VERSION=${{ matrix.nvidia-version }}
-            BASE_TAG=${{ needs.build-base.outputs.base-image-full }}
+            BASE_IMAGE_FULL=${{ needs.build-base.outputs.base-image-full }}
 
       - name: Sign Image
         uses: ./.github/actions/sign-image

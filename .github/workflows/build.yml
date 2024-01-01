@@ -123,7 +123,9 @@ jobs:
           context: .
           file: Containerfile.nvidia
           push: true
-          tags: ${{ steps.generate-image-tags.outputs.names-fBASE_TAG }}
+          tags: ${{ steps.generate-image-tags.outputs.names-full-concat }}
+          build-args: |
+            FEDORA_VERSION=${{ matrix.fedora-version }}
             FEDORA_EDITION=${{ matrix.fedora-edition }}
             NVIDIA_VERSION=${{ matrix.nvidia-version }}
             BASE_TAG=${{ needs.build-base.outputs.base-image-full }}

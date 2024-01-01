@@ -27,38 +27,20 @@ jobs:
       packages: write
       id-token: write
     env:
-      TAGS: ""
-      TAGS_CONCAT: ""
       IMAGE_NAME: eternal-linux/main/${{ matrix.fedora-edition }}
+    outputs:
+      base-image-full: ${{ steps.generate-image-tags.outputs.primary-name-full }}
     steps:
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
 
-      - name: Generate Image Metadata
-        if: github.event_name != 'pull_request'
-        shell: bash
-        run: |
-          TAGS=()
-
-          TAGS+=("${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.fedora-version }}")
-          TAGS+=("${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:$(git rev-parse --short HEAD)-${{ matrix.fedora-version }}")
-
-          echo "TAGS=${TAGS[*]}" >> $GITHUB_ENV
-          echo "TAGS_CONCAT=$(IFS=, ; echo "${TAGS[*]}")" >> $GITHUB_ENV
-
-      - name: Generate Image Metadata (Pull Request)
-        if: github.event_name == 'pull_request'
-        shell: bash
-        run: |
-          TAGS=()
-
-          # Add PR number as a tag
-          TAGS+=("${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:pr${{ github.event.number }}-${{ matrix.fedora-version }}")
-          # Add short commit hash with PR number as a tag
-          TAGS+=("${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:pr${{ github.event.number }}-$(git rev-parse --short HEAD)-${{ matrix.fedora-version }}")
-
-          echo "TAGS=${TAGS[*]}" >> $GITHUB_ENV
-          echo "TAGS_CONCAT=$(IFS=, ; echo "${TAGS[*]}")" >> $GITHUB_ENV
+      - name: Generate Image Tags
+        uses: ./.github/actions/generate-image-tags
+        id: generate-image-tags
+        with:
+          image-name: ${{ env.IMAGE_REGISTRY}}/${{ env.IMAGE_NAME }}
+          major-version: ${{ matrix.fedora-version }}
+          is-release: ${{ github.event_name != 'pull_request' }}
 
       - name: Login to GHCR
         uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3
@@ -77,7 +59,7 @@ jobs:
           context: .
           file: Containerfile
           push: true
-          tags: ${{ env.TAGS_CONCAT }}
+          tags: ${{ steps.generate-image-tags.outputs.names-full-concat }}
           build-args: |
             FEDORA_VERSION=${{ matrix.fedora-version }}
             FEDORA_EDITION=${{ matrix.fedora-edition }}
@@ -109,49 +91,20 @@ jobs:
       packages: write
       id-token: write
     env:
-      TAGS: ""
-      TAGS_CONCAT: ""
-      BASE_TAG: ""
       IMAGE_NAME: eternal-linux/main/${{ matrix.fedora-edition }}
     steps:
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
 
-      - name: Generate Image Metadata
-        if: github.event_name != 'pull_request'
-        shell: bash
-        run: |
-          TAGS=()
-
-          TAGS+=("${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.fedora-version }}-nvidia${{ matrix.nvidia-version }}")
-          TAGS+=("${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:$(git rev-parse --short HEAD)-${{ matrix.fedora-version }}-nvidia${{ matrix.nvidia-version }}")
-          if [[ "${{ matrix.nvidia-is-stable }}" == "true" ]]; then
-            TAGS+=("${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ matrix.fedora-version }}-nvidia")
-            TAGS+=("${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:$(git rev-parse --short HEAD)-${{ matrix.fedora-version }}-nvidia")
-          fi
-
-          echo "TAGS=${TAGS[*]}" >> $GITHUB_ENV
-          echo "TAGS_CONCAT=$(IFS=, ; echo "${TAGS[*]}")" >> $GITHUB_ENV
-          echo "BASE_TAG=$(git rev-parse --short HEAD)-${{ matrix.fedora-version }}" >> $GITHUB_ENV
-
-      - name: Generate Image Metadata (Pull Request)
-        if: github.event_name == 'pull_request'
-        shell: bash
-        run: |
-          TAGS=()
-
-          # Add PR number as a tag
-          TAGS+=("${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:pr${{ github.event.number }}-${{ matrix.fedora-version }}-nvidia${{ matrix.nvidia-version }}")
-          # Add short commit hash with PR number as a tag
-          TAGS+=("${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:pr${{ github.event.number }}-$(git rev-parse --short HEAD)-${{ matrix.fedora-version }}-nvidia${{ matrix.nvidia-version }}")
-          if [[ "${{ matrix.nvidia-is-stable }}" == "true" ]]; then
-            TAGS+=("${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:pr${{ github.event.number }}-${{ matrix.fedora-version }}-nvidia")
-            TAGS+=("${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:pr${{ github.event.number }}-$(git rev-parse --short HEAD)-${{ matrix.fedora-version }}-nvidia")
-          fi
-
-          echo "TAGS=${TAGS[*]}" >> $GITHUB_ENV
-          echo "TAGS_CONCAT=$(IFS=, ; echo "${TAGS[*]}")" >> $GITHUB_ENV
-          echo "BASE_TAG=pr${{ github.event.number }}-$(git rev-parse --short HEAD)-${{ matrix.fedora-version }}" >> $GITHUB_ENV
+      - name: Generate Image Tags
+        uses: ./.github/actions/generate-image-tags
+        id: generate-image-tags
+        with:
+          image-name: ${{ env.IMAGE_REGISTRY}}/${{ env.IMAGE_NAME }}
+          major-version: ${{ matrix.fedora-version }}
+          is-release: ${{ github.event_name != 'pull_request' }}
+          nvidia-driver-version: ${{ matrix.nvidia-version }}
+          nvidia-driver-is-stable: ${{ matrix.nvidia-is-stable }}
 
       - name: Login to GHCR
         uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3
@@ -170,12 +123,12 @@ jobs:
           context: .
           file: Containerfile.nvidia
           push: true
-          tags: ${{ env.TAGS_CONCAT }}
+          tags: ${{ steps.generate-image-tags.outputs.names-full-concat }}
           build-args: |
             FEDORA_VERSION=${{ matrix.fedora-version }}
             FEDORA_EDITION=${{ matrix.fedora-edition }}
             NVIDIA_VERSION=${{ matrix.nvidia-version }}
-            BASE_TAG=${{ env.BASE_TAG }}
+            BASE_IMAGE_FULL=${{ needs.build-base.outputs.base-image-full }}
 
       - name: Sign Image
         uses: ./.github/actions/sign-image

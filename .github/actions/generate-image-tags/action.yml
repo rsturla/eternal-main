@@ -1,0 +1,180 @@
+name: Generate Image Tags
+
+inputs:
+  image-name:
+    description: 'Name of the image'
+    required: true
+  major-version:
+    description: 'Major version of the image'
+    required: true
+  is-release:
+    description: 'Is this a release version of the Docker image?'
+    default: false
+  nvidia-driver-version:
+    description: 'Version of the NVIDIA driver (if applicable)'
+    required: false
+    default: ''
+  nvidia-driver-is-stable:
+    description: 'Is the NVIDIA driver version stable?'
+    required: false
+
+outputs:
+  tags:
+    description: 'Generated tags for the OCI image'
+    value: ${{ steps.set-outputs.outputs.TAGS }}
+  tags-concat:
+    description: 'Generated tags for the OCI image (comma separated)'
+    value: ${{ steps.set-outputs.outputs.TAGS_CONCAT }}
+  names-full:
+    description: 'Full names of the OCI image tags'
+    value: ${{ steps.set-outputs.outputs.NAMES_FULL }}
+  names-full-concat:
+    description: 'Full names of the OCI image tags (comma separated)'
+    value: ${{ steps.set-outputs.outputs.NAMES_FULL_CONCAT }}
+  primary-tag:
+    description: 'Primary tag for the OCI image'
+    value: ${{ steps.set-outputs.outputs.PRIMARY_TAG }}
+  primary-name-full:
+    description: 'Full name of the OCI image with primary tag'
+    value: ${{ steps.set-outputs.outputs.PRIMARY_NAME_FULL }}
+
+runs:
+  using: composite
+  steps:
+    - name: Generate Tags (Pull Request)
+      if: inputs.is-release == 'false'
+      shell: bash
+      id: generate-tags-pull-request
+      env:
+        NVIDIA_DRIVER_VERSION: ${{ inputs.nvidia-driver-version }}
+        NVIDIA_DRIVER_IS_STABLE: ${{ inputs.nvidia-driver-is-stable }}
+        IMAGE_NAME: ${{ inputs.image-name }}
+        MAJOR_VERSION: ${{ inputs.major-version }}
+        PR_NUMBER: ${{ github.event.number }}
+      run: |
+        echo "Generating tags for pull request..."
+
+        TAGS_PRE_SUFFIX=(
+          "pr$PR_NUMBER-$MAJOR_VERSION"
+          "pr$PR_NUMBER-$(git rev-parse --short HEAD)-$MAJOR_VERSION"
+        )
+        TAG_SUFFIXES=()
+
+        if [[ -n "$NVIDIA_DRIVER_VERSION" ]]; then
+          TAG_SUFFIXES+=("-nvidia")
+          if [[ "$NVIDIA_DRIVER_IS_STABLE" == "true" ]]; then
+            TAG_SUFFIXES+=("-nvidia$NVIDIA_DRIVER_VERSION")
+          fi
+        fi
+
+        TAGS=()
+        for TAG in "${TAGS_PRE_SUFFIX[@]}"; do
+          if [[ -n "$TAG_SUFFIXES" ]]; then
+            for SUFFIX in "${TAG_SUFFIXES[@]}"; do
+              TAGS+=("$TAG$SUFFIX")
+            done
+          else
+            TAGS+=("$TAG")
+          fi
+        done
+
+        PRIMARY_TAG="pr$PR_NUMBER-$(git rev-parse --short HEAD)-$MAJOR_VERSION"
+        if [[ -n "$NVIDIA_DRIVER_VERSION" ]]; then
+          PRIMARY_TAG="$PRIMARY_TAG-nvidia$NVIDIA_DRIVER_VERSION"
+        fi
+
+        echo "Generated primary tag: $PRIMARY_TAG"
+        echo "Generated tags: ${TAGS[*]}"
+        echo "TAGS=${TAGS[*]}" >> "$GITHUB_OUTPUT"
+        echo "TAGS_CONCAT=$(IFS=, ; echo "${TAGS[*]}")" >> "$GITHUB_OUTPUT"
+        echo "PRIMARY_TAG=$PRIMARY_TAG" >> "$GITHUB_OUTPUT"
+
+        NAMES_FULL=()
+        for TAG in "${TAGS[@]}"; do
+          NAMES_FULL+=("$IMAGE_NAME:$TAG")
+        done
+
+        echo "Generated full names: ${NAMES_FULL[*]}"
+        echo "NAMES_FULL=${NAMES_FULL[*]}" >> "$GITHUB_OUTPUT"
+        echo "NAMES_FULL_CONCAT=$(IFS=, ; echo "${NAMES_FULL[*]}")" >> "$GITHUB_OUTPUT"
+        echo "PRIMARY_NAME_FULL=$IMAGE_NAME:$PRIMARY_TAG" >> "$GITHUB_OUTPUT"
+
+    - name: Generate Tags
+      if: inputs.is-release == 'true'
+      shell: bash
+      id: generate-tags
+      env:
+        NVIDIA_DRIVER_VERSION: ${{ inputs.nvidia-driver-version }}
+        NVIDIA_DRIVER_IS_STABLE: ${{ inputs.nvidia-driver-is-stable }}
+        IMAGE_NAME: ${{ inputs.image-name }}
+        MAJOR_VERSION: ${{ inputs.major-version }}
+      run: |
+        echo "Generating tags for release..."
+
+        TAGS_PRE_SUFFIX=(
+          "$MAJOR_VERSION"
+          "$(git rev-parse --short HEAD)-$MAJOR_VERSION"
+        )
+        TAG_SUFFIXES=()
+
+        if [[ -n "$NVIDIA_DRIVER_VERSION" ]]; then
+          TAG_SUFFIXES+=("-nvidia")
+          if [[ "$NVIDIA_DRIVER_IS_STABLE" == "true" ]]; then
+            TAG_SUFFIXES+=("-nvidia$NVIDIA_DRIVER_VERSION")
+          fi
+        fi
+
+        TAGS=()
+        for TAG in "${TAGS_PRE_SUFFIX[@]}"; do
+          if [[ -n "$TAG_SUFFIXES" ]]; then
+            for SUFFIX in "${TAG_SUFFIXES[@]}"; do
+              TAGS+=("$TAG$SUFFIX")
+            done
+          else
+            TAGS+=("$TAG")
+          fi
+        done
+
+        PRIMARY_TAG="$(git rev-parse --short HEAD)-$MAJOR_VERSION"
+        if [[ -n "$NVIDIA_DRIVER_VERSION" ]]; then
+          PRIMARY_TAG="$PRIMARY_TAG-nvidia$NVIDIA_DRIVER_VERSION"
+        fi
+
+        echo "Generated primary tag: $PRIMARY_TAG"
+        echo "Generated tags: ${TAGS[*]}"
+        echo "TAGS=${TAGS[*]}" >> "$GITHUB_OUTPUT"
+        echo "TAGS_CONCAT=$(IFS=, ; echo "${TAGS[*]}")" >> "$GITHUB_OUTPUT"
+        echo "PRIMARY_TAG=$PRIMARY_TAG" >> "$GITHUB_OUTPUT"
+
+        NAMES_FULL=()
+        for TAG in "${TAGS[@]}"; do
+          NAMES_FULL+=("$IMAGE_NAME:$TAG")
+        done
+
+        echo "Generated full names: ${NAMES_FULL[*]}"
+        echo "NAMES_FULL=${NAMES_FULL[*]}" >> "$GITHUB_OUTPUT"
+        echo "NAMES_FULL_CONCAT=$(IFS=, ; echo "${NAMES_FULL[*]}")" >> "$GITHUB_OUTPUT"
+        echo "PRIMARY_NAME_FULL=$IMAGE_NAME:$PRIMARY_TAG" >> "$GITHUB_OUTPUT"
+
+    - name: Set Outputs
+      id: set-outputs
+      shell: bash
+      env:
+        IS_RELEASE: ${{ inputs.is-release }}
+      run: |
+        echo "Setting outputs..."
+        if [[ "$IS_RELEASE" == true ]]; then
+          echo "TAGS=${{ steps.generate-tags.outputs.TAGS }}" >> $GITHUB_OUTPUT
+          echo "TAGS_CONCAT=${{ steps.generate-tags.outputs.TAGS_CONCAT }}" >> $GITHUB_OUTPUT
+          echo "NAMES_FULL=${{ steps.generate-tags.outputs.NAMES_FULL }}" >> $GITHUB_OUTPUT
+          echo "NAMES_FULL_CONCAT=${{ steps.generate-tags.outputs.NAMES_FULL_CONCAT }}" >> $GITHUB_OUTPUT
+          echo "PRIMARY_TAG=${{ steps.generate-tags.outputs.PRIMARY_TAG }}" >> $GITHUB_OUTPUT
+          echo "PRIMARY_NAME_FULL=${{ steps.generate-tags.outputs.PRIMARY_NAME_FULL }}" >> $GITHUB_OUTPUT
+        else
+          echo "TAGS=${{ steps.generate-tags-pull-request.outputs.TAGS }}" >> $GITHUB_OUTPUT
+          echo "TAGS_CONCAT=${{ steps.generate-tags-pull-request.outputs.TAGS_CONCAT }}" >> $GITHUB_OUTPUT
+          echo "NAMES_FULL=${{ steps.generate-tags-pull-request.outputs.NAMES_FULL }}" >> $GITHUB_OUTPUT
+          echo "NAMES_FULL_CONCAT=${{ steps.generate-tags-pull-request.outputs.NAMES_FULL_CONCAT }}" >> $GITHUB_OUTPUT
+          echo "PRIMARY_TAG=${{ steps.generate-tags-pull-request.outputs.PRIMARY_TAG }}" >> $GITHUB_OUTPUT
+          echo "PRIMARY_NAME_FULL=${{ steps.generate-tags-pull-request.outputs.PRIMARY_NAME_FULL }}" >> $GITHUB_OUTPUT
+        fi

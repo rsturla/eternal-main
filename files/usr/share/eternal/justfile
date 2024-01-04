@@ -1,3 +1,3 @@
-# Add includes here to make them available to the "eternal" command.
+# Add imports here to make them available to the "eternal" command.
 
-!include /usr/share/eternal/main.just
+import '/usr/share/eternal/main.just'

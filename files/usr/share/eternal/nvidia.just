@@ -1,9 +1,9 @@
 nvidia-setup:
   @echo "Configuring NVIDIA drivers..."
-  @just --unstable nvidia-disable-nouveau
-  @just --unstable nvidia-secure-boot-enable
-  @just --unstable nvidia-firefox-vaapi
-  @just --unstable nvidia-generate-cdi
+  @just nvidia-disable-nouveau
+  @just nvidia-secure-boot-enable
+  @just nvidia-firefox-vaapi
+  @just nvidia-generate-cdi
   @echo "Configuring NVIDIA drivers... done"
 
 [private]

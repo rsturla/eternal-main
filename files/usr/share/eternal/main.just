@@ -1,6 +1,6 @@
 [private]
 default:
-  @just --unstable --list
+  @just --list
 
 bios:
   systemctl reboot --firmware-setup
@@ -20,9 +20,9 @@ update-firmware:
   fwupdmgr update
 
 update:
-  @just --unstable update-flatpak
-  @just --unstable update-system
-  @just --unstable update-firmware
+  @just update-flatpak
+  @just update-system
+  @just update-firmware
 
 sign:
   #!/usr/bin/env bash

@@ -1,3 +1,6 @@
 # Add imports here to make them available to the "eternal" command.
-
 import '/usr/share/eternal/main.just'
+
+[private]
+default:
+  @just --list

@@ -1,7 +1,3 @@
-[private]
-default:
-  @just --list
-
 bios:
   systemctl reboot --firmware-setup
 

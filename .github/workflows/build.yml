@@ -141,14 +141,10 @@ jobs:
 
   check:
     needs: [build-base, build-nvidia]
-    if: ${{ !cancelled() }}
+    if: always()
     runs-on: ubuntu-latest
     steps:
-      - name: Exit on failure
-        if: ${{ needs.build-base.results == 'failure' || needs.build-nvidia.results == 'failure' }}
-        shell: bash
-        run: exit 1
-
-      - name: Exit on success
-        shell: bash
-        run: exit 0
+      - name: Check Job Status
+        uses: ./.github/actions/check-jobs-success
+        with:
+          jobs: ${{ toJSON(needs) }}

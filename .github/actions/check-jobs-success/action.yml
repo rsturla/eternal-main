@@ -1,0 +1,26 @@
+name: Check jobs success
+description: Check if all required jobs are successful or skipped
+
+inputs:
+  jobs:
+    description: 'JSON string of jobs (should be toJSON(needs))'
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Check Jobs
+      shell: bash
+      env:
+        JOBS: ${{ inputs.jobs }}
+      run: |
+        echo "Job status:"
+        echo $JOBS | jq -r 'to_entries[] | " - \(.key): \(.value.result)"'
+
+        for i in $(echo $JOBS | jq -r 'to_entries[] | .value.result'); do
+          if [ "$i" != "success" ] && [ "$i" != "skipped" ]; then
+            echo ""
+            echo "Status check not okay!"
+            exit 1
+          fi
+        done

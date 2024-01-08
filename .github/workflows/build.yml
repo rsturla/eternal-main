@@ -144,6 +144,9 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+
       - name: Check Job Status
         uses: ./.github/actions/check-jobs-success
         with:

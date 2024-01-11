@@ -23,8 +23,11 @@ runs:
         DATABASE_REF: ${{ inputs.database-ref }}
       run: |
         docker pull $DATABASE_REF
-        docker save -o .clair/ $DATABASE_REF
+        mkdir -p /tmp/clair
+        docker save -o /tmp/clair/ $DATABASE_REF
+        mv /tmp/clair/matcher.db.tar.gz .clair/
         tar -xvf .clair/matcher.db.tar.gz -C .clair/
+        rm -rf .clair/matcher.db.tar.gz
 
     - name: Scan image
       uses: quay/clair-action@main

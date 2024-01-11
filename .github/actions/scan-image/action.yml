@@ -12,6 +12,7 @@ runs:
     - name: Save Docker image
       shell: bash
       run: |
+        docker image ls
         docker save -o /tmp/${{ github.sha }} ${{ inputs.image-ref }}
 
     - name: Scan image

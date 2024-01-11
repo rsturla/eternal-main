@@ -64,6 +64,11 @@ jobs:
             FEDORA_VERSION=${{ matrix.fedora-version }}
             FEDORA_EDITION=${{ matrix.fedora-edition }}
 
+      - name: Scan Image
+        uses: ./.github/actions/scan-image
+        with:
+          image-ref: ${{ steps.build.outputs.digest }}
+
       - name: Sign Image
         uses: ./.github/actions/sign-image
         if: github.event_name != 'pull_request'
@@ -129,6 +134,11 @@ jobs:
             FEDORA_EDITION=${{ matrix.fedora-edition }}
             NVIDIA_VERSION=${{ matrix.nvidia-version }}
             BASE_IMAGE_FULL=${{ needs.build-base.outputs.base-image-full }}
+
+      - name: Scan Image
+        uses: ./.github/actions/scan-image
+        with:
+          image-ref: ${{ steps.build.outputs.digest }}
 
       - name: Sign Image
         uses: ./.github/actions/sign-image

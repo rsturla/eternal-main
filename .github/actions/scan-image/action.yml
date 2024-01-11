@@ -1,0 +1,40 @@
+name: Scan Image
+description: Scan image with Trivy
+
+inputs:
+  severity:
+    description: 'Severity threshold'
+    required: true
+    default: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
+  ignore-unfixed:
+    description: 'Ignore unfixed vulnerabilities'
+    required: true
+    default: 'false'
+  image-ref:
+    description: 'Image reference'
+    required: true
+  vuln-type:
+    description: 'Vulnerability type'
+    required: true
+    default: 'os,library'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Scan image
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ${{ inputs.image-ref }}
+        format: table
+        output: trivy-results.md
+        severity: ${{ inputs.severity }}
+        vuln-type: ${{ inputs.vuln-type }}
+        ignore-unfixed: ${{ inputs.ignore-unfixed }}
+        exit-code: 1
+
+    - name: Upload results to Job Summary
+      run: |
+        cat trivy-results.md >> $GITHUB_STEP_SUMMARY

@@ -59,6 +59,7 @@ jobs:
           context: .
           file: Containerfile
           push: false
+          load: true
           tags: ${{ steps.generate-image-tags.outputs.names-full-concat }}
           build-args: |
             FEDORA_VERSION=${{ matrix.fedora-version }}

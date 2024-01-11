@@ -1,0 +1,3 @@
+FROM scratch
+
+COPY matcher.db /matcher.db

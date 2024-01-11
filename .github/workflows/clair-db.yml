@@ -1,0 +1,45 @@
+name: Generate Clair Database
+
+on:
+  schedule:
+    # Every 12 hours (at 11:00 and 23:00)
+    - cron: '0 11,23 * * *'
+  workflow_dispatch:
+  pull_request:
+
+env:
+  IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_NAME: eternal-linux/_ci/clair-db
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Run Clair V4 update
+        uses: quay/clair-action@allow-update
+        with:
+          db-file: .clair/matcher.db
+          mode: update
+
+      - name: Docker Login
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push
+        uses: docker/build-push-action@v2
+        with:
+          context: .clair/.
+          file: Containerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:latest

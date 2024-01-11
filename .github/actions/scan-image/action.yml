@@ -5,6 +5,9 @@ inputs:
   image-ref:
     description: 'Image reference'
     required: true
+  database-ref:
+    description: 'Database reference'
+    required: true
 
 runs:
   using: 'composite'
@@ -14,9 +17,15 @@ runs:
       run: |
         docker save -o ${{ github.sha }} ${{ inputs.image-ref }}
 
+    - name: Extract database from image
+      shell: bash
+      run: |
+        docker save -o database .clair/
+
     - name: Scan image
       uses: quay/clair-action@main
       with:
+        db-file: .clair/matcher.db
         image-path: ${{ github.sha }}
         format: clair
         output: clair-results.md

@@ -9,12 +9,18 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    - name: Save Docker image
+      shell: bash
+      run: |
+        docker save -o /tmp/${{ github.sha }} ${{ inputs.image-ref }}
+
     - name: Scan image
       uses: quay/clair-action@main
       with:
-        image-ref: ${{ inputs.image-ref }}
+        image-path: /tmp/${{ github.sha }}
         format: clair
         output: clair-results.md
+        docker-config-dir: .docker
         return-code: 1
 
     - name: Upload results to Job Summary

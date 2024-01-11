@@ -13,6 +13,10 @@ env:
 jobs:
   generate:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
     env:
       IMAGE_NAME: eternal-linux/helpers/ci/clair-db
     steps:

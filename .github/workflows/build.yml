@@ -138,7 +138,7 @@ jobs:
       - name: Scan Image
         uses: ./.github/actions/scan-image
         with:
-          image-ref: ${{ steps.build.outputs.digest }}
+          image-ref: ${{ steps.build.outputs.imageid }}
 
       - name: Sign Image
         uses: ./.github/actions/sign-image

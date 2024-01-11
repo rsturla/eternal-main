@@ -33,6 +33,7 @@ runs:
         exit-code: 1
 
     - name: Upload results to Job Summary
+      if: always()
       shell: bash
       run: |
         cat trivy-results.md >> $GITHUB_STEP_SUMMARY

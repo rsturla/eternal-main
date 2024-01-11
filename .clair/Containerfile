@@ -1,3 +1,3 @@
 FROM scratch
 
-COPY matcher.db /matcher.db
+COPY matcher.db.tar.gz /matcher.db.tar.gz

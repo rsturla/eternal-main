@@ -23,7 +23,6 @@ runs:
         DATABASE_REF: ${{ inputs.database-ref }}
       run: |
         docker pull $DATABASE_REF
-        mkdir -p /tmp/clair
         docker save -o /tmp/clair/ $DATABASE_REF
         mv /tmp/clair/matcher.db.tar.gz .clair/
         tar -xvf .clair/matcher.db.tar.gz -C .clair/

@@ -24,7 +24,6 @@ runs:
       run: |
         docker pull $DATABASE_REF
         docker save -o .clair/ $DATABASE_REF
-        # Uncompress the database
         tar -xvf .clair/matcher.db.tar.gz -C .clair/
 
     - name: Scan image

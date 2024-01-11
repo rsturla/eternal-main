@@ -28,6 +28,11 @@ jobs:
           db-file: .clair/matcher.db
           mode: update
 
+      - name: Compress database
+        run: |
+          tar -czvf .clair/matcher.db.tar.gz .clair/matcher.db
+          rm .clair/matcher.db
+
       - name: Docker Login
         uses: docker/login-action@v1
         with:

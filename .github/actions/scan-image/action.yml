@@ -1,39 +1,24 @@
 name: Scan Image
-description: Scan image with Trivy
+description: Scan image with ClairV4
 
 inputs:
-  severity:
-    description: 'Severity threshold'
-    required: true
-    default: 'UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL'
-  ignore-unfixed:
-    description: 'Ignore unfixed vulnerabilities'
-    required: true
-    default: 'false'
   image-ref:
     description: 'Image reference'
     required: true
-  vuln-type:
-    description: 'Vulnerability type'
-    required: true
-    default: 'os,library'
 
 runs:
   using: 'composite'
   steps:
     - name: Scan image
-      uses: aquasecurity/trivy-action@master
+      uses: quay/clair-action@main
       with:
         image-ref: ${{ inputs.image-ref }}
-        format: table
-        output: trivy-results.md
-        severity: ${{ inputs.severity }}
-        vuln-type: ${{ inputs.vuln-type }}
-        ignore-unfixed: ${{ inputs.ignore-unfixed }}
-        exit-code: 1
+        format: clair
+        output: clair-results.md
+        return-code: 1
 
     - name: Upload results to Job Summary
       if: always()
       shell: bash
       run: |
-        cat trivy-results.md >> $GITHUB_STEP_SUMMARY
+        cat clair-results.md >> $GITHUB_STEP_SUMMARY

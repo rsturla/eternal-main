@@ -67,7 +67,7 @@ jobs:
       - name: Scan Image
         uses: ./.github/actions/scan-image
         with:
-          image-ref: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.build.outputs.imageid }}
+          image-ref: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.generate-image-tags.outputs.primary-name-full }}
 
       - name: Sign Image
         uses: ./.github/actions/sign-image
@@ -138,7 +138,7 @@ jobs:
       - name: Scan Image
         uses: ./.github/actions/scan-image
         with:
-          image-ref: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.build.outputs.imageid }}
+          image-ref: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.generate-image-tags.outputs.primary-name-full }}
 
       - name: Sign Image
         uses: ./.github/actions/sign-image

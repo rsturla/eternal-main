@@ -19,8 +19,11 @@ runs:
 
     - name: Extract database from image
       shell: bash
+      env:
+        DATABASE_REF: ${{ inputs.database-ref }}
       run: |
-        docker save -o database .clair/
+        docker pull $DATABASE_REF
+        docker save -o .clair/ $DATABASE_REF
 
     - name: Scan image
       uses: quay/clair-action@main

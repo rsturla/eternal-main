@@ -31,6 +31,9 @@ jobs:
     outputs:
       base-image-full: ${{ steps.generate-image-tags.outputs.primary-name-full }}
     steps:
+      - name: Maximize build space
+        uses: ublue-os/remove-unwanted-software@v6
+
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
 

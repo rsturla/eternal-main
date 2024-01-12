@@ -27,6 +27,7 @@ runs:
         id=$(docker create $DATABASE_REF /bin/true)
         docker cp $id:/matcher.db.tar.gz /tmp/clair/matcher.db.tar.gz
         docker rm $id
+        docker rmi $DATABASE_REF
         tar -xvf /tmp/clair/matcher.db.tar.gz -C .clair/
         rm -rf .clair/matcher.db.tar.gz /tmp/clair/
 

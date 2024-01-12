@@ -36,12 +36,10 @@ runs:
       with:
         db-file: .clair/matcher.db
         image-path: ${{ github.sha }}
-        format: clair
-        output: clair-results.md
-        return-code: 1
+        format: sarif
+        output: clair_results.sarif
 
-    - name: Upload results to Job Summary
-      if: always()
-      shell: bash
-      run: |
-        cat clair-results.md >> $GITHUB_STEP_SUMMARY
+    - name: Upload SARIF results
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: clair_results.sarif

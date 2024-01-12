@@ -114,6 +114,9 @@ jobs:
     env:
       IMAGE_NAME: eternal-linux/main/${{ matrix.fedora-edition }}
     steps:
+      - name: Maximize build space
+        uses: ublue-os/remove-unwanted-software@v6
+
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
 
@@ -156,7 +159,7 @@ jobs:
         uses: ./.github/actions/scan-image
         with:
           image-ref: ${{ steps.generate-image-tags.outputs.primary-name-full }}
-          database-ref: ${{ env.IMAGE_REGISTRY }}/eternal-linux/helpers/ci/clair-db
+          database-ref: ${{ env.IMAGE_REGISTRY }}/eternal-linux/helpers/ci/clair-db:latest
 
       - name: Push Image
         uses: docker/build-push-action@4a13e500e55cf31b7a5d59a38ab2040ab0f42f56 # v5

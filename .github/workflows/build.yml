@@ -29,7 +29,7 @@ jobs:
     env:
       IMAGE_NAME: eternal-linux/main/${{ matrix.fedora-edition }}
     outputs:
-      base-image-full: ${{ steps.generate-image-tags.outputs.primary-name-full }}
+      base-image-tag: ${{ steps.generate-image-tags.outputs.primary-tag }}
     steps:
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
@@ -128,7 +128,7 @@ jobs:
             FEDORA_VERSION=${{ matrix.fedora-version }}
             FEDORA_EDITION=${{ matrix.fedora-edition }}
             NVIDIA_VERSION=${{ matrix.nvidia-version }}
-            BASE_IMAGE_FULL=${{ needs.build-base.outputs.base-image-full }}
+            BASE_TAG=${{ needs.build-base.outputs.base-image-tag }}
 
       - name: Sign Image
         uses: ./.github/actions/sign-image

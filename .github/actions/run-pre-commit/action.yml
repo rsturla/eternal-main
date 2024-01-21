@@ -1,10 +1,6 @@
 name: Run pre-commit
 
 inputs:
-  pre-commit-version:
-    description: 'The version of pre-commit to use'
-    required: false
-    default: 'latest'
   pre-commit-args:
     description: 'Additional arguments to pass to pre-commit'
     required: false

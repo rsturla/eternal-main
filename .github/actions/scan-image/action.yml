@@ -1,0 +1,45 @@
+name: Scan Image
+description: Scan image with ClairV4
+
+inputs:
+  image-ref:
+    description: 'Image reference'
+    required: true
+  database-ref:
+    description: 'Database reference'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Save Docker image
+      shell: bash
+      run: |
+        docker save -o ${{ github.sha }} ${{ inputs.image-ref }}
+
+    - name: Extract database from image
+      shell: bash
+      env:
+        DATABASE_REF: ${{ inputs.database-ref }}
+      run: |
+        mkdir -p /tmp/clair/
+        docker pull $DATABASE_REF
+        id=$(docker create $DATABASE_REF /bin/true)
+        docker cp $id:/matcher.db.tar.gz /tmp/clair/matcher.db.tar.gz
+        docker rm $id
+        docker rmi $DATABASE_REF
+        tar -xvf /tmp/clair/matcher.db.tar.gz -C .clair/
+        rm -rf .clair/matcher.db.tar.gz /tmp/clair/
+
+    - name: Scan image
+      uses: quay/clair-action@main
+      with:
+        db-file: .clair/matcher.db
+        image-path: ${{ github.sha }}
+        format: sarif
+        output: clair_results.sarif
+
+    - name: Upload SARIF results
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: clair_results.sarif

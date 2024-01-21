@@ -1,0 +1,26 @@
+name: Run pre-commit
+
+inputs:
+  pre-commit-args:
+    description: 'Additional arguments to pass to pre-commit'
+    required: false
+    default: '--all-files'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Python
+      uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5
+
+    - name: Run pre-commit
+      uses: pre-commit/action@646c83fcd040023954eafda54b4db0192ce70507 # v3.0.0
+      with:
+        extra_args: ${{ inputs.pre-commit-args }}
+
+    - name: Check for changed files
+      shell: bash
+      run: |
+        if [[ -n "$(git status --porcelain)" ]]; then
+          echo "pre-commit changed files, please run pre-commit locally and commit the changes"
+          exit 1
+        fi

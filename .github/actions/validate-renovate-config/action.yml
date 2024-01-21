@@ -1,0 +1,25 @@
+name: Validate Renovate config
+
+inputs:
+  renovate-version:
+    description: 'The version of Renovate to use'
+    required: false
+    default: 'latest'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4
+      with:
+        node-version: latest
+
+    - name: Install dependencies
+      shell: bash
+      env:
+        RENOVATE_VERSION: ${{ inputs.renovate-version }}
+      run: npm install -g renovate@${RENOVATE_VERSION}
+
+    - name: Validate Renovate config
+      shell: bash
+      run: renovate-config-validator --strict

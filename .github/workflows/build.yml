@@ -32,7 +32,7 @@ jobs:
       base-image-tag: ${{ steps.generate-image-tags.outputs.primary-tag }}
     steps:
       - name: Optimize GHA Storage
-        uses: ./.github/actions/optimize-gha-storage
+        uses: ./.github/actions/optimise-gha-storage
 
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4

@@ -1,0 +1,100 @@
+name: Optimise GitHub Actions storage
+
+inputs:
+  remove-dotnet:
+    description: 'Removes .NET runtime and libraries. (frees ~4 GB)'
+    required: false
+    default: 'true'
+  remove-android:
+    description: 'Removes Android SDKs and Tools. (frees ~11 GB)'
+    required: false
+    default: 'true'
+  remove-haskell:
+    description: 'Removes GHC (Haskell) artifacts. (frees a few MBs)'
+    required: false
+    default: 'true'
+  remove-codeql:
+    description: 'Removes CodeQL Action Bundles. (frees ~5.4 GB)'
+    required: false
+    default: 'true'
+  remove-docker-images:
+    description: 'Removes cached Docker images. (frees ~3 GB)'
+    required: false
+    default: 'true'
+  remove-large-packages:
+    description: 'Removes large packages. (frees ~5 GB)'
+    required: false
+    default: 'true'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Disk space report before modification
+      shell: bash
+      run: |
+          echo "==> Available space before cleanup"
+          echo
+          df -h
+
+    - name: Maximize build disk space
+      shell: bash
+      run: |
+          set -euo pipefail
+
+          echo -n "  Removing:     "
+          if [[ ${{ inputs.remove-dotnet }} == 'true' ]]; then
+            echo -n "dotnet "
+          fi
+          if [[ ${{ inputs.remove-android }} == 'true' ]]; then
+            echo -n "android "
+          fi
+          if [[ ${{ inputs.remove-haskell }} == 'true' ]]; then
+            echo -n "haskell "
+          fi
+          if [[ ${{ inputs.remove-codeql }} == 'true' ]]; then
+            echo -n "codeql "
+          fi
+          if [[ ${{ inputs.remove-docker-images }} == 'true' ]]; then
+            echo -n "docker "
+          fi
+          echo
+
+          echo "Removing unwanted software... "
+          if [[ ${{ inputs.remove-dotnet }} == 'true' ]]; then
+            sudo rm -rf /usr/share/dotnet
+          fi
+          if [[ ${{ inputs.remove-android }} == 'true' ]]; then
+            sudo rm -rf /usr/local/lib/android
+          fi
+          if [[ ${{ inputs.remove-haskell }} == 'true' ]]; then
+            sudo rm -rf /opt/ghc
+          fi
+          if [[ ${{ inputs.remove-codeql }} == 'true' ]]; then
+            sudo rm -rf /opt/hostedtoolcache/CodeQL
+          fi
+          if [[ ${{ inputs.remove-docker-images }} == 'true' ]]; then
+            sudo docker image prune --all --force > /dev/null
+          fi
+          if [[ ${{ inputs.remove-large-packages }} == 'true' ]]; then
+            sudo apt-get purge -y \
+              '^llvm-.*' \
+              'php.*' \
+              '^mongodb-.*' \
+              '^mysql-.*' \
+              azure-cli \
+              google-chrome-stable \
+              firefox \
+              powershell \
+              microsoft-edge-stable \
+              mono-devel
+            sudo apt-get autoremove -y
+            sudo apt-get clean
+          fi
+          echo "... done"
+
+    - name: Disk space report after modification
+      shell: bash
+      run: |
+          echo "==> Available space after cleanup"
+          echo
+          df -h

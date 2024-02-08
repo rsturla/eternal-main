@@ -118,6 +118,8 @@ jobs:
           image: ${{ env.IMAGE_NAME }}
           tags: |
             ${{ steps.generate-image-tags.outputs.tags }}
+          extra-args: |
+            --squash
           build-args: |
             FEDORA_VERSION=${{ matrix.fedora-version }}
             FEDORA_EDITION=${{ matrix.fedora-edition }}

@@ -31,11 +31,11 @@ jobs:
     outputs:
       base-image-tag: ${{ steps.generate-image-tags.outputs.primary-tag }}
     steps:
-      - name: Optimize GHA Storage
-        uses: ./.github/actions/optimise-gha-storage
-
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+
+      - name: Optimize GHA Storage
+        uses: ./.github/actions/optimise-gha-storage
 
       - name: Generate Image Tags
         uses: ./.github/actions/generate-image-tags
@@ -98,11 +98,11 @@ jobs:
     env:
       IMAGE_NAME: eternal-linux/main/${{ matrix.fedora-edition }}
     steps:
-      - name: Optimise GHA Storage
-        uses: ./.github/actions/optimise-gha-storage
-
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+
+      - name: Optimize GHA Storage
+        uses: ./.github/actions/optimise-gha-storage
 
       - name: Generate Image Tags
         uses: ./.github/actions/generate-image-tags

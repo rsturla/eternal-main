@@ -74,7 +74,7 @@ jobs:
         if: github.event_name != 'pull_request'
         with:
           registry: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}
-          digest: ${{ steps.build.outputs.digest }}
+          digest: ${{ steps.push.outputs.digest }}
           private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
           private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
 
@@ -147,7 +147,7 @@ jobs:
         if: github.event_name != 'pull_request'
         with:
           registry: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}
-          digest: ${{ steps.build.outputs.digest }}
+          digest: ${{ steps.push.outputs.digest }}
           private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
           private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
 

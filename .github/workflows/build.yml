@@ -69,6 +69,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Login to GHCR
+        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
       - name: Sign Image
         uses: ./.github/actions/sign-image
         if: github.event_name != 'pull_request'
@@ -141,6 +148,13 @@ jobs:
           registry: ${{ env.IMAGE_REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Login to GHCR
+        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
 
       - name: Sign Image
         uses: ./.github/actions/sign-image

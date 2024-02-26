@@ -118,9 +118,9 @@ runs:
         TAG_SUFFIXES=()
 
         if [[ -n "$NVIDIA_DRIVER_VERSION" ]]; then
-          TAG_SUFFIXES+=("-nvidia")
+          TAG_SUFFIXES+=("-nvidia$NVIDIA_DRIVER_VERSION")
           if [[ "$NVIDIA_DRIVER_IS_STABLE" == "true" ]]; then
-            TAG_SUFFIXES+=("-nvidia$NVIDIA_DRIVER_VERSION")
+            TAG_SUFFIXES+=("-nvidia")
           fi
         fi
 

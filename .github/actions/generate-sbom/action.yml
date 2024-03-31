@@ -36,8 +36,8 @@ runs:
         image: ${{ inputs.image-ref }}
         output-file: ${{ inputs.output-file }}
         format: spdx-json
-        username: ${{ inputs.username || github.actor }}
-        password: ${{ inputs.password || github.token }}
+        registry-username: ${{ inputs.username || github.actor }}
+        registry-password: ${{ inputs.password || github.token }}
 
     - name: Scan Image Tarball
       if: inputs.image-tar != ''
@@ -47,5 +47,5 @@ runs:
         image-tar: ${{ inputs.image-tar }}
         output-file: ${{ inputs.output-file }}
         format: spdx-json
-        username: ${{ inputs.username || github.actor }}
-        password: ${{ inputs.password || github.token }}
+        registry-username: ${{ inputs.username || github.actor }}
+        registry-password: ${{ inputs.password || github.token }}

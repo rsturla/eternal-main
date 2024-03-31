@@ -94,7 +94,7 @@ jobs:
       - name: Upload SBOM to Job Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ env.IMAGE_NAME }}-sbom
+          name: ${{ matrix.fedora-edition }}-${{ matrix.fedora-version }}-sbom
           path: 'syft-sbom.json'
 
   build-nvidia:

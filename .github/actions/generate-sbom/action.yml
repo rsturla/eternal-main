@@ -38,6 +38,7 @@ runs:
         format: spdx-json
         registry-username: ${{ inputs.username || github.actor }}
         registry-password: ${{ inputs.password || github.token }}
+        
 
     - name: Scan Image Tarball
       if: inputs.image-tar != ''

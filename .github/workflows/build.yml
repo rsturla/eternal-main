@@ -95,7 +95,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.IMAGE_NAME }}-sbom
-          path: ${{ steps.generate-sbom.outputs.sbom-path }}
+          path: 'syft-sbom.json'
 
   build-nvidia:
     runs-on: ubuntu-latest

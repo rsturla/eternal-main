@@ -1,0 +1,49 @@
+name: Generate Image SBOM
+
+inputs:
+  image-ref:
+    description: 'The image reference to generate the SBOM for'
+    required: false
+    default: ''
+  image-tar:
+    description: 'The image tarball to generate the SBOM for'
+    required: false
+    default: ''
+  output-file:
+    description: 'The path to the SBOM file'
+    required: false
+    default: 'syft-sbom.json'
+  username:
+    description: 'The username to authenticate with the registry.  Defaults to GITHUB_ACTOR'
+    required: false
+  password:
+    description: 'The password to authenticate with the registry.  Defaults to GITHUB_TOKEN'
+    required: false
+
+outputs:
+  sbom-file:
+    description: 'The path to the SBOM file'
+    value: ${{ inputs.output-file }}
+
+runs:
+  using: composite
+  steps:
+    - name: Scan Image
+      if: inputs.image-ref != ''
+      id: run-syft
+      uses:
+        image: ${{ inputs.image-ref }}
+        output-file: ${{ inputs.output-file }}
+        format: spdx-json
+        username: ${{ inputs.username || github.actor }}
+        password: ${{ inputs.password || github.token }}
+
+    - name: Scan Image Tarball
+      if: inputs.image-tar != ''
+      id: run-syft-tar
+      uses:
+        image-tar: ${{ inputs.image-tar }}
+        output-file: ${{ inputs.output-file }}
+        format: spdx-json
+        username: ${{ inputs.username || github.actor }}
+        password: ${{ inputs.password || github.token }}

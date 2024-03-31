@@ -90,12 +90,7 @@ jobs:
         uses: ./.github/actions/generate-sbom
         with:
           image-ref: ${{ steps.push.outputs.registry-path }}
-
-      - name: Upload SBOM to Job Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.fedora-edition }}-${{ matrix.fedora-version }}-sbom
-          path: 'syft-sbom.json'
+          artifact-name: ${{ matrix.fedora-edition }}-${{ matrix.fedora-version }}-sbom
 
   build-nvidia:
     runs-on: ubuntu-latest
@@ -174,6 +169,13 @@ jobs:
           digest: ${{ steps.push.outputs.digest }}
           private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
           private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
+
+      - name: Generate SBOM
+        id: generate-sbom
+        uses: ./.github/actions/generate-sbom
+        with:
+          image-ref: ${{ steps.push.outputs.registry-path }}
+          artifact-name: ${{ matrix.fedora-edition }}-${{ matrix.fedora-version }}-nvidia${{ matrix.nvidia-version }}-sbom
 
   check:
     needs: [build-base, build-nvidia]

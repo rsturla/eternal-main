@@ -5,10 +5,9 @@ inputs:
     description: 'The image reference to generate the SBOM for'
     required: false
     default: ''
-  image-tar:
-    description: 'The image tarball to generate the SBOM for'
+  artifact-name:
+    description: 'The name of the artifact to generate the SBOM for'
     required: false
-    default: ''
   output-file:
     description: 'The path to the SBOM file'
     required: false
@@ -21,7 +20,7 @@ inputs:
     required: false
 
 outputs:
-  sbom-file:
+  output-file:
     description: 'The path to the SBOM file'
     value: ${{ inputs.output-file }}
 
@@ -38,15 +37,13 @@ runs:
         format: spdx-json
         registry-username: ${{ inputs.username || github.actor }}
         registry-password: ${{ inputs.password || github.token }}
-        
+        upload-artifact: false
 
-    - name: Scan Image Tarball
-      if: inputs.image-tar != ''
-      id: run-syft-tar
-      uses: anchore/sbom-action@v0
+    - name: Upload SBOM Artifact
+      if: inputs.artifact-name != ''
+      uses: actions/upload-artifact@v4
       with:
-        image-tar: ${{ inputs.image-tar }}
-        output-file: ${{ inputs.output-file }}
-        format: spdx-json
-        registry-username: ${{ inputs.username || github.actor }}
-        registry-password: ${{ inputs.password || github.token }}
+        name: ${{ inputs.artifact-name }}
+        path: ${{ inputs.output-file }}
+        if-no-files-found: error
+        compression-level: 8

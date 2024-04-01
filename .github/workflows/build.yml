@@ -85,6 +85,13 @@ jobs:
           private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
           private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
 
+      - name: Generate SBOM
+        id: generate-sbom
+        uses: ./.github/actions/generate-sbom
+        with:
+          image-ref: ${{ steps.push.outputs.registry-path }}
+          artifact-name: ${{ matrix.fedora-edition }}-${{ matrix.fedora-version }}-sbom
+
   build-nvidia:
     runs-on: ubuntu-latest
     needs: build-base
@@ -162,6 +169,13 @@ jobs:
           digest: ${{ steps.push.outputs.digest }}
           private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
           private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
+
+      - name: Generate SBOM
+        id: generate-sbom
+        uses: ./.github/actions/generate-sbom
+        with:
+          image-ref: ${{ steps.push.outputs.registry-path }}
+          artifact-name: ${{ matrix.fedora-edition }}-${{ matrix.fedora-version }}-nvidia${{ matrix.nvidia-version }}-sbom
 
   check:
     needs: [build-base, build-nvidia]

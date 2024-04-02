@@ -92,6 +92,12 @@ jobs:
           image-ref: ${{ steps.push.outputs.registry-path }}
           artifact-name: ${{ matrix.fedora-edition }}-${{ matrix.fedora-version }}-sbom
 
+      - name: Scan SBOM
+        uses: ./.github/actions/scan-sbom
+        with:
+          sbom-path: ${{ steps.generate-sbom.outputs.output-file }}
+          artifact-name: ${{ matrix.fedora-edition }}-${{ matrix.fedora-version }}-scan
+
   build-nvidia:
     runs-on: ubuntu-latest
     needs: build-base
@@ -176,6 +182,12 @@ jobs:
         with:
           image-ref: ${{ steps.push.outputs.registry-path }}
           artifact-name: ${{ matrix.fedora-edition }}-${{ matrix.fedora-version }}-nvidia${{ matrix.nvidia-version }}-sbom
+
+      - name: Scan SBOM
+        uses: ./.github/actions/scan-sbom
+        with:
+          sbom-path: ${{ steps.generate-sbom.outputs.output-file }}
+          artifact-name: ${{ matrix.fedora-edition }}-${{ matrix.fedora-version }}-nvidia${{ matrix.nvidia-version }}-scan
 
   check:
     needs: [build-base, build-nvidia]

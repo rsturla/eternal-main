@@ -17,13 +17,13 @@ jobs:
       - name: Pull Image
         shell: bash
         run: |
-          docker pull ${{ github.event.inputs.image-ref }}
+          docker pull ${{ inputs.image-ref }}
 
       - name: Generate SBOM
         id: generate-sbom
         uses: ./.github/actions/generate-sbom
         with:
-          image-ref: ${{ github.event.inputs.image-ref }}
+          image-ref: ${{ inputs.image-ref }}
           output-file: sbom.json
           artifact-name: sbom
 

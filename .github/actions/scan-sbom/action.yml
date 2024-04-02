@@ -1,0 +1,39 @@
+name: Scan SBOM
+
+inputs:
+  sbom-file:
+    description: 'The path to the SBOM file'
+    required: true
+  output-format:
+    description: 'The output format for the scan.  Either json or sarif'
+    required: false
+    default: 'json'
+  artifact-name:
+    description: 'The name of the artifact to generate the SBOM for'
+    required: false
+    default: ''
+
+outputs:
+  output-file:
+    description: 'The path to the scan output file'
+    value: ${{ steps.scan.outputs.json || steps.scan.outputs.sarif }}
+
+runs:
+  using: composite
+  steps:
+    - name: Scan SBOM
+      id: scan
+      uses: anchore/scan-action@v3
+      with:
+        sbom: ${{ inputs.sbom-file }}
+        output-format: ${{ inputs.output-format }}
+
+    - name: Upload SBOM Artifact
+      if: inputs.artifact-name != ''
+      id: upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ steps.scan.outputs.json || steps.scan.outputs.sarif }}
+        if-no-files-found: error
+        compression-level: 6

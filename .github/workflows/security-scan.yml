@@ -13,4 +13,4 @@ jobs:
     # if: ${{ github.event.registry_package.package_version.container_metadata.tag.name != '' }}
     uses: ./.github/workflows/_security-scan.yml
     with:
-      image-ref: ghcr.io/${{ github.repository_owner }}/eternal-linux/main/silverblue:latest
+      image-ref: ghcr.io/${{ github.repository_owner }}/eternal-linux/main/silverblue:39

@@ -10,7 +10,7 @@ on:
 jobs:
   security-scan:
     name: Security Scan
-    if: ${{ github.event.registry_package.package_version.container_metadata.tag.name != '' }}
+    # if: ${{ github.event.registry_package.package_version.container_metadata.tag.name != '' }}
     uses: ./.github/workflows/_security-scan.yml
     with:
       image-ref: ghcr.io/${{ github.repository }}/eternal-linux/main/silverblue:latest

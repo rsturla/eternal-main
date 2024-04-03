@@ -134,6 +134,21 @@ jobs:
           nvidia-driver-version: ${{ matrix.nvidia-version }}
           nvidia-driver-is-stable: ${{ matrix.nvidia-is-stable }}
 
+      - name: Generate Base Image Tag
+        id: generate-base-image-tag
+        env:
+          FEDORA_VERSION: ${{ matrix.fedora-version }}
+          PR_NUMBER: ${{ github.event.number }}
+          IS_PR: ${{ github.event_name == 'pull_request' }}
+        run: |
+          GIT_SHA=$(git rev-parse --short HEAD)
+          if [ $IS_PR == 'true' ]; then
+            BASE_TAG="pr${PR_NUMBER}-${GIT_SHA}-${FEDORA_VERSION}"
+          else
+            BASE_TAG="${GIT_SHA}-${FEDORA_VERSION}"
+          fi
+          echo "base-tag=${BASE_TAG}" >> $GITHUB_OUTPUT
+
       - name: Build Image
         id: build
         uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2
@@ -148,7 +163,7 @@ jobs:
             FEDORA_VERSION=${{ matrix.fedora-version }}
             FEDORA_EDITION=${{ matrix.fedora-edition }}
             NVIDIA_VERSION=${{ matrix.nvidia-version }}
-            BASE_TAG=${{ needs.build-base.outputs.base-image-tag }}
+            BASE_TAG=${{ steps.generate-base-image-tag.outputs.base-tag }}
 
       - name: Push Image
         id: push

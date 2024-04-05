@@ -32,7 +32,7 @@ runs:
 
     - name: Scan SBOM
       id: scan
-      uses: p4/scan-action@config-file-input
+      uses: p5/scan-action@config-file-input
       with:
         sbom: ${{ inputs.sbom-file }}
         output-format: ${{ inputs.output-format }}

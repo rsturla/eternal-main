@@ -95,7 +95,7 @@ jobs:
       - name: Scan SBOM
         uses: ./.github/actions/scan-sbom
         with:
-          sbom-path: ${{ steps.generate-sbom.outputs.output-file }}
+          sbom-file: ${{ steps.generate-sbom.outputs.output-file }}
           artifact-name: ${{ matrix.fedora-edition }}-${{ matrix.fedora-version }}-scan
 
   build-nvidia:
@@ -201,7 +201,7 @@ jobs:
       - name: Scan SBOM
         uses: ./.github/actions/scan-sbom
         with:
-          sbom-path: ${{ steps.generate-sbom.outputs.output-file }}
+          sbom-file: ${{ steps.generate-sbom.outputs.output-file }}
           artifact-name: ${{ matrix.fedora-edition }}-${{ matrix.fedora-version }}-nvidia${{ matrix.nvidia-version }}-scan
 
   check:

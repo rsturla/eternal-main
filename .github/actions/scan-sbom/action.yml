@@ -12,6 +12,9 @@ inputs:
     description: 'The name of the artifact to generate the SBOM for'
     required: false
     default: ''
+  config-file:
+    description: 'The path to the configuration file'
+    required: false
 
 outputs:
   output-file:
@@ -21,12 +24,19 @@ outputs:
 runs:
   using: composite
   steps:
+    - name: Copy configuration
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+      run: cp -r $ACTION_PATH/grype.default.yaml .
+
     - name: Scan SBOM
       id: scan
-      uses: anchore/scan-action@3343887d815d7b07465f6fdcd395bd66508d486a # v3
+      uses: p4/scan-action@config-file-input
       with:
         sbom: ${{ inputs.sbom-file }}
         output-format: ${{ inputs.output-format }}
+        config: ${{ inputs.config-file != '' && inputs.config-file || format('{0}/grype.default.yaml', github.action_path) }}
         fail-build: false
 
     - name: Upload SBOM Artifact
@@ -38,3 +48,7 @@ runs:
         path: ${{ steps.scan.outputs.json || steps.scan.outputs.sarif }}
         if-no-files-found: error
         compression-level: 6
+
+    - name: Delete configuration
+      shell: bash
+      run: rm grype.default.yaml

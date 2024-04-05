@@ -1,3 +1,12 @@
 ignore:
   - package:
     type: npm
+
+log:
+  # suppress all output (except for the vulnerability list)
+  # same as -q ; GRYPE_LOG_QUIET env var
+  quiet: false
+
+  # increase verbosity
+  # same as GRYPE_LOG_VERBOSITY env var
+  verbosity: 1

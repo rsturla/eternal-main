@@ -77,6 +77,8 @@ RUN rpm-ostree override remove \
 
 # Install packages
 RUN rpm-ostree install \
+  bootc \
+  bootupd \
   direnv \
   distrobox \
   ffmpeg \

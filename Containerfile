@@ -2,9 +2,29 @@ ARG FEDORA_VERSION=40
 ARG FEDORA_EDITION=base
 ARG FEDORA_IMAGE=quay.io/fedora-ostree-desktops/${FEDORA_EDITION}:${FEDORA_VERSION}
 
+# Extract kernel version from CoreOS
+FROM quay.io/fedora/fedora-coreos:stable AS coreos-kernel
+
+# e.g. 6.7.7-200.fc39
+RUN rpm -qa | grep -oP 'kernel-core-\K[0-9]+\.[0-9]+\.[0-9]+-[0-9]+\.fc[0-9]+' | head -n 1 >> /tmp/kernel-version
+
 FROM ${FEDORA_IMAGE} as base
 
 COPY files/usr /usr
+COPY --from=coreos-kernel /tmp/kernel-version /usr/etc/kernel-version
+
+# Replace the kernel version with the one from CoreOS
+RUN KERNEL_VERSION=$(cat /usr/etc/kernel-version) && \
+  KERNEL_MAJOR_MINOR_PATCH=$(echo $KERNEL_VERSION | cut -d '-' -f 1) && \
+  KERNEL_RELEASE=$(rpm -qa | grep -oP 'kernel-core-\K[0-9]+\.[0-9]+\.[0-9]+-[0-9]+\.fc[0-9]+' | head -n 1 | cut -d '-' -f 2) && \
+  rpm-ostree override replace --experimental \
+    https://kojipkgs.fedoraproject.org//packages/kernel/$KERNEL_MAJOR_MINOR_PATCH/$KERNEL_RELEASE/x86_64/kernel-$KERNEL_MAJOR_MINOR_PATCH-$KERNEL_RELEASE.x86_64.rpm \
+    https://kojipkgs.fedoraproject.org//packages/kernel/$KERNEL_MAJOR_MINOR_PATCH/$KERNEL_RELEASE/x86_64/kernel-core-$KERNEL_MAJOR_MINOR_PATCH-$KERNEL_RELEASE.x86_64.rpm \
+    https://kojipkgs.fedoraproject.org//packages/kernel/$KERNEL_MAJOR_MINOR_PATCH/$KERNEL_RELEASE/x86_64/kernel-modules-$KERNEL_MAJOR_MINOR_PATCH-$KERNEL_RELEASE.x86_64.rpm \
+    https://kojipkgs.fedoraproject.org//packages/kernel/$KERNEL_MAJOR_MINOR_PATCH/$KERNEL_RELEASE/x86_64/kernel-modules-core-$KERNEL_MAJOR_MINOR_PATCH-$KERNEL_RELEASE.x86_64.rpm \
+  && \
+  rm -rf /var/* /tmp/* && \
+  ostree container commit
 
 # Setup /etc/bashrc.d
 RUN cp /etc/bashrc /usr/etc/bashrc && \

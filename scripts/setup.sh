@@ -39,6 +39,11 @@ for script in /tmp/scripts/_base/*.sh; do
   fi
 done
 
+# If the image is BASE, then we don't need to run the same scripts again
+if [[ "$BASE" == "base" ]]; then
+  exit 0
+fi
+
 for script in /tmp/scripts/_$BASE/*.sh; do
   if [[ -f "$script" ]]; then
     echo "Running $script"

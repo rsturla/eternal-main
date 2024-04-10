@@ -17,7 +17,7 @@ FROM ${BASE_IMAGE_FULL} as base-nvidia
 
 ARG FEDORA_VERSION
 
-COPY files/_nvidia/usr /usr
+COPY files/_nvidia /
 
 COPY --from=akmods-nvidia /var/cache /var/cache
 COPY --from=akmods-nvidia /tmp/nvidia-addons /tmp/nvidia-addons

@@ -14,21 +14,3 @@ rpm-ostree install \
   --uninstall=rpmfusion-nonfree-release-$(rpm -E %fedora)-1.noarch
 
 sed -i 's@enabled=0@enabled=1@g' /etc/yum.repos.d/fedora-{updates-archive,cisco-openh264}.repo
-
-# Install packages
-rpm-ostree install \
-  bootc \
-  bootupd \
-  direnv \
-  distrobox \
-  ffmpeg \
-  ffmpeg-libs \
-  htop \
-  just \
-  neofetch \
-  openssl \
-  tmux \
-  zsh
-
-# Remove unwanted desktop icons
-rm /usr/share/applications/htop.desktop

@@ -2,7 +2,6 @@ org.mozilla.firefox
 com.github.tchx84.Flatseal
 com.mattjakeman.ExtensionManager
 io.missioncenter.MissionCenter
-org.freedesktop.Platform.ffmpeg-full//22.08
 org.gnome.baobab
 org.gnome.Calculator
 org.gnome.Calendar

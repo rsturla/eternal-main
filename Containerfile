@@ -17,8 +17,6 @@ COPY files/_base /
 COPY files/_${FEDORA_EDITION} /
 COPY --from=coreos-kernel /tmp/kernel-version /usr/etc/kernel-version
 
-COPY scripts/ /tmp/scripts
-
 # Replace the kernel version with the one from CoreOS
 RUN KERNEL_VERSION=$(cat /usr/etc/kernel-version) && \
   KERNEL_MAJOR_MINOR_PATCH=$(echo $KERNEL_VERSION | cut -d '-' -f 1) && \
@@ -32,6 +30,8 @@ RUN KERNEL_VERSION=$(cat /usr/etc/kernel-version) && \
   && \
   rm -rf /var/* /tmp/* && \
   ostree container commit
+
+COPY scripts/ /tmp/scripts
 
 RUN chmod +x /tmp/scripts/*.sh /tmp/scripts/_${FEDORA_EDITION}/*.sh && \
   /tmp/scripts/setup.sh --version ${FEDORA_VERSION} --base ${FEDORA_EDITION} && \

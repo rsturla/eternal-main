@@ -5,7 +5,7 @@ ARG BASE_IMAGE=ghcr.io/rsturla/eternal-linux/main/${FEDORA_EDITION}
 ARG BASE_TAG=${FEDORA_VERSION}
 ARG BASE_IMAGE_FULL=${BASE_IMAGE}:${BASE_TAG}
 
-ARG NVIDIA_VERSION=545
+ARG NVIDIA_VERSION=550
 ARG NVIDIA_AKMODS_IMAGE=ghcr.io/rsturla/akmods-nvidia
 ARG NVIDIA_AKMODS_TAG=${FEDORA_VERSION}-${NVIDIA_VERSION}
 
@@ -17,16 +17,20 @@ FROM ${BASE_IMAGE_FULL} as base-nvidia
 
 ARG FEDORA_VERSION
 
-COPY files/_nvidia/usr /usr
+COPY files/_nvidia /
+COPY scripts /tmp/scripts
 
 COPY --from=akmods-nvidia /var/cache /var/cache
 COPY --from=akmods-nvidia /tmp/nvidia-addons /tmp/nvidia-addons
 COPY --from=akmods-nvidia /tmp/scripts /tmp/scripts
 
-RUN /tmp/scripts/nvidia-install.sh && \
+RUN chmod +x /tmp/scripts/*.sh && \
+  /tmp/scripts/nvidia-install.sh && \
   /tmp/scripts/nvidia-postinstall.sh \
+  && \
+  ./tmp/scripts/cleanup.sh \
+  && \
+  echo "import '/usr/share/eternal/nvidia.just'" >> /usr/share/eternal/justfile \
   && \
   rm -rf /var/* /tmp/* && \
   ostree container commit
-
-RUN echo "import '/usr/share/eternal/nvidia.just'" >> /usr/share/eternal/justfile

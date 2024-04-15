@@ -16,7 +16,7 @@ COPY --from=coreos-kernel /tmp/kernel-version /usr/etc/kernel-version
 # Replace the kernel version with the one from CoreOS
 RUN KERNEL_VERSION=$(cat /usr/etc/kernel-version) && \
   KERNEL_MAJOR_MINOR_PATCH=$(echo $KERNEL_VERSION | cut -d '-' -f 1) && \
-  KERNEL_RELEASE=$(rpm -qa | grep -oP 'kernel-core-\K[0-9]+\.[0-9]+\.[0-9]+-[0-9]+\.fc[0-9]+' | head -n 1 | cut -d '-' -f 2) && \
+  KERNEL_RELEASE=$(echo $KERNEL_VERSION | cut -d '-' -f 2)
   rpm-ostree override replace --experimental \
     https://kojipkgs.fedoraproject.org//packages/kernel/$KERNEL_MAJOR_MINOR_PATCH/$KERNEL_RELEASE/x86_64/kernel-$KERNEL_MAJOR_MINOR_PATCH-$KERNEL_RELEASE.x86_64.rpm \
     https://kojipkgs.fedoraproject.org//packages/kernel/$KERNEL_MAJOR_MINOR_PATCH/$KERNEL_RELEASE/x86_64/kernel-core-$KERNEL_MAJOR_MINOR_PATCH-$KERNEL_RELEASE.x86_64.rpm \

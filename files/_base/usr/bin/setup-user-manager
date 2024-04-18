@@ -12,6 +12,13 @@ IS_ERROR=0
 CURRENT_HASH=$(find "${HASHED_LOCATIONS[@]}" -type f -exec sha256sum {} \; | sha256sum | awk '{print $1}')
 HASH_FILE="$HOME/.config/setup-manager/user-lastrun"
 
+# If the hash file exists and matches the current hash, exit
+if [[ -f "$HASH_FILE" ]]; then
+  if [[ "$(cat "$HASH_FILE")" == "$CURRENT_HASH" ]]; then
+    exit 0
+  fi
+fi
+
 # Execute all scripts in /etc/eternal/setup-manager/user.d/*
 for script in /etc/eternal/setup-manager/user.d/*; do
   if [[ -x "$script" ]]; then

@@ -118,7 +118,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        fedora-version: [39, 40]
+        fedora-version: [39, 40, stable]
         fedora-edition: [base, silverblue, kinoite]
         nvidia-version: [550]
         include:

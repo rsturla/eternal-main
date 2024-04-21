@@ -29,7 +29,7 @@ jobs:
     env:
       IMAGE_NAME: eternal-linux/main/${{ matrix.fedora-edition }}
       FEDORA_VERSION: ${{ matrix.fedora-version }}
-      COREOS_KERNEL: ""
+      COREOS_KERNEL: "N/A"
 
     outputs:
       base-image-tag: ${{ steps.generate-image-tags.outputs.primary-tag }}

@@ -12,13 +12,8 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     --coreos-kernel)
-      if [[ "$2" == "" || "$2" == --* ]]; then
-        COREOS_KERNEL=""
-        shift 1
-      else
-        COREOS_KERNEL="$2"
-        shift 2
-      fi
+      COREOS_KERNEL="$2"
+      shift 2
       ;;
     *)
       echo "Unknown argument: $1"
@@ -27,7 +22,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ "$COREOS_KERNEL" == "" ]]; then
+if [[ "$COREOS_KERNEL" == "N/A" ]]; then
   exit 0
 fi
 

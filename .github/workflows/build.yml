@@ -245,17 +245,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
 
-      - name: Check Job Status
-        uses: ./.github/actions/check-jobs-success
-        with:
-          jobs: ${{ toJSON(needs) }}
-
       - name: Download Outputs Files
         uses: actions/download-artifact@v4
         id: download-outputs
         with:
           pattern: outputs-*
-          merge-multiple: true
+          merge-multiple: false
 
       - name: Upload Outputs Files to Job Artifact
         uses: actions/upload-artifact@v4
@@ -263,3 +258,8 @@ jobs:
           name: merged-outputs
           if-no-file-found: error
           path: ${{ steps.download-outputs.outputs.download-path }}
+
+      - name: Check Job Status
+        uses: ./.github/actions/check-jobs-success
+        with:
+          jobs: ${{ toJSON(needs) }}

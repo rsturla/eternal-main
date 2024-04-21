@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        fedora-version: [39, 40]
+        fedora-version: [39, 40, stable]
         fedora-edition: [base, silverblue, kinoite]
     permissions:
       contents: read
@@ -28,6 +28,9 @@ jobs:
       id-token: write
     env:
       IMAGE_NAME: eternal-linux/main/${{ matrix.fedora-edition }}
+      FEDORA_VERSION: ${{ matrix.fedora-version }}
+      COREOS_KERNEL: ""
+
     outputs:
       base-image-tag: ${{ steps.generate-image-tags.outputs.primary-tag }}
     steps:
@@ -45,6 +48,15 @@ jobs:
           major-version: ${{ matrix.fedora-version }}
           is-release: ${{ github.event_name != 'pull_request' }}
 
+      - name: Generate Stable Parameters
+        if: matrix.fedora-version == 'stable'
+        run: |
+          COMMAND="rpm -qa | grep -oP 'kernel-core-\K[0-9]+\.[0-9]+\.[0-9]+-[0-9]+\.fc[0-9]+' | head -n 1"
+          KERNEL_VERSION=$(docker run --rm --privileged quay.io/fedora/fedora-coreos:stable sh -c "$COMMAND") # 6.7.7-200.fc39
+          FEDORA_VERSION=$(echo $KERNEL_VERSION | grep -oP 'fc\K[0-9]+') # 39
+          echo "FEDORA_VERSION=$FEDORA_VERSION" >> $GITHUB_ENV
+          echo "COREOS_KERNEL=$KERNEL_VERSION" >> $GITHUB_ENV
+
       - name: Build Image
         id: build
         uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2
@@ -56,8 +68,9 @@ jobs:
           tags: |
             ${{ steps.generate-image-tags.outputs.tags }}
           build-args: |
-            FEDORA_VERSION=${{ matrix.fedora-version }}
+            FEDORA_VERSION=${{ env.FEDORA_VERSION }}
             FEDORA_EDITION=${{ matrix.fedora-edition }}
+            COREOS_KERNEL=${{ env.COREOS_KERNEL }}
 
       - name: Push Image
         id: push

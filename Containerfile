@@ -1,14 +1,17 @@
 ARG FEDORA_VERSION=40
 ARG FEDORA_EDITION=base
 ARG FEDORA_IMAGE=quay.io/fedora-ostree-desktops/${FEDORA_EDITION}:${FEDORA_VERSION}
+ARG COREOS_KERNEL=""
 
 FROM ${FEDORA_IMAGE} as base
 
 ARG FEDORA_VERSION
 ARG FEDORA_EDITION
+ARG COREOS_KERNEL
 
 COPY files/_base /
 COPY files/_${FEDORA_EDITION} /
+COPY --from=coreos-kernel /tmp/kernel-version /tmp/kernel-version
 
 COPY scripts/ /tmp/scripts
 

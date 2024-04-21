@@ -176,9 +176,9 @@ jobs:
         run: |
           GIT_SHA=$(git rev-parse --short HEAD)
           if [ $IS_PR == 'true' ]; then
-            BASE_TAG="pr${PR_NUMBER}-${GIT_SHA}-${FEDORA_VERSION}"
+            BASE_TAG="pr${PR_NUMBER}-${GIT_SHA}-${BASE_FEDORA_VERSION}"
           else
-            BASE_TAG="${GIT_SHA}-${FEDORA_VERSION}"
+            BASE_TAG="${GIT_SHA}-${BASE_FEDORA_VERSION}"
           fi
           echo "base-tag=${BASE_TAG}" >> $GITHUB_OUTPUT
 

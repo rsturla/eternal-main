@@ -22,7 +22,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ "$KERNEL" == "" ]]; then
+if [[ "$COREOS_KERNEL" == "" ]]; then
   exit 0
 fi
 

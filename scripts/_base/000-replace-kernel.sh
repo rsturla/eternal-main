@@ -19,6 +19,7 @@ while [[ $# -gt 0 ]]; do
         COREOS_KERNEL="$2"
         shift 2
       fi
+      ;;
     *)
       echo "Unknown argument: $1"
       exit 1

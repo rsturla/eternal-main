@@ -101,20 +101,18 @@ jobs:
           private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
           private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
 
-      - name: Generate SBOM
-        id: generate-sbom
-        if: github.event_name != 'pull_request'
-        uses: ./.github/actions/generate-sbom
+      - name: Create Outputs File
+        run: |
+          echo "DIGEST=${{ steps.push.outputs.digest }}" >> $OUTPUTS_FILE
+          echo "IMAGE_NAME=${{ env.IMAGE_NAME }}" >> $OUTPUTS_FILE
+      
+      - name: Upload Outputs File
+        uses: actions/upload-artifact@v4
         with:
-          image-ref: ${{ steps.push.outputs.registry-path }}
-          artifact-name: ${{ matrix.fedora-edition }}-${{ matrix.fedora-version }}-sbom
+          name: outputs-${{ env.IMAGE_NAME }}-${{ matrix.image-flavour }}-${{ matrix.fedora-version }}
+          if-no-files-found: error
+          path: ${{ env.OUTPUTS_FILE }}
 
-      - name: Scan SBOM
-        uses: ./.github/actions/scan-sbom
-        if: github.event_name != 'pull_request'
-        with:
-          sbom-file: ${{ steps.generate-sbom.outputs.output-file }}
-          artifact-name: ${{ matrix.fedora-edition }}-${{ matrix.fedora-version }}-scan
 
   build-nvidia:
     runs-on: ubuntu-latest
@@ -137,6 +135,7 @@ jobs:
       IMAGE_NAME: eternal-linux/main/${{ matrix.fedora-edition }}
       FEDORA_VERSION: ${{ matrix.fedora-version }}
       COREOS_KERNEL: "N/A"
+      OUTPUTS_FILE: /tmp/matrix-outputs.txt
     steps:
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
@@ -225,22 +224,20 @@ jobs:
           private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
           private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
 
-      - name: Generate SBOM
-        id: generate-sbom
-        uses: ./.github/actions/generate-sbom
-        if: github.event_name != 'pull_request'
+      - name: Create Outputs File
+        run: |
+          echo "DIGEST=${{ steps.push.outputs.digest }}" >> $OUTPUTS_FILE
+          echo "IMAGE_NAME=${{ env.IMAGE_NAME }}" >> $OUTPUTS_FILE
+      
+      - name: Upload Outputs File
+        uses: actions/upload-artifact@v4
         with:
-          image-ref: ${{ steps.push.outputs.registry-path }}
-          artifact-name: ${{ matrix.fedora-edition }}-${{ matrix.fedora-version }}-nvidia${{ matrix.nvidia-version }}-sbom
+          name: outputs-${{ env.IMAGE_NAME }}-${{ matrix.image-flavour }}-${{ matrix.fedora-version }}-nvidia${{ matrix.nvidia-version }}
+          if-no-files-found: error
+          path: ${{ env.OUTPUTS_FILE }}
 
-      - name: Scan SBOM
-        uses: ./.github/actions/scan-sbom
-        if: github.event_name != 'pull_request'
-        with:
-          sbom-file: ${{ steps.generate-sbom.outputs.output-file }}
-          artifact-name: ${{ matrix.fedora-edition }}-${{ matrix.fedora-version }}-nvidia${{ matrix.nvidia-version }}-scan
 
-  check:
+  fan-in:
     needs: [build-base, build-nvidia]
     if: always()
     runs-on: ubuntu-latest
@@ -252,3 +249,17 @@ jobs:
         uses: ./.github/actions/check-jobs-success
         with:
           jobs: ${{ toJSON(needs) }}
+
+      - name: Download Outputs Files
+        uses: actions/download-artifact@v4
+        id: download-outputs
+        with:
+          pattern: outputs-*
+          merge-multiple: true
+
+      - name: Upload Outputs Files to Job Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: merged-outputs
+          if-no-file-found: error
+          path: ${{ steps.download-outputs.outputs.download-path }}

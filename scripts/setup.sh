@@ -4,6 +4,7 @@ set -euox pipefail
 
 BASE=""
 FEDORA_VERSION=""
+COREOS_KERNEL=""
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -13,6 +14,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --version)
       FEDORA_VERSION="$2"
+      shift 2
+      ;;
+    --coreos-kernel)
+      COREOS_KERNEL="$2"
       shift 2
       ;;
     *)
@@ -35,7 +40,7 @@ fi
 for script in /tmp/scripts/_base/*.sh; do
   if [[ -f "$script" ]]; then
     echo "Running $script"
-    bash "$script" --version "$FEDORA_VERSION"
+    bash "$script" --version "$FEDORA_VERSION" --coreos-kernel "$COREOS_KERNEL"
   fi
 done
 

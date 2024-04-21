@@ -42,6 +42,7 @@ runs:
         echo "fedora-version=$FEDORA_VERSION" >> $GITHUB_OUTPUT
 
     - name: Cleanup
+      shell: bash
       env:
         COREOS_STREAM: ${{ inputs.coreos-stream }}
       run: |

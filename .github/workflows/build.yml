@@ -193,10 +193,11 @@ jobs:
           tags: |
             ${{ steps.generate-image-tags.outputs.tags }}
           build-args: |
-            FEDORA_VERSION=${{ matrix.fedora-version }}
+            FEDORA_VERSION=${{ env.FEDORA_VERSION }}
             FEDORA_EDITION=${{ matrix.fedora-edition }}
             NVIDIA_VERSION=${{ matrix.nvidia-version }}
             BASE_TAG=${{ steps.generate-base-image-tag.outputs.base-tag }}
+            NVIDIA_AKMODS_TAG=${{ matrix.fedora-version }}-${{ matrix.nvidia-version }}
 
       - name: Push Image
         id: push

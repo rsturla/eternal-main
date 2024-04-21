@@ -12,9 +12,13 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     --coreos-kernel)
-      COREOS_KERNEL="$2"
-      shift 2
-      ;;
+      if [[ "$2" == "" || "$2" == --* ]]; then
+        COREOS_KERNEL=""
+        shift 1
+      else
+        COREOS_KERNEL="$2"
+        shift 2
+      fi
     *)
       echo "Unknown argument: $1"
       exit 1

@@ -107,14 +107,14 @@ jobs:
         uses: ./.github/actions/generate-sbom
         with:
           image-ref: ${{ steps.push.outputs.registry-path }}
-          artifact-name: ${{ matrix.fedora-edition }}-${{ env.FEDORA_VERSION }}-sbom
+          artifact-name: ${{ matrix.fedora-edition }}-${{ matrix.fedora-version }}-sbom
 
       - name: Scan SBOM
         uses: ./.github/actions/scan-sbom
         if: github.event_name != 'pull_request'
         with:
           sbom-file: ${{ steps.generate-sbom.outputs.output-file }}
-          artifact-name: ${{ matrix.fedora-edition }}-${{ env.FEDORA_VERSION }}-scan
+          artifact-name: ${{ matrix.fedora-edition }}-${{ matrix.fedora-version }}-scan
 
   build-nvidia:
     runs-on: ubuntu-latest
@@ -231,14 +231,14 @@ jobs:
         if: github.event_name != 'pull_request'
         with:
           image-ref: ${{ steps.push.outputs.registry-path }}
-          artifact-name: ${{ matrix.fedora-edition }}-${{ env.FEDORA_VERSION }}-nvidia${{ matrix.nvidia-version }}-sbom
+          artifact-name: ${{ matrix.fedora-edition }}-${{ matrix.fedora-version }}-nvidia${{ matrix.nvidia-version }}-sbom
 
       - name: Scan SBOM
         uses: ./.github/actions/scan-sbom
         if: github.event_name != 'pull_request'
         with:
           sbom-file: ${{ steps.generate-sbom.outputs.output-file }}
-          artifact-name: ${{ matrix.fedora-edition }}-${{ env.FEDORA_VERSION }}-nvidia${{ matrix.nvidia-version }}-scan
+          artifact-name: ${{ matrix.fedora-edition }}-${{ matrix.fedora-version }}-nvidia${{ matrix.nvidia-version }}-scan
 
   check:
     needs: [build-base, build-nvidia]

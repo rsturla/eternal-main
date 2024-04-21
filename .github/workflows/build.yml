@@ -100,6 +100,7 @@ jobs:
 
       - name: Generate SBOM
         id: generate-sbom
+        if: github.event_name != 'pull_request'
         uses: ./.github/actions/generate-sbom
         with:
           image-ref: ${{ steps.push.outputs.registry-path }}
@@ -107,6 +108,7 @@ jobs:
 
       - name: Scan SBOM
         uses: ./.github/actions/scan-sbom
+        if: github.event_name != 'pull_request'
         with:
           sbom-file: ${{ steps.generate-sbom.outputs.output-file }}
           artifact-name: ${{ matrix.fedora-edition }}-${{ matrix.fedora-version }}-scan
@@ -130,6 +132,7 @@ jobs:
       id-token: write
     env:
       IMAGE_NAME: eternal-linux/main/${{ matrix.fedora-edition }}
+      AKMODS_FEDORA_VERSION: ${{ matrix.fedora-version }}
     steps:
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
@@ -146,6 +149,14 @@ jobs:
           is-release: ${{ github.event_name != 'pull_request' }}
           nvidia-driver-version: ${{ matrix.nvidia-version }}
           nvidia-driver-is-stable: ${{ matrix.nvidia-is-stable }}
+
+      - name: Generate Stable Parameters
+        if: matrix.fedora-version == 'stable'
+        run: |
+          COMMAND="rpm -qa | grep -oP 'kernel-core-\K[0-9]+\.[0-9]+\.[0-9]+-[0-9]+\.fc[0-9]+' | head -n 1"
+          KERNEL_VERSION=$(docker run --rm --privileged quay.io/fedora/fedora-coreos:stable sh -c "$COMMAND") # 6.7.7-200.fc39
+          FEDORA_VERSION=$(echo $KERNEL_VERSION | grep -oP 'fc\K[0-9]+') # 39
+          echo "AKMODS_FEDORA_VERSION=$FEDORA_VERSION" >> $GITHUB_ENV
 
       - name: Generate Base Image Tag
         id: generate-base-image-tag
@@ -177,6 +188,7 @@ jobs:
             FEDORA_EDITION=${{ matrix.fedora-edition }}
             NVIDIA_VERSION=${{ matrix.nvidia-version }}
             BASE_TAG=${{ steps.generate-base-image-tag.outputs.base-tag }}
+            NVIDIA_AKMODS_TAG=${{ env.AKMODS_FEDORA_VERSION }}-${{ matrix.nvidia-version }}
 
       - name: Push Image
         id: push
@@ -207,12 +219,14 @@ jobs:
       - name: Generate SBOM
         id: generate-sbom
         uses: ./.github/actions/generate-sbom
+        if: github.event_name != 'pull_request'
         with:
           image-ref: ${{ steps.push.outputs.registry-path }}
           artifact-name: ${{ matrix.fedora-edition }}-${{ matrix.fedora-version }}-nvidia${{ matrix.nvidia-version }}-sbom
 
       - name: Scan SBOM
         uses: ./.github/actions/scan-sbom
+        if: github.event_name != 'pull_request'
         with:
           sbom-file: ${{ steps.generate-sbom.outputs.output-file }}
           artifact-name: ${{ matrix.fedora-edition }}-${{ matrix.fedora-version }}-nvidia${{ matrix.nvidia-version }}-scan

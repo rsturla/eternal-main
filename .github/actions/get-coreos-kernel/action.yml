@@ -1,0 +1,48 @@
+name: Get CoreOS Kernel
+
+inputs:
+  coreos-stream:
+    description: 'The CoreOS stream to pull the image from'
+    required: true
+    default: 'stable'
+
+outputs:
+  coreos-repo-version:
+    description: 'The Fedora repository version CoreOS sources it's kernel from'
+    value: ${{ steps.extract-fedora-version.outputs.fedora-version }}
+  coreos-kernel-release:
+    description: 'The full CoreOS kernel version string'
+    value: ${{ steps.extract-kernel-release.outputs.kernel-release }}
+
+runs:
+  using: composite
+  steps:
+    - name: Pull CoreOS Image
+      shell: bash
+      env:
+        COREOS_STREAM: ${{ inputs.coreos-stream }}
+      run: |
+        docker pull quay.io/fedora/fedora-coreos:$COREOS_STREAM
+
+    - name: Extract Kernel Release
+      shell: bash
+      env:
+        COREOS_STREAM: ${{ inputs.coreos-stream }}
+        COMMAND: "rpm -qa | grep -oP 'kernel-core-\K[0-9]+\.[0-9]+\.[0-9]+-[0-9]+\.fc[0-9]+' | head -n 1"
+      run: |
+        KERNEL_RELEASE=$(docker run --rm --privileged quay.io/fedora/fedora-coreos:$COREOS_STREAM sh -c "$COMMAND")
+        echo "kernel-release=$KERNEL_RELEASE" >> $GITHUB_OUTPUT
+
+    - name: Extract Fedora Repository Version
+      shell: bash
+      env:
+        KERNEL_RELEASE: ${{ steps.extract-kernel-release.outputs.kernel-release }}
+      run: |
+        FEDORA_VERSION=$(echo $KERNEL_RELEASE | grep -oP 'fc\K[0-9]+')
+        echo "fedora-version=$FEDORA_VERSION" >> $GITHUB_OUTPUT
+
+    - name: Cleanup
+      env:
+        COREOS_STREAM: ${{ inputs.coreos-stream }}
+      run: |
+        docker image rm quay.io/fedora/fedora-coreos:$COREOS_STREAM

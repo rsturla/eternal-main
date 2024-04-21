@@ -30,7 +30,6 @@ jobs:
       IMAGE_NAME: eternal-linux/main/${{ matrix.fedora-edition }}
       FEDORA_VERSION: ${{ matrix.fedora-version }}
       COREOS_KERNEL: "N/A"
-
     outputs:
       base-image-tag: ${{ steps.generate-image-tags.outputs.primary-tag }}
     steps:
@@ -48,14 +47,18 @@ jobs:
           major-version: ${{ env.FEDORA_VERSION }}
           is-release: ${{ github.event_name != 'pull_request' }}
 
-      - name: Generate Stable Parameters
-        if: env.FEDORA_VERSION == 'stable'
+      - name: Get CoreOS Kernel Information
+        if: ${{ env.FEDORA_VERSION == 'stable' || env.FEDORA_VERSION == 'testing' }}
+        uses: ./.github/actions/get-coreos-kernel
+        id: get-coreos-kernel
+        with:
+          coreos-stream: ${{ env.FEDORA_VERSION }}
+
+      - name: Set CoreOS Environment Variables
+        if: ${{ env.FEDORA_VERSION == 'stable' || env.FEDORA_VERSION == 'testing' }}
         run: |
-          COMMAND="rpm -qa | grep -oP 'kernel-core-\K[0-9]+\.[0-9]+\.[0-9]+-[0-9]+\.fc[0-9]+' | head -n 1"
-          KERNEL_VERSION=$(docker run --rm --privileged quay.io/fedora/fedora-coreos:stable sh -c "$COMMAND") # 6.7.7-200.fc39
-          FEDORA_VERSION=$(echo $KERNEL_VERSION | grep -oP 'fc\K[0-9]+') # 39
-          echo "FEDORA_VERSION=$FEDORA_VERSION" >> $GITHUB_ENV
-          echo "COREOS_KERNEL=$KERNEL_VERSION" >> $GITHUB_ENV
+          echo "COREOS_KERNEL=${{ steps.get-coreos-kernel.outputs.coreos-kernel-release }}" >> $GITHUB_ENV
+          echo "FEDORA_VERSION=${{ steps.get-coreos-kernel.outputs.coreos-repo-version }}" >> $GITHUB_ENV
 
       - name: Build Image
         id: build
@@ -133,6 +136,7 @@ jobs:
     env:
       IMAGE_NAME: eternal-linux/main/${{ matrix.fedora-edition }}
       FEDORA_VERSION: ${{ matrix.fedora-version }}
+      COREOS_KERNEL: "N/A"
     steps:
       - name: Checkout
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
@@ -150,13 +154,18 @@ jobs:
           nvidia-driver-version: ${{ matrix.nvidia-version }}
           nvidia-driver-is-stable: ${{ matrix.nvidia-is-stable }}
 
-      - name: Generate Stable Parameters
-        if: env.FEDORA_VERSION == 'stable'
+      - name: Get CoreOS Kernel Information
+        if: ${{ env.FEDORA_VERSION == 'stable' || env.FEDORA_VERSION == 'testing' }}
+        uses: ./.github/actions/get-coreos-kernel
+        id: get-coreos-kernel
+        with:
+          coreos-stream: ${{ env.FEDORA_VERSION }}
+
+      - name: Set CoreOS Environment Variables
+        if: ${{ env.FEDORA_VERSION == 'stable' || env.FEDORA_VERSION == 'testing' }}
         run: |
-          COMMAND="rpm -qa | grep -oP 'kernel-core-\K[0-9]+\.[0-9]+\.[0-9]+-[0-9]+\.fc[0-9]+' | head -n 1"
-          KERNEL_VERSION=$(docker run --rm --privileged quay.io/fedora/fedora-coreos:stable sh -c "$COMMAND") # 6.7.7-200.fc39
-          FEDORA_VERSION=$(echo $KERNEL_VERSION | grep -oP 'fc\K[0-9]+') # 39
-          echo "FEDORA_VERSION=$FEDORA_VERSION" >> $GITHUB_ENV
+          echo "COREOS_KERNEL=${{ steps.get-coreos-kernel.outputs.coreos-kernel-release }}" >> $GITHUB_ENV
+          echo "FEDORA_VERSION=${{ steps.get-coreos-kernel.outputs.coreos-repo-version }}" >> $GITHUB_ENV
 
       - name: Generate Base Image Tag
         id: generate-base-image-tag

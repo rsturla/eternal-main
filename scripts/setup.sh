@@ -52,6 +52,6 @@ fi
 for script in /tmp/scripts/_$BASE/*.sh; do
   if [[ -f "$script" ]]; then
     echo "Running $script"
-    bash "$script" --version "$FEDORA_VERSION" --kernel "$KERNEL"
+    bash "$script" --version "$FEDORA_VERSION"
   fi
 done

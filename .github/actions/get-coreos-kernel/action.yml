@@ -25,6 +25,7 @@ runs:
         docker pull quay.io/fedora/fedora-coreos:$COREOS_STREAM
 
     - name: Extract Kernel Release
+      id: extract-kernel-release
       shell: bash
       env:
         COREOS_STREAM: ${{ inputs.coreos-stream }}
@@ -35,6 +36,7 @@ runs:
 
     - name: Extract Fedora Repository Version
       shell: bash
+      id: extract-fedora-version
       env:
         KERNEL_RELEASE: ${{ steps.extract-kernel-release.outputs.kernel-release }}
       run: |

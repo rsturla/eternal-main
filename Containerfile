@@ -11,12 +11,11 @@ ARG COREOS_KERNEL
 
 COPY files/_base /
 COPY files/_${FEDORA_EDITION} /
-COPY --from=coreos-kernel /tmp/kernel-version /tmp/kernel-version
 
 COPY scripts/ /tmp/scripts
 
 RUN chmod +x /tmp/scripts/*.sh /tmp/scripts/_${FEDORA_EDITION}/*.sh && \
-  /tmp/scripts/setup.sh --version ${FEDORA_VERSION} --base ${FEDORA_EDITION} && \
+  /tmp/scripts/setup.sh --version ${FEDORA_VERSION} --base ${FEDORA_EDITION} --coreos-kernel ${COREOS_KERNEL} \
   /tmp/scripts/cleanup.sh --version ${FEDORA_VERSION} --base ${FEDORA_EDITION} \
   && \
   rpm-ostree cleanup -m && \

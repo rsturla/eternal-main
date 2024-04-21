@@ -232,7 +232,7 @@ jobs:
       - name: Upload Outputs File
         uses: actions/upload-artifact@v4
         with:
-          name: outputs-${{ env.IMAGE_NAME }}-${{ matrix.image-flavour }}-${{ matrix.fedora-version }}-nvidia${{ matrix.nvidia-version }}
+          name: outputs-${{ matrix.image-flavour }}-${{ matrix.fedora-version }}-nvidia${{ matrix.nvidia-version }}
           if-no-files-found: error
           path: ${{ env.OUTPUTS_FILE }}
 

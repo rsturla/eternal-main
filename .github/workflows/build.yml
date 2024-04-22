@@ -234,7 +234,7 @@ jobs:
           echo "DIGEST=${{ steps.push.outputs.digest }}" >> $OUTPUTS_FILE
           echo "IMAGE_NAME=${{ env.IMAGE_NAME }}" >> $OUTPUTS_FILE
           
-          ARTIFACT_NAME=outputs-${{ env.IMAGE_NAME }}-${{ matrix.image-flavour }}-${{ matrix.fedora-version }}-nvidia${{ matrix.nvidia-version }}"
+          ARTIFACT_NAME="outputs-${{ env.IMAGE_NAME }}-${{ matrix.image-flavour }}-${{ matrix.fedora-version }}-nvidia${{ matrix.nvidia-version }}"
           echo "ARTIFACT_NAME=${ARTIFACT_NAME//\//-}" >> $GITHUB_OUTPUT
       
       - name: Upload Outputs File

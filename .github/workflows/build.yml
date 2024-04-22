@@ -103,14 +103,18 @@ jobs:
           private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
 
       - name: Create Outputs File
+        id: create-outputs-file
         run: |
           echo "DIGEST=${{ steps.push.outputs.digest }}" >> $OUTPUTS_FILE
           echo "IMAGE_NAME=${{ env.IMAGE_NAME }}" >> $OUTPUTS_FILE
+          
+          ARTIFACT_NAME="outputs-${{ env.IMAGE_NAME }}-${{ matrix.image-flavour }}-${{ matrix.fedora-version }}"
+          echo "ARTIFACT_NAME=${ARTIFACT_NAME//\//-}" >> $GITHUB_OUTPUT
       
       - name: Upload Outputs File
         uses: actions/upload-artifact@v4
         with:
-          name: outputs-${{ env.IMAGE_NAME }}-${{ matrix.image-flavour }}-${{ matrix.fedora-version }}
+          name: ${{ steps.create-outputs-file.outputs.ARTIFACT_NAME }}
           if-no-files-found: error
           path: ${{ env.OUTPUTS_FILE }}
 
@@ -225,14 +229,18 @@ jobs:
           private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
 
       - name: Create Outputs File
+        id: create-outputs-file
         run: |
           echo "DIGEST=${{ steps.push.outputs.digest }}" >> $OUTPUTS_FILE
           echo "IMAGE_NAME=${{ env.IMAGE_NAME }}" >> $OUTPUTS_FILE
+          
+          ARTIFACT_NAME=outputs-${{ env.IMAGE_NAME }}-${{ matrix.image-flavour }}-${{ matrix.fedora-version }}-nvidia${{ matrix.nvidia-version }}"
+          echo "ARTIFACT_NAME=${ARTIFACT_NAME//\//-}" >> $GITHUB_OUTPUT
       
       - name: Upload Outputs File
         uses: actions/upload-artifact@v4
         with:
-          name: outputs-${{ matrix.image-flavour }}-${{ matrix.fedora-version }}-nvidia${{ matrix.nvidia-version }}
+          name: ${{ steps.create-outputs-file.outputs.ARTIFACT_NAME }}
           if-no-files-found: error
           path: ${{ env.OUTPUTS_FILE }}
 

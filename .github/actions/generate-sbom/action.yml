@@ -31,6 +31,7 @@ runs:
       shell: bash
       run: |
         curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+        syft --version
 
     - name: Scan Image
       if: inputs.image-ref != ''

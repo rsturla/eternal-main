@@ -2,6 +2,3 @@ exclude:
   - '/sysroot/ostree/repo/objects/**'
   - '/usr/share/icons/**'
   - '/usr/share/doc/**'
-
-select-catalogers:
-  - '-elf-package'

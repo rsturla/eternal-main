@@ -34,10 +34,3 @@ runs:
       run: |
         FEDORA_VERSION=$(echo $KERNEL_RELEASE | grep -oP 'fc\K[0-9]+')
         echo "fedora-version=$FEDORA_VERSION" >> $GITHUB_OUTPUT
-
-    - name: Cleanup
-      shell: bash
-      env:
-        COREOS_STREAM: ${{ inputs.coreos-stream }}
-      run: |
-        docker image rm quay.io/fedora/fedora-coreos:$COREOS_STREAM

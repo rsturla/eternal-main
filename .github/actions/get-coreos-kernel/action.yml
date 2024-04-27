@@ -30,8 +30,7 @@ runs:
       env:
         COREOS_STREAM: ${{ inputs.coreos-stream }}
       run: |
-        KERNEL_RELEASE=$(docker run --rm --privileged quay.io/fedora/fedora-coreos:$COREOS_STREAM sh -c \
-          "rpm -qa | grep -oP 'kernel-core-\K[0-9]+\.[0-9]+\.[0-9]+-[0-9]+\.fc[0-9]+' | head -n 1")
+        KERNEL_RELEASE=$(skopeo inspect docker://quay.io/fedora/fedora-coreos:$COREOS_STREAM | jq -r '.Labels["ostree.linux"]')
         echo "kernel-release=$KERNEL_RELEASE" >> $GITHUB_OUTPUT
 
     - name: Extract Fedora Repository Version

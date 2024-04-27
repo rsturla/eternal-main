@@ -9,6 +9,7 @@ rpm-ostree install \
   distrobox \
   ffmpeg \
   ffmpeg-libs \
+  fzf \
   htop \
   just \
   neofetch \

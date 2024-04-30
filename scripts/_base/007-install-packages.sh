@@ -12,7 +12,6 @@ rpm-ostree install \
   fzf \
   htop \
   just \
-  neofetch \
   openssl \
   tmux \
   zsh

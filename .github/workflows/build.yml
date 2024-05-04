@@ -24,19 +24,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        fedora-version: [39, 40]
-        fedora-edition: [base, silverblue]
+        fedora-version: [39, 40, stable]
+        fedora-edition: [base, silverblue, kinoite]
     permissions:
       contents: read
       packages: write
       id-token: write
     env:
       IMAGE_NAME: eternal-linux/main/${{ matrix.fedora-edition }}
+      FEDORA_VERSION: ${{ matrix.fedora-version }}
+      COREOS_KERNEL: "N/A"
     outputs:
       base-image-tag: ${{ steps.generate-image-tags.outputs.primary-tag }}
     steps:
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
 
       - name: Optimize GHA Storage
         uses: ./.github/actions/optimise-gha-storage
@@ -46,8 +48,21 @@ jobs:
         id: generate-image-tags
         with:
           image-name: ${{ env.IMAGE_REGISTRY}}/${{ env.IMAGE_NAME }}
-          major-version: ${{ matrix.fedora-version }}
+          major-version: ${{ env.FEDORA_VERSION }}
           is-release: ${{ github.event_name != 'pull_request' }}
+
+      - name: Get CoreOS Kernel Information
+        if: ${{ env.FEDORA_VERSION == 'stable' || env.FEDORA_VERSION == 'testing' }}
+        uses: ./.github/actions/get-coreos-kernel
+        id: get-coreos-kernel
+        with:
+          coreos-stream: ${{ env.FEDORA_VERSION }}
+
+      - name: Set CoreOS Environment Variables
+        if: ${{ env.FEDORA_VERSION == 'stable' || env.FEDORA_VERSION == 'testing' }}
+        run: |
+          echo "COREOS_KERNEL=${{ steps.get-coreos-kernel.outputs.coreos-kernel-release }}" >> $GITHUB_ENV
+          echo "FEDORA_VERSION=${{ steps.get-coreos-kernel.outputs.coreos-repo-version }}" >> $GITHUB_ENV
 
       - name: Build Image
         id: build
@@ -60,8 +75,9 @@ jobs:
           tags: |
             ${{ steps.generate-image-tags.outputs.tags }}
           build-args: |
-            FEDORA_VERSION=${{ matrix.fedora-version }}
+            FEDORA_VERSION=${{ env.FEDORA_VERSION }}
             FEDORA_EDITION=${{ matrix.fedora-edition }}
+            COREOS_KERNEL=${{ env.COREOS_KERNEL }}
 
       - name: Push Image
         id: push
@@ -74,7 +90,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Login to GHCR
-        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3
+        uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -91,6 +107,7 @@ jobs:
 
       - name: Generate SBOM
         id: generate-sbom
+        if: github.event_name != 'pull_request'
         uses: ./.github/actions/generate-sbom
         with:
           image-ref: ${{ steps.push.outputs.registry-path }}
@@ -98,8 +115,9 @@ jobs:
 
       - name: Scan SBOM
         uses: ./.github/actions/scan-sbom
+        if: github.event_name != 'pull_request'
         with:
-          sbom-path: ${{ steps.generate-sbom.outputs.output-file }}
+          sbom-file: ${{ steps.generate-sbom.outputs.output-file }}
           artifact-name: ${{ matrix.fedora-edition }}-${{ matrix.fedora-version }}-scan
 
   build-nvidia:
@@ -109,8 +127,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        fedora-version: [39, 40]
-        fedora-edition: [base, silverblue]
+        fedora-version: [39, 40, stable]
+        fedora-edition: [base, silverblue, kinoite]
         nvidia-version: [550]
         include:
           - nvidia-version: 550
@@ -121,9 +139,11 @@ jobs:
       id-token: write
     env:
       IMAGE_NAME: eternal-linux/main/${{ matrix.fedora-edition }}
+      FEDORA_VERSION: ${{ matrix.fedora-version }}
+      COREOS_KERNEL: "N/A"
     steps:
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
 
       - name: Optimize GHA Storage
         uses: ./.github/actions/optimise-gha-storage
@@ -133,10 +153,38 @@ jobs:
         id: generate-image-tags
         with:
           image-name: ${{ env.IMAGE_REGISTRY}}/${{ env.IMAGE_NAME }}
-          major-version: ${{ matrix.fedora-version }}
+          major-version: ${{ env.FEDORA_VERSION }}
           is-release: ${{ github.event_name != 'pull_request' }}
           nvidia-driver-version: ${{ matrix.nvidia-version }}
           nvidia-driver-is-stable: ${{ matrix.nvidia-is-stable }}
+
+      - name: Get CoreOS Kernel Information
+        if: ${{ env.FEDORA_VERSION == 'stable' || env.FEDORA_VERSION == 'testing' }}
+        uses: ./.github/actions/get-coreos-kernel
+        id: get-coreos-kernel
+        with:
+          coreos-stream: ${{ env.FEDORA_VERSION }}
+
+      - name: Set CoreOS Environment Variables
+        if: ${{ env.FEDORA_VERSION == 'stable' || env.FEDORA_VERSION == 'testing' }}
+        run: |
+          echo "COREOS_KERNEL=${{ steps.get-coreos-kernel.outputs.coreos-kernel-release }}" >> $GITHUB_ENV
+          echo "FEDORA_VERSION=${{ steps.get-coreos-kernel.outputs.coreos-repo-version }}" >> $GITHUB_ENV
+
+      - name: Generate Base Image Tag
+        id: generate-base-image-tag
+        env:
+          BASE_FEDORA_VERSION: ${{ matrix.fedora-version }}
+          PR_NUMBER: ${{ github.event.number }}
+          IS_PR: ${{ github.event_name == 'pull_request' }}
+        run: |
+          GIT_SHA=$(git rev-parse --short HEAD)
+          if [ $IS_PR == 'true' ]; then
+            BASE_TAG="pr${PR_NUMBER}-${GIT_SHA}-${BASE_FEDORA_VERSION}"
+          else
+            BASE_TAG="${GIT_SHA}-${BASE_FEDORA_VERSION}"
+          fi
+          echo "base-tag=${BASE_TAG}" >> $GITHUB_OUTPUT
 
       - name: Build Image
         id: build
@@ -149,10 +197,11 @@ jobs:
           tags: |
             ${{ steps.generate-image-tags.outputs.tags }}
           build-args: |
-            FEDORA_VERSION=${{ matrix.fedora-version }}
+            FEDORA_VERSION=${{ env.FEDORA_VERSION }}
             FEDORA_EDITION=${{ matrix.fedora-edition }}
             NVIDIA_VERSION=${{ matrix.nvidia-version }}
-            BASE_TAG=${{ needs.build-base.outputs.base-image-tag }}
+            BASE_TAG=${{ steps.generate-base-image-tag.outputs.base-tag }}
+            NVIDIA_AKMODS_TAG=${{ matrix.fedora-version }}-${{ matrix.nvidia-version }}
 
       - name: Push Image
         id: push
@@ -165,7 +214,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Login to GHCR
-        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3
+        uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -183,14 +232,16 @@ jobs:
       - name: Generate SBOM
         id: generate-sbom
         uses: ./.github/actions/generate-sbom
+        if: github.event_name != 'pull_request'
         with:
           image-ref: ${{ steps.push.outputs.registry-path }}
           artifact-name: ${{ matrix.fedora-edition }}-${{ matrix.fedora-version }}-nvidia${{ matrix.nvidia-version }}-sbom
 
       - name: Scan SBOM
         uses: ./.github/actions/scan-sbom
+        if: github.event_name != 'pull_request'
         with:
-          sbom-path: ${{ steps.generate-sbom.outputs.output-file }}
+          sbom-file: ${{ steps.generate-sbom.outputs.output-file }}
           artifact-name: ${{ matrix.fedora-edition }}-${{ matrix.fedora-version }}-nvidia${{ matrix.nvidia-version }}-scan
 
   check:
@@ -199,7 +250,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+        uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
 
       - name: Check Job Status
         uses: ./.github/actions/check-jobs-success

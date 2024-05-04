@@ -137,6 +137,8 @@ jobs:
       contents: read
       packages: write
       id-token: write
+    outputs:
+      images: ${{ steps.generate-outputs.outputs.images }}
     env:
       IMAGE_NAME: eternal-linux/main/${{ matrix.fedora-edition }}
       FEDORA_VERSION: ${{ matrix.fedora-version }}
@@ -229,20 +231,24 @@ jobs:
           private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
           private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
 
-      - name: Generate SBOM
-        id: generate-sbom
-        uses: ./.github/actions/generate-sbom
-        if: github.event_name != 'pull_request'
-        with:
-          image-ref: ${{ steps.push.outputs.registry-path }}
-          artifact-name: ${{ matrix.fedora-edition }}-${{ matrix.fedora-version }}-nvidia${{ matrix.nvidia-version }}-sbom
+      - name: Generate file containing outputs
+        env:
+          DIGEST: ${{ steps.push.outputs.digest }}
+          IMAGE_REGISTRY: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}
+          IMAGE_NAME: ${{ env.IMAGE_NAME }}
+          FEDORA_VERSION: ${{ matrix.fedora-version }}
+          FEDORA_EDITION: ${{ matrix.fedora-edition }}
+        run: 
+          echo "${IMAGE_REGISTRY}@${DIGEST}" > "${IMAGE_NAME}-${FEDORA_EDITION}-${FEDORA_VERSION}-nvidia"
 
-      - name: Scan SBOM
-        uses: ./.github/actions/scan-sbom
-        if: github.event_name != 'pull_request'
+      - name: Upload outputs
+        uses: actions/upload-artifact@v4
         with:
-          sbom-file: ${{ steps.generate-sbom.outputs.output-file }}
-          artifact-name: ${{ matrix.fedora-edition }}-${{ matrix.fedora-version }}-nvidia${{ matrix.nvidia-version }}-scan
+          name: output-build-nvidia-${{ env.IMAGE_NAME }}-${{ matrix.fedora-edition }}-${{ matrix.fedora-version }}
+          retention-days: 1
+          if-no-files-found: error
+          path: |
+            ${{ env.IMAGE_NAME }}-${{ matrix.fedora-edition }}-${{ matrix.fedora-version }}-nvidia.txt
 
   check:
     needs: [build-base, build-nvidia]
@@ -251,6 +257,32 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
+
+      - name: Download artifacts
+        id: download-artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: output-build-*
+          merge-multiple: true
+
+      - name: Create output
+        id: generate-outputs
+        env:
+          JOBS: ${{ toJson(needs) }}
+          ARTIFACT_PATH: ${{ steps.download-artifacts.outputs.download-path }}
+        run: |
+          # Initialize the array
+          images=()
+
+          # Populate the array with each line from each file in the artifacts directory
+          for file in $ARTIFACT_PATH/*; do
+              while IFS= read -r line; do
+                images+=("$line")
+              done < "$file"
+          done
+
+          # Create the GITHUB_OUTPUT in the format '["image1", "image2", ...]'
+          echo "images=$(printf '%s\n' "${images[@]}" | jq -R -s -c 'split("\n") | .[:-1]')" >> $GITHUB_OUTPUT
 
       - name: Check Job Status
         uses: ./.github/actions/check-jobs-success

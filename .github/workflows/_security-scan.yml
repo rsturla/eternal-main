@@ -3,8 +3,8 @@ name: Security Scan
 on:
   workflow_call:
     inputs:
-      image-ref:
-        description: 'The image reference to scan'
+      images:
+        description: "A comma-separated list of images to scan.  E.G. '[\"docker.io/library/alpine:3.14.0\", \"docker.io/library/alpine:3.13.6\"]'"
         required: true
         type: string
 
@@ -13,6 +13,18 @@ permissions:
   packages: read
 
 jobs:
+  generate-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Set matrix
+        id: set-matrix
+        env:
+          IMAGES: ${{ inputs.images }}
+        run: |
+          echo "matrix=$IMAGES" >> $GITHUB_OUTPUT
+
   generate-sbom:
     runs-on: ubuntu-latest
     outputs:

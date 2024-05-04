@@ -22,7 +22,10 @@ outputs:
     value: ${{ inputs.output-file }}
   artifact-url:
     description: 'The URL to the uploaded artifact'
-    value: ${{ steps.upload.outputs.artifact_url }}
+    value: ${{ steps.upload.outputs.artifact-url }}
+  artifact-id:
+    description: 'The ID of the uploaded artifact'
+    value: ${{ steps.upload.outputs.artifact-id }}
 
 runs:
   using: composite

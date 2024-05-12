@@ -62,7 +62,8 @@ runs:
         for tag in "${tag_array[@]}"; do
           tags+="${{ inputs.image-name }}:$tag, "
         done
-        tags=${tags%,}
+        # Remove trailing comma and space
+        tags="${tags%, }"
         echo "tags=$tags" >> $GITHUB_OUTPUT
 
     - name: Build (Docker)
@@ -88,6 +89,7 @@ runs:
           digest=$(podman image inspect ${{ inputs.image-name }} --format '{{.Digest}}')
           echo "digest=$digest" >> $GITHUB_OUTPUT
         else
-          echo "tags=${{ steps.generate-image-tags-docker.outputs.tags }}" >> $GITHUB_OUTPUT
+          tags=$(echo ${{ steps.generate-image-tags-docker.outputs.tags }} | tr -d ',')
+          echo "tags=$tags" >> $GITHUB_OUTPUT
           echo "digest=${{ steps.build-docker.outputs.digest }}" >> $GITHUB_OUTPUT
         fi

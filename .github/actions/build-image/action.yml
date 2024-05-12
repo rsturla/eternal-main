@@ -89,7 +89,6 @@ runs:
           digest=$(podman image inspect ${{ inputs.image-name }} --format '{{.Digest}}')
           echo "digest=$digest" >> $GITHUB_OUTPUT
         else
-          tags=$(echo ${{ steps.generate-image-tags-docker.outputs.tags }} | tr -d ',')
-          echo "tags=$tags" >> $GITHUB_OUTPUT
+          echo "tags=${{ inputs.image-tags }}" >> $GITHUB_OUTPUT
           echo "digest=${{ steps.build-docker.outputs.digest }}" >> $GITHUB_OUTPUT
         fi

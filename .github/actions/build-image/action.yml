@@ -60,7 +60,7 @@ runs:
         # Iterate over all tag inputs and prepend the image name
         tags=""
         for tag in "${tag_array[@]}"; do
-          tags+="${{ inputs.image-name }}:$tag,"
+          tags+="${{ inputs.image-name }}:$tag, "
         done
         tags=${tags%,}
         echo "tags=$tags" >> $GITHUB_OUTPUT

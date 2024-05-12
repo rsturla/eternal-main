@@ -54,9 +54,12 @@ runs:
       id: generate-image-tags-docker
       shell: bash
       run: |
+        # Reading space-separated list into an array
+        IFS=' ' read -r -a tag_array <<< "${{ inputs.image-tags }}"
+
         # Iterate over all tag inputs and prepend the image name
         tags=""
-        for tag in ${{ inputs.image-tags }}; do
+        for tag in "${tag_array[@]}"; do
           tags+="${{ inputs.image-name }}:$tag "
         done
         echo "tags=$tags" >> $GITHUB_OUTPUT

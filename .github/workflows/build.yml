@@ -62,14 +62,12 @@ jobs:
 
       - name: Build Image
         id: build
-        uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2
+        uses: ./.github/actions/build-image
         with:
           context: .
-          containerfiles: |
-            Containerfile
-          image: ${{ env.IMAGE_NAME }}
-          tags: |
-            ${{ steps.generate-image-tags.outputs.tags }}
+          dockerfile: Containerfile
+          image-name: ${{ env.IMAGE_NAME }}
+          tags: ${{ steps.generate-image-tags.outputs.tags }}
           build-args: |
             FEDORA_VERSION=${{ env.FEDORA_VERSION }}
             FEDORA_EDITION=${{ matrix.fedora-edition }}
@@ -84,13 +82,6 @@ jobs:
           registry: ${{ env.IMAGE_REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Login to GHCR
-        uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ github.token }}
 
       - name: Sign Image
         uses: ./.github/actions/sign-image
@@ -184,13 +175,12 @@ jobs:
 
       - name: Build Image
         id: build
-        uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2
+        uses: ./.github/actions/build-image
         with:
           context: .
-          containerfiles: |
-            Containerfile.nvidia
-          image: ${{ env.IMAGE_NAME }}
-          tags: |
+          dockerfile: Containerfile.nvidia
+          image-name: ${{ env.IMAGE_NAME }}
+          image-tags: |
             ${{ steps.generate-image-tags.outputs.tags }}
           build-args: |
             FEDORA_VERSION=${{ env.FEDORA_VERSION }}

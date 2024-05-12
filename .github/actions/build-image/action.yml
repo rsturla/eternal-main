@@ -52,6 +52,7 @@ runs:
     - name: Generate Tags (Docker)
       if: ${{ inputs.builder == 'docker' }}
       id: generate-image-tags-docker
+      shell: bash
       run: |
         # Iterate over all tag inputs and prepend the image name
         tags=""
@@ -73,6 +74,7 @@ runs:
 
     - name: Set Outputs
       id: set-outputs
+      shell: bash
       env:
         BUILDER: ${{ inputs.builder }}
       run: |

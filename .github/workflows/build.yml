@@ -67,7 +67,8 @@ jobs:
           context: .
           dockerfile: Containerfile
           image-name: ${{ env.IMAGE_NAME }}
-          tags: ${{ steps.generate-image-tags.outputs.tags }}
+          tags: |
+            ${{ steps.generate-image-tags.outputs.tags }}
           build-args: |
             FEDORA_VERSION=${{ env.FEDORA_VERSION }}
             FEDORA_EDITION=${{ matrix.fedora-edition }}

@@ -36,8 +36,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
 
-      # - name: Optimize GHA Storage
-      #   uses: ./.github/actions/optimise-gha-storage
+      - name: Optimize GHA Storage
+        uses: ./.github/actions/optimise-gha-storage
 
       - name: Generate Image Tags
         uses: ./.github/actions/generate-image-tags
@@ -64,7 +64,7 @@ jobs:
         id: build
         uses: ./.github/actions/build-image
         with:
-          builder: docker
+          builder: podman
           context: .
           dockerfile: Containerfile
           image-name: ${{ env.IMAGE_NAME }}
@@ -135,8 +135,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
 
-      # - name: Optimize GHA Storage
-      #   uses: ./.github/actions/optimise-gha-storage
+      - name: Optimize GHA Storage
+        uses: ./.github/actions/optimise-gha-storage
 
       - name: Generate Image Tags
         uses: ./.github/actions/generate-image-tags
@@ -180,7 +180,7 @@ jobs:
         id: build
         uses: ./.github/actions/build-image
         with:
-          builder: docker
+          builder: podman
           context: .
           dockerfile: Containerfile.nvidia
           image-name: ${{ env.IMAGE_NAME }}

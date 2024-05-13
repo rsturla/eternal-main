@@ -60,12 +60,10 @@ runs:
           image="${{ inputs.image-registry }}/${{ inputs.image-name }}:${tag}"
           echo "IMAGE=${image}"
           tags+=" ${image}"
-          docker tag "${{ inputs.image-name }}:${tag}" "${image}"
+          docker image tag "${{ inputs.image-name }}:${tag}" "${image}"
+          docker image push "${image}"
         done
 
-        echo "TAGS=${tags}"
-
-        docker push $tags
         echo "registry-path=$tags[0]" >> $GITHUB_OUTPUT
 
     - name: Set Outputs

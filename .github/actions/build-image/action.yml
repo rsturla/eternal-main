@@ -34,6 +34,9 @@ outputs:
   digest:
     description: 'The digest of the built image'
     value: ${{ steps.set-outputs.outputs.digest }}
+  builder:
+    description: 'The builder used to build the image'
+    value: ${{ inputs.builder }}
 
 runs:
   using: 'composite'

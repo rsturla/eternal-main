@@ -17,9 +17,11 @@ inputs:
   registry-username:
     description: 'The username to authenticate with the registry'
     required: false
+    default: ${{ github.actor }}
   registry-password:
     description: 'The password to authenticate with the registry'
     required: false
+    default: ${{ github.token }}
 
 outputs:
   registry-path:

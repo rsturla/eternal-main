@@ -91,6 +91,9 @@ jobs:
         if: github.event_name != 'pull_request'
         with:
           registry: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}
+          registry-provider: ghcr.io
+          registry-username: ${{ github.actor }}
+          registry-password: ${{ secrets.GITHUB_TOKEN }}
           digest: ${{ steps.build.outputs.digest }}
           private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
           private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
@@ -204,18 +207,14 @@ jobs:
           registry-username: ${{ github.actor }}
           registry-password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Login to GHCR
-        uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ github.token }}
-
       - name: Sign Image
         uses: ./.github/actions/sign-image
         if: github.event_name != 'pull_request'
         with:
           registry: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}
+          registry-provider: ghcr.io
+          registry-username: ${{ github.actor }}
+          registry-password: ${{ secrets.GITHUB_TOKEN }}
           digest: ${{ steps.build.outputs.digest }}
           private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
           private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}

@@ -9,6 +9,17 @@ inputs:
   registry:
     description: 'The registry to push the signed image to'
     required: true
+  registry-provider:
+    required: false
+    default: 'ghcr.io'
+  registry-username:
+    description: 'The username to authenticate with the registry'
+    required: false
+    default: ${{ github.actor }}
+  registry-password:
+    description: 'The password to authenticate with the registry'
+    required: false
+    default: ${{ github.token }}
   digest:
     description: 'The digest of the image to sign'
     required: true
@@ -22,6 +33,13 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Login to GHCR
+      uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3
+      with:
+        registry: ${{ inputs.registry-provider }}
+        username: ${{ inputs.registry-username }}
+        password: ${{ inputs.registry-password }}
+
     - name: Setup Cosign
       uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 # v3.5.0
       with:

@@ -62,13 +62,13 @@ jobs:
 
       - name: Build Image
         id: build
-        uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2
+        uses: ./.github/actions/build-image
         with:
+          builder: podman
           context: .
-          containerfiles: |
-            Containerfile
-          image: ${{ env.IMAGE_NAME }}
-          tags: |
+          dockerfile: Containerfile
+          image-name: ${{ env.IMAGE_NAME }}
+          image-tags: |
             ${{ steps.generate-image-tags.outputs.tags }}
           build-args: |
             FEDORA_VERSION=${{ env.FEDORA_VERSION }}
@@ -77,27 +77,24 @@ jobs:
 
       - name: Push Image
         id: push
-        uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2
+        uses: ./.github/actions/push-image
         with:
-          image: ${{ steps.build.outputs.image }}
-          tags: ${{ steps.build.outputs.tags }}
-          registry: ${{ env.IMAGE_REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Login to GHCR
-        uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ github.token }}
+          builder: ${{ steps.build.outputs.builder }}
+          image-name: ${{ steps.build.outputs.image }}
+          image-tags: ${{ steps.build.outputs.tags }}
+          image-registry: ${{ env.IMAGE_REGISTRY }}
+          registry-username: ${{ github.actor }}
+          registry-password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Sign Image
         uses: ./.github/actions/sign-image
         if: github.event_name != 'pull_request'
         with:
           registry: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}
-          digest: ${{ steps.push.outputs.digest }}
+          registry-provider: ghcr.io
+          registry-username: ${{ github.actor }}
+          registry-password: ${{ secrets.GITHUB_TOKEN }}
+          digest: ${{ steps.build.outputs.digest }}
           private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
           private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
 
@@ -184,13 +181,13 @@ jobs:
 
       - name: Build Image
         id: build
-        uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2
+        uses: ./.github/actions/build-image
         with:
+          builder: podman
           context: .
-          containerfiles: |
-            Containerfile.nvidia
-          image: ${{ env.IMAGE_NAME }}
-          tags: |
+          dockerfile: Containerfile.nvidia
+          image-name: ${{ env.IMAGE_NAME }}
+          image-tags: |
             ${{ steps.generate-image-tags.outputs.tags }}
           build-args: |
             FEDORA_VERSION=${{ env.FEDORA_VERSION }}
@@ -201,27 +198,24 @@ jobs:
 
       - name: Push Image
         id: push
-        uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2
+        uses: ./.github/actions/push-image
         with:
-          image: ${{ steps.build.outputs.image }}
-          tags: ${{ steps.build.outputs.tags }}
-          registry: ${{ env.IMAGE_REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Login to GHCR
-        uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ github.token }}
+          builder: ${{ steps.build.outputs.builder }}
+          image-name: ${{ steps.build.outputs.image }}
+          image-tags: ${{ steps.build.outputs.tags }}
+          image-registry: ${{ env.IMAGE_REGISTRY }}
+          registry-username: ${{ github.actor }}
+          registry-password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Sign Image
         uses: ./.github/actions/sign-image
         if: github.event_name != 'pull_request'
         with:
           registry: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}
-          digest: ${{ steps.push.outputs.digest }}
+          registry-provider: ghcr.io
+          registry-username: ${{ github.actor }}
+          registry-password: ${{ secrets.GITHUB_TOKEN }}
+          digest: ${{ steps.build.outputs.digest }}
           private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
           private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
 

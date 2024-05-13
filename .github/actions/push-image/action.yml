@@ -1,0 +1,81 @@
+name: Push Image
+
+inputs:
+  image-name:
+    description: 'The name of the image to build'
+    required: true
+  image-tags:
+    description: 'The tags to apply to the image'
+    required: true
+  image-registry:
+    description: 'The registry to push the image to'
+    required: true
+  builder:
+    description: 'The name of the builder to use (docker or podman)'
+    required: false
+    default: 'podman'
+  registry-username:
+    description: 'The username to authenticate with the registry'
+    required: false
+    default: ${{ github.actor }}
+  registry-password:
+    description: 'The password to authenticate with the registry'
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  registry-path:
+    description: 'The path to the pushed image in the registry'
+    value: ${{ steps.set-outputs.outputs.registry-path }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Push (Podman)
+      if: ${{ inputs.builder == 'podman' }}
+      id: push-podman
+      uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2
+      with:
+        image: ${{ inputs.image-name }}
+        tags: ${{ inputs.image-tags }}
+        registry: ${{ inputs.image-registry }}
+        username: ${{ inputs.registry-username }}
+        password: ${{ inputs.registry-password }}
+
+    - name: Login (Docker)
+      if: ${{ inputs.builder == 'docker' }}
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ inputs.image-registry }}
+        username: ${{ inputs.registry-username }}
+        password: ${{ inputs.registry-password }}
+
+    - name: Push (Docker)
+      if: ${{ inputs.builder == 'docker' }}
+      id: push-docker
+      shell: bash
+      run: |
+        # Get the first tag
+        IFS=' ' read -ra TAGS <<< "${{ inputs.image-tags }}"
+        tags=""
+        for tag in "${TAGS[@]}"; do
+          image="${{ inputs.image-registry }}/${{ inputs.image-name }}:${tag}"
+          echo "IMAGE=${image}"
+          tags+=" ${image}"
+          docker image tag "${{ inputs.image-name }}:${tag}" "${image}"
+          docker image push "${image}"
+        done
+
+        echo "registry-path=$tags[0]" >> $GITHUB_OUTPUT
+
+    - name: Set Outputs
+      id: set-outputs
+      shell: bash
+      env:
+        BUILDER: ${{ inputs.builder }}
+      run: |
+        if [ $BUILDER == 'podman' ]; then
+          echo "registry-path=${{ steps.push-podman.outputs.registry-path }}" >> $GITHUB_OUTPUT
+        else
+          echo "registry-path=${{ steps.push-docker.outputs.registry-path }}" >> $GITHUB_OUTPUT
+        fi

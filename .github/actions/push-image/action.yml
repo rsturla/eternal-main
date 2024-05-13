@@ -58,9 +58,12 @@ runs:
         tags=""
         for tag in "${TAGS[@]}"; do
           image="${{ inputs.image-registry }}/${{ inputs.image-name }}:${tag}"
+          echo "IMAGE=${image}"
           tags+=" ${image}"
           docker tag "${{ inputs.image-name }}:${tag}" "${image}"
         done
+
+        echo "TAGS=${tags}"
 
         docker push $tags
         echo "registry-path=$tags[0]" >> $GITHUB_OUTPUT

@@ -57,9 +57,9 @@ runs:
         IFS=' ' read -ra TAGS <<< "${{ inputs.image-tags }}"
         tags=""
         for tag in "${TAGS[@]}"; do
-          image-full=${{ inputs.image-registry }}/${{ inputs.image-name }}:${tag}
-          tags+=" ${image-full}"
-          docker tag "${{ inputs.image-name }}:${tag}" "${image-full}"
+          image="${{ inputs.image-registry }}/${{ inputs.image-name }}:${tag}"
+          tags+=" ${image}"
+          docker tag "${{ inputs.image-name }}:${tag}" "${image}"
         done
 
         docker push $tags

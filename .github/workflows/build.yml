@@ -64,7 +64,7 @@ jobs:
         id: build
         uses: ./.github/actions/build-image
         with:
-          builder: podman
+          builder: docker
           context: .
           dockerfile: Containerfile
           image-name: ${{ env.IMAGE_NAME }}
@@ -180,7 +180,7 @@ jobs:
         id: build
         uses: ./.github/actions/build-image
         with:
-          builder: podman
+          builder: docker
           context: .
           dockerfile: Containerfile.nvidia
           image-name: ${{ env.IMAGE_NAME }}

@@ -51,6 +51,7 @@ runs:
     - name: Push (Docker)
       if: ${{ inputs.builder == 'docker' }}
       id: push-docker
+      shell: bash
       run: |
         # Get the first tag
         IFS=' ' read -ra TAGS <<< "${{ inputs.image-tags }}"

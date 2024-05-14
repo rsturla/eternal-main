@@ -50,7 +50,8 @@ jobs:
       - name: Setup Podman machine
         run: |
           podman pull docker://quay.io/podman/stable:latest
-          systemctl enable --now podman.socket
+          systemctl --user start podman.socket
+          sudo systemctl start podman.socket
           mkdir -p ~/var/lib/mycontainer ~/run/podman
           podman run --detach --name=podmanctr --net=host --security-opt label=disable --security-opt seccomp=unconfined --device /dev/fuse:rw -v $HOME/var/lib/mycontainer:/var/lib/containers:Z --privileged -v $HOME/run/podman:/run/user/1000  stable sh -c 'while true ;do sleep 100000 ; done'
           podman exec -it podmanctr /bin/bash > /dev/null 2>&1 &

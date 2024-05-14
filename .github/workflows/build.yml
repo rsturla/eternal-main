@@ -63,6 +63,12 @@ jobs:
           podman system connection list
           podman --remote system connection default podmanctr
 
+      - name: Another test
+        run: |
+          podman version
+          podman --remote info
+          podman --remote pull hello-world:latest
+
       - name: Get CoreOS Kernel Information
         if: ${{ env.FEDORA_VERSION == 'stable' || env.FEDORA_VERSION == 'testing' }}
         uses: ./.github/actions/get-coreos-kernel

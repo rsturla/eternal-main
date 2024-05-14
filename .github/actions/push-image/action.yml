@@ -55,9 +55,11 @@ runs:
       id: push-docker
       shell: bash
       run: |
-        # Get the first tag
+        # Convert the tags to an array
         IFS=' ' read -ra TAGS <<< "${{ inputs.image-tags }}"
         tags=()
+
+        # Push the image with each tag
         for tag in "${TAGS[@]}"; do
           image="${{ inputs.image-registry }}/${{ inputs.image-name }}:${tag}"
           echo "IMAGE=${image}"
@@ -66,7 +68,7 @@ runs:
           docker image push "${image}"
         done
 
-        # Set the first tag as the registry path
+        # Set the outputs
         echo "registry-path=${tags[0]}" >> $GITHUB_OUTPUT
         echo "tags=${tags[@]}" >> $GITHUB_OUTPUT
 

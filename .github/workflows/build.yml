@@ -86,10 +86,6 @@ jobs:
           registry-username: ${{ github.actor }}
           registry-password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Test
-        run: |
-          echo "Registry Path: ${{ steps.push.outputs.registry-path }}"
-
       - name: Sign Image
         uses: ./.github/actions/sign-image
         if: github.event_name != 'pull_request'

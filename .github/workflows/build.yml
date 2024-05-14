@@ -47,6 +47,22 @@ jobs:
           major-version: ${{ env.FEDORA_VERSION }}
           is-release: ${{ github.event_name != 'pull_request' }}
 
+      - name: Setup Podman machine
+        run: |
+          podman pull docker://quay.io/podman/stable:latest
+          podman run --detach --name=podmanctr --net=host --security-opt label=disable \
+            -p 2375:2375 \
+            --security-opt seccomp=unconfined --device /dev/fuse:rw \
+            -v /var/lib/mycontainer:/var/lib/containers:Z --privileged  stable \
+              "podman machine init --rootfull --volume /var/lib/containers:/var/lib/containers && \
+              podman machine start"
+          podman --remote system connection add root ssh://root@localhost:2375
+
+      - name: Test
+        run: |
+          podman version
+          podman --remote info
+
       - name: Get CoreOS Kernel Information
         if: ${{ env.FEDORA_VERSION == 'stable' || env.FEDORA_VERSION == 'testing' }}
         uses: ./.github/actions/get-coreos-kernel

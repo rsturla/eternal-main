@@ -54,6 +54,9 @@ jobs:
           mkdir -p ~/var/lib/mycontainer
           cat <<EOF > ~/script.sh
           #!/bin/bash
+          # Start sshd
+          /usr/sbin/sshd -D &
+          # Start podman machine
           podman machine init --rootfull --volume /var/lib/containers:/var/lib/containers
           podman machine start
           EOF

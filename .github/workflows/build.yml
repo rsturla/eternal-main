@@ -61,13 +61,12 @@ jobs:
           podman machine start
           EOF
           chmod +x ~/script.sh
-          podman run --detach --name=podmanctr --security-opt label=disable \
-            -p 2375:22 \
+          podman run --detach --name=podmanctr --security-opt label=disable --net=host \
             --security-opt seccomp=unconfined --device /dev/fuse:rw \
             -v $HOME/script.sh:/script.sh \
             -v /usr/lib/systemd/user/podman.socket:/run/podman/podman.sock \
             -v $HOME/var/lib/mycontainer:/var/lib/containers --privileged stable /script.sh
-          podman --remote system connection add root ssh://root@localhost:2375
+          podman --remote system connection add root ssh://root@localhost
 
       - name: Test
         run: |

@@ -61,9 +61,9 @@ jobs:
           # podman --remote system connection default podmanctr
 
           # Symlink the podman.sock to the default location
-          sudo rm -f /run/podman/podman.sock /run/user/1000/podman/podman.sock
+          sudo rm -f /run/podman/podman.sock /run/user/1001/podman/podman.sock
           sudo ln -s ${HOME}/run/podman/podman.sock /run/podman/podman.sock
-          ln -s ${HOME}/run/podman/podman.sock /run/user/1000/podman/podman.sock
+          ln -s ${HOME}/run/podman/podman.sock /run/user/1001/podman/podman.sock
 
       - name: Test
         run: |

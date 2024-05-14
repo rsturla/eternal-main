@@ -50,24 +50,25 @@ jobs:
       - name: Setup Podman machine
         run: |
           podman pull docker://quay.io/podman/stable:latest
+          systemctl enable --now podman.socket
           mkdir -p ~/var/lib/mycontainer ~/run/podman
           podman run --detach --name=podmanctr --net=host --security-opt label=disable --security-opt seccomp=unconfined --device /dev/fuse:rw -v $HOME/var/lib/mycontainer:/var/lib/containers:Z --privileged -v $HOME/run/podman:/run/user/1000  stable sh -c 'while true ;do sleep 100000 ; done'
           podman exec -it podmanctr /bin/bash > /dev/null 2>&1 &
 
-          podman --remote system connection add podmanctr ssh://root@localhost${HOME}/run/podman/podman.sock
-          podman --remote system connection default podmanctr
+          # podman --remote system connection add podmanctr ssh://root@localhost${HOME}/run/podman/podman.sock
+          # podman --remote system connection default podmanctr
+
+          # Symlink the podman.sock to the default location
+          sudo ln -s ${HOME}/run/podman/podman.sock /run/podman/podman.sock
+          ln -s ${HOME}/run/podman/podman.sock /run/user/1000/podman/podman.sock
 
       - name: Test
         run: |
           podman version
-          podman system connection list
-          podman --remote system connection default podmanctr
 
       - name: Another test
         run: |
-          podman version
-          podman --remote info
-          podman --remote pull hello-world:latest
+          exit 1
 
       - name: Get CoreOS Kernel Information
         if: ${{ env.FEDORA_VERSION == 'stable' || env.FEDORA_VERSION == 'testing' }}

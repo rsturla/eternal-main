@@ -27,6 +27,9 @@ outputs:
   registry-path:
     description: 'The path to the pushed image in the registry'
     value: ${{ steps.set-outputs.outputs.registry-path }}
+  digest:
+    description: 'The digest of the image in the registry'
+    value: ${{ steps.set-outputs.outputs.digest }}
 
 runs:
   using: 'composite'
@@ -68,9 +71,12 @@ runs:
           docker image push "${image}"
         done
 
+        digest=$(skopeo inspect docker://${tags[0]} --format '{{.Digest}}')
+
         # Set the outputs
         echo "registry-path=${tags[0]}" >> $GITHUB_OUTPUT
         echo "tags=${tags[@]}" >> $GITHUB_OUTPUT
+        echo "digest=${digest}" >> $GITHUB_OUTPUT
 
     - name: Set Outputs
       id: set-outputs
@@ -80,6 +86,8 @@ runs:
       run: |
         if [ $BUILDER == 'podman' ]; then
           echo "registry-path=${{ steps.push-podman.outputs.registry-path }}" >> $GITHUB_OUTPUT
+          echo "digest=${{ steps.push-podman.outputs.digest }}" >> $GITHUB_OUTPUT
         else
           echo "registry-path=${{ steps.push-docker.outputs.registry-path }}" >> $GITHUB_OUTPUT
+          echo "digest=${{ steps.push-docker.outputs.digest }}" >> $GITHUB_OUTPUT
         fi

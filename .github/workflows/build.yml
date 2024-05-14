@@ -59,7 +59,7 @@ jobs:
           EOF
           chmod +x ~/script.sh
           podman run --detach --name=podmanctr --security-opt label=disable \
-            -p 2375:2375 \
+            -p 2375:22 \
             --security-opt seccomp=unconfined --device /dev/fuse:rw \
             -v $HOME/script.sh:/script.sh \
             -v /usr/lib/systemd/user/podman.socket:/run/podman/podman.sock \

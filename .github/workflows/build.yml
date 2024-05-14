@@ -52,7 +52,7 @@ jobs:
           podman pull docker://quay.io/podman/stable:latest
           mkdir -p ~/var/lib/mycontainer
           podman run --detach --name=podmanctr --net=host --security-opt label=disable --security-opt seccomp=unconfined --device /dev/fuse:rw -v $HOME/var/lib/mycontainer:/var/lib/containers:Z --privileged  stable sh -c 'while true ;do sleep 100000 ; done'
-          podman exec -it podmanctr /bin/bash
+          podman exec -it podmanctr /bin/bash > /dev/null 2>&1 &
 
       - name: Test
         run: |

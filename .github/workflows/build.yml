@@ -57,6 +57,7 @@ jobs:
           podman machine init --rootfull --volume /var/lib/containers:/var/lib/containers
           podman machine start
           EOF
+          chmod +x ~/script.sh
           podman run --detach --name=podmanctr --security-opt label=disable \
             -p 2375:2375 \
             --security-opt seccomp=unconfined --device /dev/fuse:rw \

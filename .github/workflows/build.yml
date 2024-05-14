@@ -54,7 +54,7 @@ jobs:
           podman run --detach --name=podmanctr --security-opt label=disable \
             -p 2375:2375 \
             --security-opt seccomp=unconfined --device /dev/fuse:rw \
-            -v /run/podman/podman.sock:/run/podman/podman.sock \
+            -v /run/user/1000/podman/podman.sock:/run/podman/podman.sock \
             -v $HOME/var/lib/mycontainer:/var/lib/containers:Z --privileged  stable \
               "podman machine init --rootfull --volume /var/lib/containers:/var/lib/containers && \
               podman machine start"

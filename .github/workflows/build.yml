@@ -60,7 +60,7 @@ jobs:
       - name: Test
         run: |
           podman version
-          podman --remote info
+          podman system connection list
 
       - name: Get CoreOS Kernel Information
         if: ${{ env.FEDORA_VERSION == 'stable' || env.FEDORA_VERSION == 'testing' }}

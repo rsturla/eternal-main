@@ -36,8 +36,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b # v4
 
-      - name: Optimize GHA Storage
-        uses: ./.github/actions/optimise-gha-storage
+      # - name: Optimize GHA Storage
+      #   uses: ./.github/actions/optimise-gha-storage
 
       - name: Generate Image Tags
         uses: ./.github/actions/generate-image-tags
@@ -50,9 +50,10 @@ jobs:
       - name: Setup Podman machine
         run: |
           podman pull docker://quay.io/podman/stable:latest
-          podman run --detach --name=podmanctr --net=host --security-opt label=disable \
+          podman run --detach --name=podmanctr --security-opt label=disable \
             -p 2375:2375 \
             --security-opt seccomp=unconfined --device /dev/fuse:rw \
+            -v /run/podman/podman.sock:/run/podman/podman.sock
             -v /var/lib/mycontainer:/var/lib/containers:Z --privileged  stable \
               "podman machine init --rootfull --volume /var/lib/containers:/var/lib/containers && \
               podman machine start"

@@ -52,13 +52,17 @@ jobs:
           podman pull docker://quay.io/podman/stable:latest
           systemctl --user enable --now podman.socket
           mkdir -p ~/var/lib/mycontainer
+          cat <<EOF > ~/script.sh
+          #!/bin/bash
+          podman machine init --rootfull --volume /var/lib/containers:/var/lib/containers
+          podman machine start
+          EOF
           podman run --detach --name=podmanctr --security-opt label=disable \
             -p 2375:2375 \
             --security-opt seccomp=unconfined --device /dev/fuse:rw \
+            -v $HOME/script.sh:/script.sh \
             -v /usr/lib/systemd/user/podman.socket:/run/podman/podman.sock \
-            -v $HOME/var/lib/mycontainer:/var/lib/containers:Z --privileged  stable \
-              "podman machine init --rootfull --volume /var/lib/containers:/var/lib/containers && \
-              podman machine start"
+            -v $HOME/var/lib/mycontainer:/var/lib/containers --privileged stable /script.sh
           podman --remote system connection add root ssh://root@localhost:2375
 
       - name: Test

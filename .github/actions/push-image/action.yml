@@ -57,16 +57,18 @@ runs:
       run: |
         # Get the first tag
         IFS=' ' read -ra TAGS <<< "${{ inputs.image-tags }}"
-        tags=""
+        tags=()
         for tag in "${TAGS[@]}"; do
           image="${{ inputs.image-registry }}/${{ inputs.image-name }}:${tag}"
           echo "IMAGE=${image}"
-          tags+=" ${image}"
+          tags+=("${image}")
           docker image tag "${{ inputs.image-name }}:${tag}" "${image}"
           docker image push "${image}"
         done
 
-        echo "registry-path=$tags[0]" >> $GITHUB_OUTPUT
+        # Set the first tag as the registry path
+        echo "registry-path=${tags[0]}" >> $GITHUB_OUTPUT
+        echo "tags=${tags[@]}" >> $GITHUB_OUTPUT
 
     - name: Set Outputs
       id: set-outputs

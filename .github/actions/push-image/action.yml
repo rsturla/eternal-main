@@ -44,7 +44,7 @@ runs:
 
     - name: Login (Docker)
       if: ${{ inputs.builder == 'docker' }}
-      uses: docker/login-action@v3
+      uses: docker/login-action@e92390c5fb421da1463c202d546fed0ec5c39f20 # v3
       with:
         registry: ${{ inputs.image-registry }}
         username: ${{ inputs.registry-username }}

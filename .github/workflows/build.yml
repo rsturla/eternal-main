@@ -50,12 +50,12 @@ jobs:
       - name: Setup Podman machine
         run: |
           podman pull docker://quay.io/podman/stable:latest
-          mkdir -p /var/lib/mycontainer
+          mkdir -p ~/var/lib/mycontainer
           podman run --detach --name=podmanctr --security-opt label=disable \
             -p 2375:2375 \
             --security-opt seccomp=unconfined --device /dev/fuse:rw \
             -v /run/podman/podman.sock:/run/podman/podman.sock \
-            -v /var/lib/mycontainer:/var/lib/containers:Z --privileged  stable \
+            -v $HOME/var/lib/mycontainer:/var/lib/containers:Z --privileged  stable \
               "podman machine init --rootfull --volume /var/lib/containers:/var/lib/containers && \
               podman machine start"
           podman --remote system connection add root ssh://root@localhost:2375

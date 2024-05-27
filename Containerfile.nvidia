@@ -20,13 +20,13 @@ ARG FEDORA_VERSION
 COPY files/_nvidia /
 COPY scripts /tmp/scripts
 
-COPY --from=akmods-nvidia /var/cache /var/cache
-COPY --from=akmods-nvidia /tmp/nvidia-addons /tmp/nvidia-addons
-COPY --from=akmods-nvidia /tmp/scripts /tmp/scripts
+COPY --from=akmods-nvidia /rpms /rpms
+COPY --from=akmods-nvidia /info /info
+COPY --from=akmods-nvidia /scripts /scripts
 
 RUN chmod +x /tmp/scripts/*.sh && \
-  /tmp/scripts/nvidia-install.sh && \
-  /tmp/scripts/nvidia-postinstall.sh \
+  /scripts/nvidia-install.sh && \
+  /scripts/nvidia-postinstall.sh \
   && \
   ./tmp/scripts/cleanup.sh \
   && \

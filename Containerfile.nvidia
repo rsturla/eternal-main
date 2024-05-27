@@ -24,7 +24,9 @@ COPY --from=akmods-nvidia /rpms /tmp/akmods/rpms
 COPY --from=akmods-nvidia /info /tmp/akmods/info
 COPY --from=akmods-nvidia /scripts /tmp/akmods/scripts
 
-RUN chmod +x /tmp/akmods/scripts/*.sh && \
+RUN chmod +x /tmp/akmods/scripts/*.sh \
+  chmod +x /tmp/scripts/*.sh \
+  && \
   /tmp/akmods/scripts/00-preinstall.sh && \
   /tmp/akmods/scripts/01-install.sh && \
   /tmp/akmods/scripts/02-postinstall.sh \

@@ -12,7 +12,7 @@ ARG COREOS_KERNEL
 COPY files/_base /
 COPY files/_${FEDORA_EDITION} /
 
-# COPY scripts/ /tmp/scripts
+COPY scripts/ /tmp/scripts
 
 # RUN chmod +x /tmp/scripts/*.sh /tmp/scripts/_${FEDORA_EDITION}/*.sh && \
 #   /tmp/scripts/setup.sh --version ${FEDORA_VERSION} --base ${FEDORA_EDITION} --coreos-kernel ${COREOS_KERNEL} && \

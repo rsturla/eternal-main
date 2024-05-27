@@ -25,8 +25,8 @@ COPY --from=akmods-nvidia /info /info
 COPY --from=akmods-nvidia /scripts /scripts
 
 RUN chmod +x /tmp/scripts/*.sh && \
-  /scripts/nvidia-install.sh && \
-  /scripts/nvidia-postinstall.sh \
+  /scripts/01-install.sh && \
+  /scripts/02-postinstall.sh \
   && \
   ./tmp/scripts/cleanup.sh \
   && \

@@ -1,0 +1,7 @@
+# Ignore all NPM packages
+ignore:
+  - package:
+      type: npm
+
+log:
+  quiet: false

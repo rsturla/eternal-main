@@ -17,6 +17,7 @@ while [[ $# -gt 0 ]]; do
       ;;
     *)
       echo "Unknown argument: $1"
+      shift 1
       ;;
   esac
 done

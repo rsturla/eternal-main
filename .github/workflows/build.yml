@@ -98,20 +98,6 @@ jobs:
           private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
           private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
 
-      - name: Generate SBOM
-        id: generate-sbom
-        if: github.event_name != 'pull_request'
-        uses: ./.github/actions/generate-sbom
-        with:
-          image-ref: ${{ steps.push.outputs.registry-path }}
-          artifact-name: ${{ matrix.fedora-edition }}-${{ matrix.fedora-version }}-sbom
-
-      - name: Scan SBOM
-        uses: ./.github/actions/scan-sbom
-        if: github.event_name != 'pull_request'
-        with:
-          sbom-file: ${{ steps.generate-sbom.outputs.output-file }}
-          artifact-name: ${{ matrix.fedora-edition }}-${{ matrix.fedora-version }}-scan
 
   build-nvidia:
     runs-on: ubuntu-latest
@@ -219,20 +205,6 @@ jobs:
           private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
           private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
 
-      - name: Generate SBOM
-        id: generate-sbom
-        uses: ./.github/actions/generate-sbom
-        if: github.event_name != 'pull_request'
-        with:
-          image-ref: ${{ steps.push.outputs.registry-path }}
-          artifact-name: ${{ matrix.fedora-edition }}-${{ matrix.fedora-version }}-nvidia${{ matrix.nvidia-version }}-sbom
-
-      - name: Scan SBOM
-        uses: ./.github/actions/scan-sbom
-        if: github.event_name != 'pull_request'
-        with:
-          sbom-file: ${{ steps.generate-sbom.outputs.output-file }}
-          artifact-name: ${{ matrix.fedora-edition }}-${{ matrix.fedora-version }}-nvidia${{ matrix.nvidia-version }}-scan
 
   check:
     needs: [build-base, build-nvidia]

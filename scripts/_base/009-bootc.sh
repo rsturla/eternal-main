@@ -37,4 +37,3 @@ fi
 if [[ "$FEDORA_VERSION" -ge 40 ]]; then
   /usr/bin/bootupctl backend generate-update-metadata
 fi
-

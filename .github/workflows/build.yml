@@ -173,9 +173,8 @@ jobs:
           build-args: |
             FEDORA_VERSION=${{ env.FEDORA_VERSION }}
             FEDORA_EDITION=${{ matrix.fedora-edition }}
-            NVIDIA_VERSION=${{ matrix.nvidia-version }}
             BASE_TAG=${{ steps.generate-base-image-tag.outputs.base-tag }}
-            NVIDIA_AKMODS_TAG=${{ matrix.fedora-version }}-${{ matrix.nvidia-version }}
+            NVIDIA_AKMODS_TAG=${{ matrix.fedora-version }}
 
       - name: Push Image
         id: push

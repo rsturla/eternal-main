@@ -108,10 +108,6 @@ jobs:
       matrix:
         fedora-version: [39, 40, stable]
         fedora-edition: [base, silverblue, kinoite]
-        nvidia-version: [550]
-        include:
-          - nvidia-version: 550
-            nvidia-is-stable: true
     permissions:
       contents: read
       packages: write
@@ -134,8 +130,7 @@ jobs:
           image-name: ${{ env.IMAGE_REGISTRY}}/${{ env.IMAGE_NAME }}
           major-version: ${{ env.FEDORA_VERSION }}
           is-release: ${{ github.event_name != 'pull_request' }}
-          nvidia-driver-version: ${{ matrix.nvidia-version }}
-          nvidia-driver-is-stable: ${{ matrix.nvidia-is-stable }}
+          is-nvidia: true
 
       - name: Get CoreOS Kernel Information
         if: ${{ env.FEDORA_VERSION == 'stable' || env.FEDORA_VERSION == 'testing' }}

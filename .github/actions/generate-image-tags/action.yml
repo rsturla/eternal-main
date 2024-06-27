@@ -10,13 +10,9 @@ inputs:
   is-release:
     description: 'Is this a release version of the Docker image?'
     default: false
-  nvidia-driver-version:
-    description: 'Version of the NVIDIA driver (if applicable)'
-    required: false
-    default: ''
-  nvidia-driver-is-stable:
-    description: 'Is the NVIDIA driver version stable?'
-    required: false
+  is-nvidia:
+    description: 'Does this image contain proprietary Nvidia drivers?'
+    default: false
 
 outputs:
   tags:
@@ -46,8 +42,7 @@ runs:
       shell: bash
       id: generate-tags-pull-request
       env:
-        NVIDIA_DRIVER_VERSION: ${{ inputs.nvidia-driver-version }}
-        NVIDIA_DRIVER_IS_STABLE: ${{ inputs.nvidia-driver-is-stable }}
+        IS_NVIDIA_DRIVER: ${{ inputs.is-nvidia }}
         IMAGE_NAME: ${{ inputs.image-name }}
         MAJOR_VERSION: ${{ inputs.major-version }}
         PR_NUMBER: ${{ github.event.number }}
@@ -60,11 +55,8 @@ runs:
         )
         TAG_SUFFIXES=()
 
-        if [[ -n "$NVIDIA_DRIVER_VERSION" ]]; then
+        if [[ "$IS_RELEASE" == true ]]; then
           TAG_SUFFIXES+=("-nvidia")
-          if [[ "$NVIDIA_DRIVER_IS_STABLE" == "true" ]]; then
-            TAG_SUFFIXES+=("-nvidia$NVIDIA_DRIVER_VERSION")
-          fi
         fi
 
         TAGS=()
@@ -79,8 +71,8 @@ runs:
         done
 
         PRIMARY_TAG="pr$PR_NUMBER-$(git rev-parse --short HEAD)-$MAJOR_VERSION"
-        if [[ -n "$NVIDIA_DRIVER_VERSION" ]]; then
-          PRIMARY_TAG="$PRIMARY_TAG-nvidia$NVIDIA_DRIVER_VERSION"
+        if [[ "$IS_NVIDIA" == true ]]; then
+          PRIMARY_TAG="$PRIMARY_TAG-nvidia"
         fi
 
         echo "Generated primary tag: $PRIMARY_TAG"
@@ -104,8 +96,7 @@ runs:
       shell: bash
       id: generate-tags
       env:
-        NVIDIA_DRIVER_VERSION: ${{ inputs.nvidia-driver-version }}
-        NVIDIA_DRIVER_IS_STABLE: ${{ inputs.nvidia-driver-is-stable }}
+        IS_NVIDIA_DRIVER: ${{ inputs.is-nvidia }}
         IMAGE_NAME: ${{ inputs.image-name }}
         MAJOR_VERSION: ${{ inputs.major-version }}
       run: |
@@ -117,11 +108,8 @@ runs:
         )
         TAG_SUFFIXES=()
 
-        if [[ -n "$NVIDIA_DRIVER_VERSION" ]]; then
-          TAG_SUFFIXES+=("-nvidia$NVIDIA_DRIVER_VERSION")
-          if [[ "$NVIDIA_DRIVER_IS_STABLE" == "true" ]]; then
-            TAG_SUFFIXES+=("-nvidia")
-          fi
+        if [[ "$IS_NVIDIA" == true ]]; then
+          TAG_SUFFIXES+=("-nvidia")
         fi
 
         TAGS=()
@@ -136,8 +124,8 @@ runs:
         done
 
         PRIMARY_TAG="$(git rev-parse --short HEAD)-$MAJOR_VERSION"
-        if [[ -n "$NVIDIA_DRIVER_VERSION" ]]; then
-          PRIMARY_TAG="$PRIMARY_TAG-nvidia$NVIDIA_DRIVER_VERSION"
+        if [[ "$IS_NVIDIA" == true ]]; then
+          PRIMARY_TAG="$PRIMARY_TAG-nvidia"
         fi
 
         echo "Generated primary tag: $PRIMARY_TAG"

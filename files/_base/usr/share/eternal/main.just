@@ -57,3 +57,10 @@ cleanup:
     nix-store --gc
     nix-store --optimise
   fi
+
+setup-luks-tpm:
+  sudo /usr/libexec/luks-enable-tpm2-autounlock
+
+[private]
+remove-luks-tpm:
+  sudo /usr/libexec/luks-disable-tpm2-autounlock

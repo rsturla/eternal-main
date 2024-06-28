@@ -55,7 +55,7 @@ runs:
         )
         TAG_SUFFIXES=()
 
-        if [[ "$IS_RELEASE" == true ]]; then
+        if [[ "$IS_NVIDIA_DRIVER" == true ]]; then
           TAG_SUFFIXES+=("-nvidia")
         fi
 
@@ -71,7 +71,7 @@ runs:
         done
 
         PRIMARY_TAG="pr$PR_NUMBER-$(git rev-parse --short HEAD)-$MAJOR_VERSION"
-        if [[ "$IS_NVIDIA" == true ]]; then
+        if [[ "$IS_NVIDIA_DRIVER" == true ]]; then
           PRIMARY_TAG="$PRIMARY_TAG-nvidia"
         fi
 
@@ -108,7 +108,7 @@ runs:
         )
         TAG_SUFFIXES=()
 
-        if [[ "$IS_NVIDIA" == true ]]; then
+        if [[ "$IS_NVIDIA_DRIVER" == true ]]; then
           TAG_SUFFIXES+=("-nvidia")
         fi
 
@@ -124,7 +124,7 @@ runs:
         done
 
         PRIMARY_TAG="$(git rev-parse --short HEAD)-$MAJOR_VERSION"
-        if [[ "$IS_NVIDIA" == true ]]; then
+        if [[ "$IS_NVIDIA_DRIVER" == true ]]; then
           PRIMARY_TAG="$PRIMARY_TAG-nvidia"
         fi
 

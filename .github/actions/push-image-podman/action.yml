@@ -84,6 +84,7 @@ runs:
         MANIFEST_TAGS: ${{ inputs.manifest-tags }}
       run: |
         manifest_digests=()
+        tagged_image_references=()
         for tag in "${MANIFEST_TAGS[@]}"; do
           manifest_name="${IMAGE_REGISTRY}/${IMAGE_NAME}:${tag}"
           podman manifest create ${manifest_name}
@@ -95,9 +96,11 @@ runs:
 
           podman manifest push --all ${manifest_name}
           manifest_digests+=($(skopeo inspect docker://${manifest_name} --format '{{.Digest}}'))
+          tagged_image_references+=("${manifest_name}")
         done
 
         echo "digest=${manifest_digests[0]}" >> $GITHUB_OUTPUT
+        echo "tagged-image-references=${tagged_image_references[*]}" >> $GITHUB_OUTPUT
 
 
     - name: Set Outputs

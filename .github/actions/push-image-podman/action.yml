@@ -57,7 +57,7 @@ runs:
           echo "Processing tag: $tag"
 
           for compression_format in "${compression_formats[@]}"; do
-            echo "Tagging: ${{ inputs.image-name }}:${tag} as ${{ inputs.image-name }}:${tag}-${compression_format}"
+            echo "Tagging: ${{ inputs.image-name }}:${tag} as ${{ inputs.image-registry }}/${{ inputs.image-name }}:${tag}-${compression_format}"
             podman tag ${{ inputs.image-name }}:${tag} ${{ inputs.image-registry }}/${{ inputs.image-name }}:${tag}-${compression_format}
           done
           processed_tags+=("${{ inputs.image-registry }}/${{ inputs.image-name }}:${tag}")
@@ -77,8 +77,8 @@ runs:
 
         for tag in "${tags[@]}"; do
           for compression_format in "${compression_formats[@]}"; do
-            echo "Annotating: ${{ inputs.image-name }}-${tag}-${compression_format}"
-            podman manifest add ${{ steps.push-podman.outputs.registry-path }} ${{ inputs.image-name }}-${tag}-${compression_format}
+            echo "Annotating: ${{ inputs.image-registry }}/${{ inputs.image-name }}:${tag}-${compression_format}"
+            podman manifest add ${{ steps.push-podman.outputs.registry-path }} ${{ inputs.image-registry }}/${{ inputs.image-name }}:${tag}-${compression_format}
           done
         done
 

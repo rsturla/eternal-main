@@ -19,9 +19,9 @@ inputs:
     required: false
     default: ${{ github.token }}
   compression-formats:
-    description: 'A comma-separated list of compression formats to use'
+    description: 'A space-separated list of compression formats to use.  Best to include gzip as the first option for compatibility.'
     required: false
-    default: 'gzip zstd'
+    default: 'gzip zstd zstd:chunked'
 
 outputs:
   registry-path:

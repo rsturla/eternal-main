@@ -55,9 +55,9 @@ runs:
         for tag in "${image_tags[@]}"; do
           for format in "${compression_formats[@]}"; do
             full_tag="${{ inputs.image-registry }}/${{ inputs.image-name }}:${tag}-${format}"
-            echo "Tagging and pushing: ${{ inputs.image-name }}:${tag} as ${full_tag}"
+            echo "Tagging and pushing: ${{ inputs.image-name }}:${tag} as ${full_tag} with ${format} compression"
             podman tag ${{ inputs.image-name }}:${tag} ${full_tag}
-            podman push ${full_tag} --compression-format=${format}
+            podman push --compression-format=${format} ${full_tag}
           done
           tagged_image_references+=("${{ inputs.image-registry }}/${{ inputs.image-name }}:${tag}")
         done

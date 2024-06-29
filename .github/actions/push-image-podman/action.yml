@@ -19,7 +19,7 @@ inputs:
     required: false
     default: ${{ github.token }}
   compression-formats:
-    description: 'A space-separated list of compression formats to use.  Best to include gzip as the first option for compatibility.'
+    description: 'A space-separated list of compression formats to use. Best to include gzip as the first option for compatibility.'
     required: false
     default: 'gzip zstd zstd:chunked'
 
@@ -48,61 +48,53 @@ runs:
       id: tag-and-push
       shell: bash
       run: |
-        IFS=' ' read -ra compression_formats <<< "${{ inputs.compression-formats }}"
-        IFS=' ' read -ra image_tags <<< "${{ inputs.image-tags }}"
-        tagged_image_references=()
-        compression_formats_sanitized=()
+        IFS=' ' read -r -a compression_formats_array <<< "${{ inputs.compression-formats }}"
+        IFS=' ' read -r -a image_tags_array <<< "${{ inputs.image-tags }}"
+        tagged_image_refs=()
+        sanitized_compression_formats=()
 
-        for tag in "${image_tags[@]}"; do
-          for format in "${compression_formats[@]}"; do
-            format_sanitized=$(echo ${format} | tr ':' '-')
-            compression_formats_sanitized+=("${format_sanitized}")
+        for tag in "${image_tags_array[@]}"; do
+          for format in "${compression_formats_array[@]}"; do
+            sanitized_format=$(echo "$format" | tr ':' '-')
+            sanitized_compression_formats+=("$sanitized_format")
 
-            full_tag="${{ inputs.image-registry }}/${{ inputs.image-name }}:${tag}-${format_sanitized}"
+            full_tag="${{ inputs.image-registry }}/${{ inputs.image-name }}:${tag}-${sanitized_format}"
             echo "Tagging and pushing: ${{ inputs.image-name }}:${tag} as ${full_tag} with ${format} compression"
-            podman tag ${{ inputs.image-name }}:${tag} ${full_tag}
-            podman push --compression-format=${format} ${full_tag}
+            podman tag "${{ inputs.image-name }}:${tag}" "${full_tag}"
+            podman push --compression-format="$format" "${full_tag}"
           done
-          tagged_image_references+=("${{ inputs.image-registry }}/${{ inputs.image-name }}:${tag}")
+          tagged_image_refs+=("${{ inputs.image-registry }}/${{ inputs.image-name }}:${tag}")
         done
 
-        echo "tagged-image-references=${tagged_image_references[@]}" >> $GITHUB_OUTPUT
-        echo "compression-formats-sanitized=${compression_formats_sanitized[@]}" >> $GITHUB_OUTPUT
+        echo "tagged-image-references=${tagged_image_refs[*]}" >> $GITHUB_OUTPUT
+        echo "sanitized-compression-formats=${sanitized_compression_formats[*]}" >> $GITHUB_OUTPUT
 
     - name: Create and Push Manifests
       id: create-and-push-manifests
       shell: bash
       run: |
-        IFS=' ' read -ra tagged_image_references <<< "${{ steps.tag-and-push.outputs.tagged-image-references }}"
-        IFS=' ' read -ra compression_formats_sanitized <<< "${{ steps.tag-and-push.outputs.compression-formats-sanitized }}"
+        IFS=' ' read -r -a tagged_image_refs <<< "${{ steps.tag-and-push.outputs.tagged-image-references }}"
+        IFS=' ' read -r -a sanitized_compression_formats <<< "${{ steps.tag-and-push.outputs.sanitized-compression-formats }}"
 
-        podman image ls
+        for tag_reference in "${tagged_image_refs[@]}"; do
+          podman manifest create "$tag_reference"
 
-        for tag_reference in "${tagged_image_references[@]}"; do
-          podman manifest create ${tag_reference}
-
-          for format in "${compression_formats_sanitized[@]}"; do
+          for format in "${sanitized_compression_formats[@]}"; do
             full_image_reference="${tag_reference}-${format}"
             echo "Adding image ${full_image_reference} to manifest ${tag_reference}"
-            podman manifest add ${tag_reference} docker://${full_image_reference}
+            podman manifest add "$tag_reference" "docker://${full_image_reference}"
           done
 
-          podman manifest push --all=false ${tag_reference} docker://${tag_reference}
-
-          manifest_digest=$(skopeo inspect docker://${tag_reference} --format '{{.Digest}}')
-          echo "digest-${tag_reference}=${manifest_digest}" >> $GITHUB_OUTPUT
+          podman manifest push --all=false "$tag_reference" "docker://${tag_reference}"
         done
+
+        manifest_digest=$(skopeo inspect "docker://${tagged_image_refs[0]}" --format '{{.Digest}}')
+        echo "digest=${manifest_digest}" >> $GITHUB_OUTPUT
 
     - name: Set Outputs
       id: set-outputs
       shell: bash
       run: |
-        IFS=' ' read -ra tagged_image_references <<< "${{ steps.tag-and-push.outputs.tagged-image-references }}"
-        echo "registry-path=${tagged_image_references[0]}" >> $GITHUB_OUTPUT
-
-        for tag_reference in "${tagged_image_references[@]}"; do
-          manifest_digest=$(skopeo inspect docker://${tag_reference} --format '{{.Digest}}')
-          echo "digest-${tag_reference}=${manifest_digest}" >> $GITHUB_OUTPUT
-        done
-
+        echo "registry-path=${tagged_image_refs[0]}" >> $GITHUB_OUTPUT
         echo "compression-formats=${{ inputs.compression-formats }}" >> $GITHUB_OUTPUT
+        echo "digest=${manifest_digest}" >> $GITHUB_OUTPUT

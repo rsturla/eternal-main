@@ -58,17 +58,18 @@ runs:
       run: |
         IFS=' ' read -r -a compression_formats_array <<< "${COMPRESSION_FORMATS}"
         sanitized_compression_formats=()
+        intermediary_tag_reference="${IMAGE_REGISTRY}/${IMAGE_NAME}:${INTERMEDIARY_TAG}"
 
         for format in "${compression_formats_array[@]}"; do
           sanitized_format=$(echo "$format" | tr ':' '-')
           sanitized_compression_formats+=("$sanitized_format")
-          full_tag="${IMAGE_REGISTRY}/${IMAGE_NAME}:${INTERMEDIARY_TAG}-${sanitized_format}"
+          full_tag="${intermediary_tag_reference}-${sanitized_format}"
           echo "Tagging: ${IMAGE_NAME}:${INTERMEDIARY_TAG} as ${full_tag} with ${format} compression"
           podman tag "${IMAGE_NAME}:${INTERMEDIARY_TAG}" "${full_tag}"
           podman push --compression-format="$format" "${full_tag}"
         done
 
-        echo "tagged-image-reference=${full_tag}" >> $GITHUB_OUTPUT
+        echo "intermediary-tag-reference=${intermediary_tag_reference}" >> $GITHUB_OUTPUT
         echo "sanitized-compression-formats=${sanitized_compression_formats[*]}" >> $GITHUB_OUTPUT
 
     - name: Create and Push Manifests
@@ -79,21 +80,21 @@ runs:
         SANITIZED_COMPRESSION_FORMATS: ${{ steps.tag-and-push.outputs.sanitized-compression-formats }}
         IMAGE_NAME: ${{ inputs.image-name }}
         IMAGE_REGISTRY: ${{ inputs.image-registry }}
-        INTERMEDIARY_TAG: ${{ inputs.intermediary-tag }}
-        TAGGED_IMAGE_REFERENCE: ${{ steps.tag-and-push.outputs.tagged-image-reference }}
+        INTERMEDIARY_TAG_REFERENCE: ${{ steps.tag-and-push.outputs.intermediary-tag-reference }}
         MANIFEST_TAGS: ${{ inputs.manifest-tags }}
       run: |
         manifest_digests=()
         for tag in "${MANIFEST_TAGS[@]}"; do
-          podman manifest create ${IMAGE_REGISTRY}/${IMAGE_NAME}:${tag}
+          manifest_name="${IMAGE_REGISTRY}/${IMAGE_NAME}:${tag}"
+          podman manifest create ${manifest_name}
 
           for format in ${SANITIZED_COMPRESSION_FORMATS}; do
-            echo "Adding ${IMAGE_REGISTRY}/${IMAGE_NAME}:${INTERMEDIARY_TAG}-${format} to ${IMAGE_REGISTRY}/${IMAGE_NAME}:${tag}"
-            podman manifest add ${IMAGE_REGISTRY}/${IMAGE_NAME}:${INTERMEDIARY_TAG}-${format} ${IMAGE_REGISTRY}/${IMAGE_NAME}:${tag}
+            echo "Adding ${INTERMEDIARY_TAG_REFERENCE}-${format} to ${manifest_name}"
+            podman manifest add ${INTERMEDIARY_TAG_REFERENCE}-${format} ${manifest_name}
           done
 
-          podman manifest push --all ${IMAGE_REGISTRY}/${IMAGE_NAME}:${tag}
-          manifest_digests+=($(skopeo inspect docker://${IMAGE_REGISTRY}/${IMAGE_NAME}:${tag} --format '{{.Digest}}'))
+          podman manifest push --all ${manifest_name}
+          manifest_digests+=($(skopeo inspect docker://${manifest_name} --format '{{.Digest}}'))
         done
 
         echo "digest=${manifest_digests[0]}" >> $GITHUB_OUTPUT

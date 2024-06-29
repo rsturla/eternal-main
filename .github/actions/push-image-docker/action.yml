@@ -56,6 +56,9 @@ runs:
           tags+=("${{ inputs.image-registry }}/${{ inputs.image-name }}:${tag}")
         done
 
+        image="${{ inputs.image-registry }}/${{ inputs.image-name }}:${TAGS[0]}"
+        echo "FROM ${image}" > /tmp/Dockerfile
+
         # Push the image with each compression format
         for compression_format in "${COMPRESSION_FORMATS[@]}"; do
           tag_flags=()
@@ -63,7 +66,6 @@ runs:
             tag_flags+=("--tag ${tag}-${compression_format}")
           done
 
-          echo "FROM=${image}" > /tmp/Dockerfile
           docker buildx build \
             --output type=image,name="${image}",oci-mediatypes=true,compression=${compression_format},compression-level=3 \
             --file /tmp/Dockerfile \

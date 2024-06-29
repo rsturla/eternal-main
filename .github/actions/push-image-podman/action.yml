@@ -1,0 +1,53 @@
+name: Push Image (Podman)
+
+inputs:
+  image-name:
+    description: 'The name of the image to build'
+    required: true
+  image-tags:
+    description: 'The tags to apply to the image'
+    required: true
+  image-registry:
+    description: 'The registry to push the image to'
+    required: true
+  registry-username:
+    description: 'The username to authenticate with the registry'
+    required: false
+    default: ${{ github.actor }}
+  registry-password:
+    description: 'The password to authenticate with the registry'
+    required: false
+    default: ${{ github.token }}
+  compression-formats:
+    description: 'A comma-separated list of compression formats to use'
+    required: false
+    default: 'gzip'
+
+
+outputs:
+  registry-path:
+    description: 'The path to the pushed image in the registry'
+    value: ${{ steps.set-outputs.outputs.registry-path }}
+  digest:
+    description: 'The digest of the image in the registry'
+    value: ${{ steps.set-outputs.outputs.digest }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Push (Podman)
+      id: push-podman
+      uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2
+      with:
+        image: ${{ inputs.image-name }}
+        tags: ${{ inputs.image-tags }}
+        registry: ${{ inputs.image-registry }}
+        username: ${{ inputs.registry-username }}
+        password: ${{ inputs.registry-password }}
+
+    - name: Set Outputs
+      id: set-outputs
+      shell: bash
+      run: |
+        echo "registry-path=${{ steps.push-podman.outputs.registry-path }}" >> $GITHUB_OUTPUT
+        echo "digest=${{ steps.push-podman.outputs.digest }}" >> $GITHUB_OUTPUT

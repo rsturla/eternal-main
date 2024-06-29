@@ -22,6 +22,11 @@ inputs:
     description: 'The password to authenticate with the registry'
     required: false
     default: ${{ github.token }}
+  compression-formats:
+    description: 'A comma-separated list of compression formats to use'
+    required: false
+    default: 'gzip'
+
 
 outputs:
   registry-path:
@@ -35,48 +40,28 @@ runs:
   using: 'composite'
   steps:
     - name: Push (Podman)
-      if: ${{ inputs.builder == 'podman' }}
       id: push-podman
-      uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2
+      if: ${{ inputs.builder == 'podman' }}
+      uses: ./.github/actions/push-image-podman
       with:
-        image: ${{ inputs.image-name }}
-        tags: ${{ inputs.image-tags }}
-        registry: ${{ inputs.image-registry }}
-        username: ${{ inputs.registry-username }}
-        password: ${{ inputs.registry-password }}
-
-    - name: Login (Docker)
-      if: ${{ inputs.builder == 'docker' }}
-      uses: docker/login-action@0d4c9c5ea7693da7b068278f7b52bda2a190a446 # v3
-      with:
-        registry: ${{ inputs.image-registry }}
-        username: ${{ inputs.registry-username }}
-        password: ${{ inputs.registry-password }}
+        image-name: ${{ inputs.image-name }}
+        image-tags: ${{ inputs.image-tags }}
+        image-registry: ${{ inputs.image-registry }}
+        registry-username: ${{ inputs.registry-username }}
+        registry-password: ${{ inputs.registry-password }}
+        compression-formats: ${{ inputs.compression-formats }}
 
     - name: Push (Docker)
-      if: ${{ inputs.builder == 'docker' }}
       id: push-docker
-      shell: bash
-      run: |
-        # Convert the tags to an array
-        IFS=' ' read -ra TAGS <<< "${{ inputs.image-tags }}"
-        tags=()
-
-        # Push the image with each tag
-        for tag in "${TAGS[@]}"; do
-          image="${{ inputs.image-registry }}/${{ inputs.image-name }}:${tag}"
-          echo "IMAGE=${image}"
-          tags+=("${image}")
-          docker image tag "${{ inputs.image-name }}:${tag}" "${image}"
-          docker image push "${image}"
-        done
-
-        digest=$(skopeo inspect docker://${tags[0]} --format '{{.Digest}}')
-
-        # Set the outputs
-        echo "registry-path=${tags[0]}" >> $GITHUB_OUTPUT
-        echo "tags=${tags[@]}" >> $GITHUB_OUTPUT
-        echo "digest=${digest}" >> $GITHUB_OUTPUT
+      if: ${{ inputs.builder == 'docker' }}
+      uses: ./.github/actions/push-image-docker
+      with:
+        image-name: ${{ inputs.image-name }}
+        image-tags: ${{ inputs.image-tags }}
+        image-registry: ${{ inputs.image-registry }}
+        registry-username: ${{ inputs.registry-username }}
+        registry-password: ${{ inputs.registry-password }}
+        compression-formats: ${{ inputs.compression-formats }}
 
     - name: Set Outputs
       id: set-outputs

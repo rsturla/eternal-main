@@ -72,7 +72,7 @@ runs:
         # tags includes the compression formats and registry
         IFS=' ' read -ra tags <<< "${{ steps.push-podman.outputs.tags }}"
 
-        manifest_name
+        manifest_name="${tags[0]}"
         podman manifest create $manifest_name
 
         for tag in "${tags[@]}"; do

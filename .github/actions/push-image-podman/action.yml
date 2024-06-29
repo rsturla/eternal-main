@@ -51,6 +51,12 @@ runs:
         IFS=' ' read -ra compression_formats <<< "${{ inputs.compression-formats }}"
         IFS=' ' read -ra image_tags <<< "${{ inputs.image-tags }}"
         tagged_image_references=()
+        compression_formats_sanitized=()
+
+        # Replace colons with dashes in compression formats
+        for format in "${compression_formats[@]}"; do
+          compression_formats_sanitized+=("${format//:/-}")
+        done
 
         for tag in "${image_tags[@]}"; do
           for format in "${compression_formats[@]}"; do
@@ -63,20 +69,21 @@ runs:
         done
 
         echo "tagged-image-references=${tagged_image_references[@]}" >> $GITHUB_OUTPUT
+        echo "compression-formats-sanitized=${compression_formats_sanitized[@]}" >> $GITHUB_OUTPUT
 
     - name: Create and Push Manifests
       id: create-and-push-manifests
       shell: bash
       run: |
-        IFS=' ' read -ra compression_formats <<< "${{ inputs.compression-formats }}"
         IFS=' ' read -ra tagged_image_references <<< "${{ steps.tag-and-push.outputs.tagged-image-references }}"
+        IFS=' ' read -ra compression_formats_sanitized <<< "${{ steps.tag-and-push.outputs.compression-formats-sanitized }}"
 
         podman image ls
 
         for tag_reference in "${tagged_image_references[@]}"; do
           podman manifest create ${tag_reference}
 
-          for format in "${compression_formats[@]}"; do
+          for format in "${compression_formats_sanitized[@]}"; do
             full_image_reference="${tag_reference}-${format}"
             echo "Adding image ${full_image_reference} to manifest ${tag_reference}"
             podman manifest add ${tag_reference} docker://${full_image_reference}

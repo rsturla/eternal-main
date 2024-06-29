@@ -74,14 +74,18 @@ runs:
         # tags includes the compression formats and registry
         IFS=' ' read -ra tags <<< "${{ steps.push-podman.outputs.tags }}"
 
-        podman manifest create ${{ steps.push-podman.outputs.registry-path }}
+        manifest_name=${{ steps.push-podman.outputs.registry-path }}
+        podman manifest create $manifest_name
 
         for tag in "${tags[@]}"; do
           echo "Adding tag: $tag"
-          podman manifest add ${{ steps.push-podman.outputs.registry-path }} $tag
+          for compression_format in "${compression_formats[@]}"; do
+            echo "Adding tag: $tag-$compression_format"
+            podman manifest add $manifest_name $tag-$compression_format
+          done
         done
 
-        podman manifest push --all ${{ steps.push-podman.outputs.registry-path }}
+        podman manifest push --all $manifest_name
 
         digest=$(skopeo inspect docker://${tags[0]} --format '{{.Digest}}')
         echo "digest=$digest" >> $GITHUB_OUTPUT

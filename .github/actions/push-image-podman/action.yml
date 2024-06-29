@@ -21,7 +21,7 @@ inputs:
   compression-formats:
     description: 'A comma-separated list of compression formats to use'
     required: false
-    default: 'gzip,zstd'
+    default: 'gzip zstd'
 
 
 outputs:
@@ -31,23 +31,62 @@ outputs:
   digest:
     description: 'The digest of the image in the registry'
     value: ${{ steps.set-outputs.outputs.digest }}
+  compression-formats:
+    description: 'The compression formats used for the image'
+    value: ${{ inputs.compression-formats }}
 
 runs:
   using: 'composite'
   steps:
-    - name: Push (Podman)
-      id: push-podman
-      uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2
+    - name: Login to Registry
+      uses: docker/login-action@0d4c9c5ea7693da7b068278f7b52bda2a190a446 # v3
       with:
-        image: ${{ inputs.image-name }}
-        tags: ${{ inputs.image-tags }}
         registry: ${{ inputs.image-registry }}
         username: ${{ inputs.registry-username }}
         password: ${{ inputs.registry-password }}
+
+    - name: Push Image
+      id: push-podman
+      run: |
+        IFS=' ' read -r -a compression_formats <<< ${{ inputs.compression-formats }}
+        IFS=' ' read -r -a tags <<< ${{ inputs.image-tags }}
+        tags=()
+
+        for tag in "${tags[@]}"; do
+          image="${{ inputs.image-registry }}/${{ inputs.image-name }}:$tag"
+          tags+=($image)
+
+          for compression_format in "${compression_formats[@]}"; do
+            podman tag $image $image-$compression_format
+          done
+        done
+
+        echo "registry-path=${tags[0]}" >> $GITHUB_OUTPUT
+        echo "tags=${tags[@]}" >> $GITHUB_OUTPUT
+
+    - name: Create Manifest (and push it)
+      id: push-manifest
+      run: |
+        IFS=' ' read -r -a compression_formats <<< ${{ inputs.compression-formats }}
+        IFS=' ' read -r -a tags <<< ${{ inputs.image-tags }}
+
+        podman manifest create ${{ steps.push-podman.outputs.registry-path }}
+
+        for tag in "${tags[@]}"; do
+          for compression_format in "${compression_formats[@]}"; do
+            podman manifest add ${{ steps.push-podman.outputs.registry-path }} ${{ steps.push-podman.outputs.registry-path }}-$tag-$compression_format
+          done
+        done
+
+        podman manifest push --all ${{ steps.push-podman.outputs.registry-path }}
+
+        digest=$(skopeo inspect docker://${tags[0]} --format '{{.Digest}}')
+        echo "digest=$digest" >> $GITHUB_OUTPUT
 
     - name: Set Outputs
       id: set-outputs
       shell: bash
       run: |
         echo "registry-path=${{ steps.push-podman.outputs.registry-path }}" >> $GITHUB_OUTPUT
-        echo "digest=${{ steps.push-podman.outputs.digest }}" >> $GITHUB_OUTPUT
+        echo "digest=${{ steps.push-manifest.outputs.digest }}" >> $GITHUB_OUTPUT
+        echo "compression-formats=${{ inputs.compression-formats }}" >> $GITHUB_OUTPUT

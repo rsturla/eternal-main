@@ -40,7 +40,7 @@ runs:
       with:
         context: ${{ inputs.context }}
         containerfiles: ${{ inputs.dockerfile }}
-        image: ${{ inputs.image-name }}
+        image: localhost/${{ inputs.image-name }}
         tags: ${{ inputs.image-tags }}
         build-args: ${{ inputs.build-args }}
 
@@ -51,7 +51,7 @@ runs:
         BUILDER: ${{ inputs.builder }}
       run: |
         podman image ls
-        echo "image=localhost/${{ inputs.image-name }}" >> $GITHUB_OUTPUT
+        echo "image=${{ inputs.image-name }}" >> $GITHUB_OUTPUT
         echo "tags=${{ inputs.image-tags }}" >> $GITHUB_OUTPUT
-        digest=$(podman image inspect localhost/${{ inputs.image-name }} --format '{{.Digest}}')
+        digest=$(podman image inspect ${{ steps.build-podman.outputs.image-with-tag }} --format '{{.Digest}}')
         echo "digest=$digest" >> $GITHUB_OUTPUT

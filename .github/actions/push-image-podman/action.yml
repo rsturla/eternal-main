@@ -96,7 +96,7 @@ runs:
 
           for format in ${SANITIZED_COMPRESSION_FORMATS[@]}; do
             echo "Adding ${INTERMEDIARY_TAG_REFERENCE}-${format} to ${manifest_name}"
-            podman manifest add ${INTERMEDIARY_TAG_REFERENCE}-${format} ${manifest_name}
+            podman manifest add ${manifest_name} ${INTERMEDIARY_TAG_REFERENCE}-${format}
           done
 
           podman manifest push --all ${manifest_name}

@@ -72,20 +72,21 @@ runs:
         # tags includes the compression formats and registry
         IFS=' ' read -ra tags <<< "${{ steps.push-podman.outputs.tags }}"
 
+        podman image ls
+
         manifest_name="${tags[0]}"
         podman manifest create $manifest_name
 
         for tag in "${tags[@]}"; do
-          echo "Adding tag: $tag"
           for compression_format in "${compression_formats[@]}"; do
             echo "Adding tag: ${tag}-${compression_format}"
-            podman manifest add $manifest_name docker://${tag}-${compression_format}
+            podman manifest add ${manifest_name} docker://${tag}-${compression_format}
           done
         done
 
         podman manifest push --all $manifest_name
 
-        digest=$(skopeo inspect docker://${tags[0]} --format '{{.Digest}}')
+        digest=$(skopeo inspect docker://${manifest_name} --format '{{.Digest}}')
         echo "digest=$digest" >> $GITHUB_OUTPUT
 
     - name: Set Outputs

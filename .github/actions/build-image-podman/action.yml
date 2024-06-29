@@ -43,6 +43,7 @@ runs:
         image: localhost/${{ inputs.image-name }}
         tags: ${{ inputs.image-tags }}
         build-args: ${{ inputs.build-args }}
+        oci: true
 
     - name: Set Outputs
       id: set-outputs

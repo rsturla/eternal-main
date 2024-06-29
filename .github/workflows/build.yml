@@ -21,13 +21,13 @@ jobs:
       fail-fast: false
       matrix:
         fedora-version: [39, 40, stable]
-        fedora-edition: [base, silverblue, kinoite]
+        fedora-edition: [base]
     permissions:
       contents: read
       packages: write
       id-token: write
     env:
-      IMAGE_NAME: eternal-linux/main/${{ matrix.fedora-edition }}
+      IMAGE_NAME: eternal-linux/test/${{ matrix.fedora-edition }}
       FEDORA_VERSION: ${{ matrix.fedora-version }}
       COREOS_KERNEL: "N/A"
     outputs:
@@ -62,9 +62,8 @@ jobs:
 
       - name: Build Image
         id: build
-        uses: ./.github/actions/build-image
+        uses: ./.github/actions/build-image-podman
         with:
-          builder: docker
           context: .
           dockerfile: Containerfile
           image-name: ${{ env.IMAGE_NAME }}
@@ -77,9 +76,8 @@ jobs:
 
       - name: Push Image
         id: push
-        uses: ./.github/actions/push-image
+        uses: ./.github/actions/push-image-podman
         with:
-          builder: ${{ steps.build.outputs.builder }}
           image-name: ${{ steps.build.outputs.image }}
           image-tags: ${{ steps.build.outputs.tags }}
           image-registry: ${{ env.IMAGE_REGISTRY }}
@@ -107,13 +105,13 @@ jobs:
       fail-fast: false
       matrix:
         fedora-version: [39, 40, stable]
-        fedora-edition: [base, silverblue, kinoite]
+        fedora-edition: [base]
     permissions:
       contents: read
       packages: write
       id-token: write
     env:
-      IMAGE_NAME: eternal-linux/main/${{ matrix.fedora-edition }}
+      IMAGE_NAME: eternal-linux/test/${{ matrix.fedora-edition }}
       FEDORA_VERSION: ${{ matrix.fedora-version }}
       COREOS_KERNEL: "N/A"
     steps:

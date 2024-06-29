@@ -180,10 +180,12 @@ jobs:
         uses: ./.github/actions/push-image-podman
         with:
           image-name: ${{ steps.build.outputs.image }}
-          image-tags: ${{ steps.build.outputs.tags }}
+          manifest-tags: ${{ steps.build.outputs.tags }}
           image-registry: ${{ env.IMAGE_REGISTRY }}
           registry-username: ${{ github.actor }}
           registry-password: ${{ secrets.GITHUB_TOKEN }}
+          compression-formats: 'gzip zstd:chunked'
+          intermediary-tag: ${{ steps.generate-image-tags.outputs.primary-tag }}
 
       - name: Sign Image
         uses: ./.github/actions/sign-image

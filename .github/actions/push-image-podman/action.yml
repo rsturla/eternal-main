@@ -87,9 +87,10 @@ runs:
         tagged_image_references=()
         for tag in "${MANIFEST_TAGS[@]}"; do
           manifest_name="${IMAGE_REGISTRY}/${IMAGE_NAME}:${tag}"
+          echo "Creating manifest: ${manifest_name}"
           podman manifest create ${manifest_name}
 
-          for format in ${SANITIZED_COMPRESSION_FORMATS}; do
+          for format in ${SANITIZED_COMPRESSION_FORMATS[@]}; do
             echo "Adding ${INTERMEDIARY_TAG_REFERENCE}-${format} to ${manifest_name}"
             podman manifest add ${INTERMEDIARY_TAG_REFERENCE}-${format} ${manifest_name}
           done

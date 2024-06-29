@@ -49,8 +49,8 @@ runs:
       id: push-podman
       shell: bash
       run: |
-        IFS=' ' read -r -a compression_formats <<< ${{ inputs.compression-formats }}
-        IFS=' ' read -r -a tags <<< ${{ inputs.image-tags }}
+        IFS=' ' read -r -a compression_formats <<< "${{ inputs.compression-formats }}"
+        IFS=' ' read -r -a tags <<< "${{ inputs.image-tags }}"
         tags=()
 
         for tag in "${tags[@]}"; do
@@ -69,8 +69,8 @@ runs:
       id: push-manifest
       shell: bash
       run: |
-        IFS=' ' read -r -a compression_formats <<< ${{ inputs.compression-formats }}
-        IFS=' ' read -r -a tags <<< ${{ inputs.image-tags }}
+        IFS=' ' read -r -a compression_formats <<< "${{ inputs.compression-formats }}"
+        IFS=' ' read -r -a tags <<< "${{ inputs.image-tags }}"
 
         podman manifest create ${{ steps.push-podman.outputs.registry-path }}
 

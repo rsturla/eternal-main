@@ -23,7 +23,6 @@ inputs:
     required: false
     default: 'gzip zstd'
 
-
 outputs:
   registry-path:
     description: 'The path to the pushed image in the registry'
@@ -45,54 +44,55 @@ runs:
         username: ${{ inputs.registry-username }}
         password: ${{ inputs.registry-password }}
 
-    - name: Push Image
-      id: push-podman
+    - name: Tag and Push Image
+      id: tag-and-push
       shell: bash
       run: |
         IFS=' ' read -ra compression_formats <<< "${{ inputs.compression-formats }}"
-        IFS=' ' read -ra tags <<< "${{ inputs.image-tags }}"
-        processed_tags=()
+        IFS=' ' read -ra image_tags <<< "${{ inputs.image-tags }}"
+        tagged_image_references=()
 
-        for tag in "${tags[@]}"; do
-          for compression_format in "${compression_formats[@]}"; do
-            echo "Tagging: ${{ inputs.image-name }}:${tag} as ${{ inputs.image-registry }}/${{ inputs.image-name }}:${tag}-${compression_format}"
-            podman tag ${{ inputs.image-name }}:${tag} ${{ inputs.image-registry }}/${{ inputs.image-name }}:${tag}-${compression_format}
+        for tag in "${image_tags[@]}"; do
+          for format in "${compression_formats[@]}"; do
+            full_tag="${{ inputs.image-registry }}/${{ inputs.image-name }}:${tag}-${format}"
+            echo "Tagging and pushing: ${{ inputs.image-name }}:${tag} as ${full_tag}"
+            podman tag ${{ inputs.image-name }}:${tag} ${full_tag}
           done
-          processed_tags+=("${{ inputs.image-registry }}/${{ inputs.image-name }}:${tag}")
+          tagged_image_references+=("${{ inputs.image-registry }}/${{ inputs.image-name }}:${tag}")
         done
 
-        echo "registry-path=${processed_tags[0]}" >> $GITHUB_OUTPUT
-        echo "tags=${processed_tags[@]}" >> $GITHUB_OUTPUT
+        echo "registry-path=${tagged_image_references[0]}" >> $GITHUB_OUTPUT
+        echo "tagged-image-references=${tagged_image_references[@]}" >> $GITHUB_OUTPUT
 
-    - name: Create Manifest (and push it)
-      id: push-manifest
+    - name: Create and Push Manifest
+      id: create-and-push-manifest
       shell: bash
       run: |
         IFS=' ' read -ra compression_formats <<< "${{ inputs.compression-formats }}"
-        # tags includes the compression formats and registry
-        IFS=' ' read -ra tags <<< "${{ steps.push-podman.outputs.tags }}"
+        IFS=' ' read -ra tagged_image_references <<< "${{ steps.tag-and-push.outputs.tagged-image-references }}"
 
         podman image ls
 
-        manifest_name="${tags[0]}"
-        podman manifest create $manifest_name
+        manifest_reference="${tagged_image_references[0]}"
+        podman manifest create ${manifest_reference}
 
-        for tag in "${tags[@]}"; do
-          for compression_format in "${compression_formats[@]}"; do
-            echo "Adding tag: ${tag}-${compression_format}"
-            podman manifest add ${manifest_name} docker://${tag}-${compression_format}
+        for image_reference in "${tagged_image_references[@]}"; do
+          for format in "${compression_formats[@]}"; do
+            full_image_reference="${image_reference}-${format}"
+            echo "Adding to manifest: ${full_image_reference}"
+            podman manifest add ${manifest_reference} docker://${full_image_reference}
           done
         done
 
-        podman manifest push --all $manifest_name
+        podman manifest push --all ${manifest_reference}
 
-        digest=$(skopeo inspect docker://${manifest_name} --format '{{.Digest}}')
-        echo "digest=$digest" >> $GITHUB_OUTPUT
+        manifest_digest=$(skopeo inspect docker://${manifest_reference} --format '{{.Digest}}')
+        echo "digest=${manifest_digest}" >> $GITHUB_OUTPUT
 
     - name: Set Outputs
       id: set-outputs
       shell: bash
       run: |
-        echo "registry-path=${{ steps.push-podman.outputs.registry-path }}" >> $GITHUB_OUTPUT
-        echo "digest=${{ steps.push-manifest.outputs.digest }}" >> $GITHUB_OUTPUT
+        echo "registry-path=${{ steps.tag-and-push.outputs.registry-path }}" >> $GITHUB_OUTPUT
+        echo "digest=${{ steps.create-and-push-manifest.outputs.digest }}" >> $GITHUB_OUTPUT
         echo "compression-formats=${{ inputs.compression-formats }}" >> $GITHUB_OUTPUT

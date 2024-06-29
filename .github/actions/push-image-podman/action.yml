@@ -49,15 +49,17 @@ runs:
       id: push-podman
       shell: bash
       run: |
-        IFS=' ' read -r -a compression_formats <<< "${{ inputs.compression-formats }}"
-        IFS=' ' read -r -a tags <<< "${{ inputs.image-tags }}"
+        IFS=' ' read -ra compression_formats <<< "${{ inputs.compression-formats }}"
+        IFS=' ' read -ra tags <<< "${{ inputs.image-tags }}"
         tags=()
 
         for tag in "${tags[@]}"; do
+          echo "Processing tag: $tag"
           image="${{ inputs.image-registry }}/${{ inputs.image-name }}:$tag"
           tags+=($image)
 
           for compression_format in "${compression_formats[@]}"; do
+            echo "Tagging: $image as $image-$compression_format"
             podman tag $image $image-$compression_format
           done
         done
@@ -69,13 +71,15 @@ runs:
       id: push-manifest
       shell: bash
       run: |
-        IFS=' ' read -r -a compression_formats <<< "${{ inputs.compression-formats }}"
-        IFS=' ' read -r -a tags <<< "${{ inputs.image-tags }}"
+        IFS=' ' read -ra compression_formats <<< "${{ inputs.compression-formats }}"
+        IFS=' ' read -ra tags <<< "${{ inputs.image-tags }}"
 
         podman manifest create ${{ steps.push-podman.outputs.registry-path }}
 
         for tag in "${tags[@]}"; do
+          echo "Processing tag: $tag"
           for compression_format in "${compression_formats[@]}"; do
+            echo "Adding: ${{ steps.push-podman.outputs.registry-path }}-$tag-$compression_format"
             podman manifest add ${{ steps.push-podman.outputs.registry-path }} ${{ steps.push-podman.outputs.registry-path }}-$tag-$compression_format
           done
         done

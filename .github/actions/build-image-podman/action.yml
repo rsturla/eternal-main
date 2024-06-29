@@ -51,7 +51,7 @@ runs:
         BUILDER: ${{ inputs.builder }}
       run: |
         podman image ls
-        echo "image=${{ inputs.image-name }}" >> $GITHUB_OUTPUT
+        echo "image=localhost/${{ inputs.image-name }}" >> $GITHUB_OUTPUT
         echo "tags=${{ inputs.image-tags }}" >> $GITHUB_OUTPUT
-        digest=$(podman image inspect ${{ inputs.image-name }} --format '{{.Digest}}')
+        digest=$(podman image inspect localhost/${{ inputs.image-name }} --format '{{.Digest}}')
         echo "digest=$digest" >> $GITHUB_OUTPUT

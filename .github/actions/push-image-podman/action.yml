@@ -47,6 +47,7 @@ runs:
 
     - name: Push Image
       id: push-podman
+      shell: bash
       run: |
         IFS=' ' read -r -a compression_formats <<< ${{ inputs.compression-formats }}
         IFS=' ' read -r -a tags <<< ${{ inputs.image-tags }}
@@ -66,6 +67,7 @@ runs:
 
     - name: Create Manifest (and push it)
       id: push-manifest
+      shell: bash
       run: |
         IFS=' ' read -r -a compression_formats <<< ${{ inputs.compression-formats }}
         IFS=' ' read -r -a tags <<< ${{ inputs.image-tags }}

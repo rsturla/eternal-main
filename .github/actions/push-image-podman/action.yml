@@ -51,12 +51,12 @@ runs:
       run: |
         IFS=' ' read -ra compression_formats <<< "${{ inputs.compression-formats }}"
         IFS=' ' read -ra tags <<< "${{ inputs.image-tags }}"
-        tags=()
+        processed_tags=()
 
         for tag in "${tags[@]}"; do
           echo "Processing tag: $tag"
           image="${{ inputs.image-registry }}/${{ inputs.image-name }}:$tag"
-          tags+=($image)
+          processed_tags+=($image)
 
           for compression_format in "${compression_formats[@]}"; do
             echo "Tagging: $image as $image-$compression_format"
@@ -64,8 +64,8 @@ runs:
           done
         done
 
-        echo "registry-path=${tags[0]}" >> $GITHUB_OUTPUT
-        echo "tags=${tags[@]}" >> $GITHUB_OUTPUT
+        echo "registry-path=${processed_tags[0]}" >> $GITHUB_OUTPUT
+        echo "tags=${processed_tags[@]}" >> $GITHUB_OUTPUT
 
     - name: Create Manifest (and push it)
       id: push-manifest

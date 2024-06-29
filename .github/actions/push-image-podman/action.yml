@@ -83,6 +83,10 @@ runs:
         INTERMEDIARY_TAG_REFERENCE: ${{ steps.tag-and-push.outputs.intermediary-tag-reference }}
         MANIFEST_TAGS: ${{ inputs.manifest-tags }}
       run: |
+        IFS=' ' read -r -a SANITIZED_COMPRESSION_FORMATS <<< "${SANITIZED_COMPRESSION_FORMATS}"
+        IFS=' ' read -r -a MANIFEST_TAGS <<< "${MANIFEST_TAGS}"
+        IFS=' ' read -r -a COMPRESSION_FORMATS <<< "${COMPRESSION_FORMATS}"
+
         manifest_digests=()
         tagged_image_references=()
         for tag in "${MANIFEST_TAGS[@]}"; do

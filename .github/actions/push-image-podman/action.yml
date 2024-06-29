@@ -71,7 +71,7 @@ runs:
       shell: bash
       run: |
         IFS=' ' read -ra compression_formats <<< "${{ inputs.compression-formats }}"
-        IFS=' ' read -ra tags <<< "${{ inputs.image-tags }}"
+        IFS=' ' read -ra tags <<< "${{ steps.push-podman.outputs.tags }}"
 
         podman manifest create ${{ steps.push-podman.outputs.registry-path }}
 

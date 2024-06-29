@@ -71,15 +71,14 @@ runs:
       shell: bash
       run: |
         IFS=' ' read -ra compression_formats <<< "${{ inputs.compression-formats }}"
+        # tags includes the compression formats and registry
         IFS=' ' read -ra tags <<< "${{ steps.push-podman.outputs.tags }}"
 
         podman manifest create ${{ steps.push-podman.outputs.registry-path }}
 
         for tag in "${tags[@]}"; do
-          for compression_format in "${compression_formats[@]}"; do
-            echo "Annotating: ${{ inputs.image-registry }}/${{ inputs.image-name }}:${tag}-${compression_format}"
-            podman manifest add ${{ steps.push-podman.outputs.registry-path }} ${{ inputs.image-registry }}/${{ inputs.image-name }}:${tag}-${compression_format}
-          done
+          echo "Adding tag: $tag"
+          podman manifest add ${{ steps.push-podman.outputs.registry-path }} $tag
         done
 
         podman manifest push --all ${{ steps.push-podman.outputs.registry-path }}

@@ -78,7 +78,7 @@ runs:
 
           for format in "${compression_formats[@]}"; do
             full_image_reference="${tag_reference}-${format}"
-            echo "Adding to manifest: ${full_image_reference}"
+            echo "Adding image ${full_image_reference} to manifest ${tag_reference}"
             podman manifest add ${tag_reference} docker://${full_image_reference}
           done
 

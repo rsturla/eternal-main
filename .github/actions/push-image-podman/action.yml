@@ -112,6 +112,8 @@ runs:
       id: set-outputs
       shell: bash
       run: |
-        echo "registry-path=${{ steps.create-and-push-manifests.outputs.tagged-image-references[0] }}" >> $GITHUB_OUTPUT
+        IFS=' ' read -r -a TAGGED_IMAGE_REFERENCES <<< "${{ steps.create-and-push-manifests.outputs.tagged-image-references }}"
+
+        echo "registry-path=${TAGGED_IMAGE_REFERENCES[0]}" >> $GITHUB_OUTPUT
         echo "compression-formats=${{ inputs.compression-formats }}" >> $GITHUB_OUTPUT
         echo "digest=${{ steps.create-and-push-manifests.outputs.digest }}" >> $GITHUB_OUTPUT

@@ -9,10 +9,10 @@ ARG NVIDIA_AKMODS_IMAGE=ghcr.io/rsturla/akmods/nvidia
 ARG NVIDIA_AKMODS_TAG=${FEDORA_VERSION}
 
 
-FROM ${NVIDIA_AKMODS_IMAGE}:${NVIDIA_AKMODS_TAG} as akmods-nvidia
+FROM busybox:latest as akmods-nvidia
 
 
-FROM ${BASE_IMAGE_FULL} as base-nvidia
+FROM busybox:latest as base-nvidia
 
 ARG FEDORA_VERSION
 

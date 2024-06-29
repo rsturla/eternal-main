@@ -53,6 +53,7 @@ runs:
       env:
         COMPRESSION_FORMATS: ${{ inputs.compression-formats }}
         IMAGE_NAME: ${{ inputs.image-name }}
+        IMAGE_REGISTRY: ${{ inputs.image-registry }}
         INTERMEDIARY_TAG: ${{ inputs.intermediary-tag }}
       run: |
         IFS=' ' read -r -a compression_formats_array <<< "${COMPRESSION_FORMATS}"
@@ -61,7 +62,7 @@ runs:
         for format in "${compression_formats_array[@]}"; do
           sanitized_format=$(echo "$format" | tr ':' '-')
           sanitized_compression_formats+=("$sanitized_format")
-          full_tag="${{ inputs.image-registry }}/${IMAGE_NAME}:${INTERMEDIARY_TAG}-${sanitized_format}"
+          full_tag="${IMAGE_REGISTRY}/${IMAGE_NAME}:${INTERMEDIARY_TAG}-${sanitized_format}"
           echo "Tagging: ${IMAGE_NAME}:${INTERMEDIARY_TAG} as ${full_tag} with ${format} compression"
           podman tag "${IMAGE_NAME}:${INTERMEDIARY_TAG}" "${full_tag}"
           podman push --compression-format="$format" "${full_tag}"
@@ -77,20 +78,21 @@ runs:
         COMPRESSION_FORMATS: ${{ inputs.compression-formats }}
         SANITIZED_COMPRESSION_FORMATS: ${{ steps.tag-and-push.outputs.sanitized-compression-formats }}
         IMAGE_NAME: ${{ inputs.image-name }}
+        IMAGE_REGISTRY: ${{ inputs.image-registry }}
         INTERMEDIARY_TAG: ${{ inputs.intermediary-tag }}
         TAGGED_IMAGE_REFERENCE: ${{ steps.tag-and-push.outputs.tagged-image-reference }}
         MANIFEST_TAGS: ${{ inputs.manifest-tags }}
       run: |
         manifest_digests=()
         for tag in "${MANIFEST_TAGS}"; do
-          podman manifest create ${TAG}
+          podman manifest create ${IMAGE_REGISTRY}/${IMAGE_NAME}:${tag}
 
           for format in ${SANITIZED_COMPRESSION_FORMATS}; do
-            podman manifest add ${TAG} ${TAG}-${format}
+            podman manifest add ${IMAGE_REGISTRY}/${IMAGE_NAME}:${INTERMEDIARY_TAG}-${format} ${IMAGE_REGISTRY}/${IMAGE_NAME}:${tag}
           done
 
-          podman manifest push --all ${TAG}
-          manifest_digests+=($(skopeo inspect docker://${TAG} --format '{{.Digest}}'))
+          podman manifest push --all ${IMAGE_REGISTRY}/${IMAGE_NAME}:${tag}
+          manifest_digests+=($(skopeo inspect docker://${IMAGE_REGISTRY}/${IMAGE_NAME}:${tag} --format '{{.Digest}}'))
         done
 
         echo "digest=${manifest_digests[0]}" >> $GITHUB_OUTPUT

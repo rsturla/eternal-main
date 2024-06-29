@@ -84,10 +84,11 @@ runs:
         MANIFEST_TAGS: ${{ inputs.manifest-tags }}
       run: |
         manifest_digests=()
-        for tag in "${MANIFEST_TAGS}"; do
+        for tag in "${MANIFEST_TAGS[@]}"; do
           podman manifest create ${IMAGE_REGISTRY}/${IMAGE_NAME}:${tag}
 
           for format in ${SANITIZED_COMPRESSION_FORMATS}; do
+            echo "Adding ${IMAGE_REGISTRY}/${IMAGE_NAME}:${INTERMEDIARY_TAG}-${format} to ${IMAGE_REGISTRY}/${IMAGE_NAME}:${tag}"
             podman manifest add ${IMAGE_REGISTRY}/${IMAGE_NAME}:${INTERMEDIARY_TAG}-${format} ${IMAGE_REGISTRY}/${IMAGE_NAME}:${tag}
           done
 

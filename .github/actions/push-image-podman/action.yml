@@ -79,7 +79,7 @@ runs:
           echo "Adding tag: $tag"
           for compression_format in "${compression_formats[@]}"; do
             echo "Adding tag: ${tag}-${compression_format}"
-            podman manifest add $manifest_name ${tag}-${compression_format}
+            podman manifest add $manifest_name docker://${tag}-${compression_format}
           done
         done
 

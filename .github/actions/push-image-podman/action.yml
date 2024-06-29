@@ -54,13 +54,11 @@ runs:
         processed_tags=()
 
         for tag in "${tags[@]}"; do
-          echo "Processing tag: $tag"
-
           for compression_format in "${compression_formats[@]}"; do
             echo "Tagging: ${{ inputs.image-name }}:${tag} as ${{ inputs.image-registry }}/${{ inputs.image-name }}:${tag}-${compression_format}"
             podman tag ${{ inputs.image-name }}:${tag} ${{ inputs.image-registry }}/${{ inputs.image-name }}:${tag}-${compression_format}
+            processed_tags+=("${{ inputs.image-registry }}/${{ inputs.image-name }}:${tag}-${compression_format}")
           done
-          processed_tags+=("${{ inputs.image-registry }}/${{ inputs.image-name }}:${tag}")
         done
 
         echo "registry-path=${processed_tags[0]}" >> $GITHUB_OUTPUT
@@ -78,11 +76,7 @@ runs:
         podman manifest create $manifest_name
 
         for tag in "${tags[@]}"; do
-          echo "Adding tag: $tag"
-          for compression_format in "${compression_formats[@]}"; do
-            echo "Adding tag: $tag-$compression_format"
-            podman manifest add $manifest_name $tag-$compression_format
-          done
+          podman manifest add $manifest_name $tag
         done
 
         podman manifest push --all $manifest_name

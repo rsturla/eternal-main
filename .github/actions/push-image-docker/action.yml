@@ -57,7 +57,7 @@ runs:
         done
 
         docker image ls
-        image="${{ inputs.image-registry }}/${{ inputs.image-name }}:${TAGS[0]}"
+        image="${{ inputs.image-name }}:${TAGS[0]}"
         echo "FROM ${image}" > /tmp/Dockerfile
 
         # Push the image with each compression format

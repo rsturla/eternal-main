@@ -21,7 +21,7 @@ inputs:
   compression-formats:
     description: 'A comma-separated list of compression formats to use'
     required: false
-    default: 'gzip'
+    default: 'gzip,zstd'
 
 
 outputs:

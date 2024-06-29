@@ -1,0 +1,56 @@
+name: Build Image (Podman)
+
+inputs:
+  context:
+    description: 'The build context directory'
+    required: false
+    default: '.'
+  dockerfile:
+    description: 'The path to the Dockerfile to build'
+    required: false
+    default: 'Containerfile'
+  image-name:
+    description: 'The name of the image to build'
+    required: true
+  image-tags:
+    description: 'The tags to apply to the image'
+    required: true
+  build-args:
+    description: 'Build arguments to pass to the Docker build'
+    required: false
+    default: ''
+
+outputs:
+  image:
+    description: 'The name of the built image'
+    value: ${{ steps.set-outputs.outputs.image }}
+  tags:
+    description: 'The tags applied to the built image'
+    value: ${{ steps.set-outputs.outputs.tags }}
+  digest:
+    description: 'The digest of the built image'
+    value: ${{ steps.set-outputs.outputs.digest }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Build
+      id: build-podman
+      uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2
+      with:
+        context: ${{ inputs.context }}
+        containerfiles: ${{ inputs.dockerfile }}
+        image: ${{ inputs.image-name }}
+        tags: ${{ inputs.image-tags }}
+        build-args: ${{ inputs.build-args }}
+
+    - name: Set Outputs
+      id: set-outputs
+      shell: bash
+      env:
+        BUILDER: ${{ inputs.builder }}
+      run: |
+        echo "image=${{ inputs.image-name }}" >> $GITHUB_OUTPUT
+        echo "tags=${{ inputs.image-tags }}" >> $GITHUB_OUTPUT
+        digest=$(podman image inspect ${{ inputs.image-name }} --format '{{.Digest}}')
+        echo "digest=$digest" >> $GITHUB_OUTPUT

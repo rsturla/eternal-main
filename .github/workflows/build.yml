@@ -162,9 +162,8 @@ jobs:
 
       - name: Build Image
         id: build
-        uses: ./.github/actions/build-image
+        uses: ./.github/actions/build-image-podman
         with:
-          builder: docker
           context: .
           dockerfile: Containerfile.nvidia
           image-name: ${{ env.IMAGE_NAME }}
@@ -178,9 +177,8 @@ jobs:
 
       - name: Push Image
         id: push
-        uses: ./.github/actions/push-image
+        uses: ./.github/actions/push-image-podman
         with:
-          builder: ${{ steps.build.outputs.builder }}
           image-name: ${{ steps.build.outputs.image }}
           image-tags: ${{ steps.build.outputs.tags }}
           image-registry: ${{ env.IMAGE_REGISTRY }}

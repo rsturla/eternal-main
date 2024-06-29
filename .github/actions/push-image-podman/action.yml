@@ -85,7 +85,8 @@ runs:
           done
         done
 
-        podman manifest push --all ${manifest_reference} docker://${manifest_reference}
+        # Remove existing manifest list
+        podman manifest push --all=false ${manifest_reference} docker://${manifest_reference}
 
         manifest_digest=$(skopeo inspect docker://${manifest_reference} --format '{{.Digest}}')
         echo "digest=${manifest_digest}" >> $GITHUB_OUTPUT

@@ -150,12 +150,19 @@ runs:
       shell: bash
       env:
         MANIFEST_NAMES: ${{ steps.create-manifests.outputs.manifest_names }}
+        COMPRESSION_FORMATS: ${{ inputs.compression-formats }}
         IMAGE_FORMAT: ${{ inputs.image-format }}
       run: |
         IFS=' ' read -r -a manifest_names_array <<< "${MANIFEST_NAMES}"
+        IFS=' ' read -r -a compression_formats_array <<< "${COMPRESSION_FORMATS}"
         manifest_digests=()
+        compression_format_flags=()
+        for compression in "${compression_formats_array[@]}"; do
+          compression_format_flags+=("--add-compression ${compression}")
+        done
+
         for manifest_name in "${manifest_names_array[@]}"; do
-          podman manifest push --all=false --format="${IMAGE_FORMAT}" ${manifest_name}
+          podman manifest push --all=false --format="${IMAGE_FORMAT}" ${compression_format_flags[@]} ${manifest_name}
           manifest_digests+=($(skopeo inspect docker://${manifest_name} --format '{{.Digest}}'))
         done
         echo "digest=${manifest_digests[0]}" >> $GITHUB_OUTPUT

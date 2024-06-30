@@ -26,7 +26,7 @@ inputs:
     description: 'A unique identifier to use for the compression-specific image tags'
     required: false
   image-format:
-    description: 'The format of the image to be pushed.  Either oci or v2s2'
+    description: 'The format of the image to be pushed.'
     default: 'oci'
 
 outputs:
@@ -83,7 +83,7 @@ runs:
         sanitized_compression_formats=()
         tagged_compression_images=()
         for format in "${compression_formats_array[@]}"; do
-          sanitized_format=$(echo "$format" | tr ':' '-')
+          sanitized_format=$(echo "${format}" | tr ':' '-')
           sanitized_compression_formats+=("$sanitized_format")
           full_tag="${COMPRESSION_IMAGE_FULL}-${sanitized_format}"
           echo "Tagging: ${IMAGE_NAME}:${COMPRESSION_TAG} as ${full_tag} with ${format} compression"
@@ -107,7 +107,7 @@ runs:
           format="${compression_formats_array[$i]}"
           tagged_compression_image="${tagged_compression_images_array[$i]}"
           echo "Pushing: ${tagged_compression_image} with ${format} compression"
-          podman push --format="${IMAGE_FORMAT}" --compression-format="$format" "${tagged_compression_image}"
+          podman push --format="${IMAGE_FORMAT}" --compression-format="${format}" "${tagged_compression_image}"
         done
 
     - name: Create Manifests

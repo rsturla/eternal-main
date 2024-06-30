@@ -162,7 +162,7 @@ runs:
         done
 
         for manifest_name in "${manifest_names_array[@]}"; do
-          podman manifest push --all=false --format="${IMAGE_FORMAT}" ${compression_format_flags[@]} ${manifest_name}
+          podman manifest push --all --format="${IMAGE_FORMAT}" ${compression_format_flags[@]} ${manifest_name}
           manifest_digests+=($(skopeo inspect docker://${manifest_name} --format '{{.Digest}}'))
         done
         echo "digest=${manifest_digests[0]}" >> $GITHUB_OUTPUT

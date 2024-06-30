@@ -22,4 +22,5 @@ retry() {
   return 0
 }
 
-export -f retry
+# Call the retry function with the arguments passed to the script
+retry "$@"

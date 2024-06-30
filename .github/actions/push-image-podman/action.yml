@@ -90,21 +90,21 @@ runs:
         echo "sanitized_compression_formats=${sanitized_compression_formats[*]}" >> $GITHUB_OUTPUT
         echo "tagged_compression_images=${tagged_compression_images[*]}" >> $GITHUB_OUTPUT
 
-    # - name: Push Tagged Images
-    #   id: push-tagged-images
-    #   shell: bash
-    #   env:
-    #     COMPRESSION_FORMATS: ${{ inputs.compression-formats }}
-    #     TAGGED_COMPRESSION_IMAGES: ${{ steps.tag-image.outputs.tagged_compression_images }}
-    #   run: |
-    #     IFS=' ' read -r -a compression_formats_array <<< "${COMPRESSION_FORMATS}"
-    #     IFS=' ' read -r -a tagged_compression_images_array <<< "${TAGGED_COMPRESSION_IMAGES}"
-    #     for i in "${!compression_formats_array[@]}"; do
-    #       format="${compression_formats_array[$i]}"
-    #       tagged_compression_image="${tagged_compression_images_array[$i]}"
-    #       echo "Pushing: ${tagged_compression_image} with ${format} compression"
-    #       podman push --compression-format="$format" "${tagged_compression_image}"
-    #     done
+    - name: Push Tagged Images
+      id: push-tagged-images
+      shell: bash
+      env:
+        COMPRESSION_FORMATS: ${{ inputs.compression-formats }}
+        TAGGED_COMPRESSION_IMAGES: ${{ steps.tag-image.outputs.tagged_compression_images }}
+      run: |
+        IFS=' ' read -r -a compression_formats_array <<< "${COMPRESSION_FORMATS}"
+        IFS=' ' read -r -a tagged_compression_images_array <<< "${TAGGED_COMPRESSION_IMAGES}"
+        for i in "${!compression_formats_array[@]}"; do
+          format="${compression_formats_array[$i]}"
+          tagged_compression_image="${tagged_compression_images_array[$i]}"
+          echo "Pushing: ${tagged_compression_image} with ${format} compression"
+          podman push --compression-format="$format" "${tagged_compression_image}"
+        done
 
     - name: Create Manifests
       id: create-manifests
@@ -150,7 +150,7 @@ runs:
         IFS=' ' read -r -a manifest_names_array <<< "${MANIFEST_NAMES}"
         manifest_digests=()
         for manifest_name in "${manifest_names_array[@]}"; do
-          podman manifest push --all ${manifest_name}
+          podman manifest push --all=false ${manifest_name}
           manifest_digests+=($(skopeo inspect docker://${manifest_name} --format '{{.Digest}}'))
         done
         echo "digest=${manifest_digests[0]}" >> $GITHUB_OUTPUT

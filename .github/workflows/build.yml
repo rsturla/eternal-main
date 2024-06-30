@@ -84,7 +84,7 @@ jobs:
           registry-username: ${{ github.actor }}
           registry-password: ${{ secrets.GITHUB_TOKEN }}
           compression-formats: 'gzip zstd:chunked'
-          intermediary-tag: ${{ steps.generate-image-tags.outputs.primary-tag }}
+          compression-tag: ${{ steps.generate-image-tags.outputs.primary-tag }}
 
       - name: Sign Image
         uses: ./.github/actions/sign-image

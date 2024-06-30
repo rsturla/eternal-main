@@ -103,7 +103,7 @@ runs:
           format="${compression_formats_array[$i]}"
           tagged_compression_image="${tagged_compression_images_array[$i]}"
           echo "Pushing: ${tagged_compression_image} with ${format} compression"
-          podman push --compression-format="$format" "${tagged_compression_image}"
+          podman push --format=v2s2 --compression-format="$format" "${tagged_compression_image}"
         done
 
     - name: Create Manifests

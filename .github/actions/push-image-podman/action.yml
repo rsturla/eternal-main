@@ -27,7 +27,7 @@ inputs:
     required: false
   image-format:
     description: 'The format of the image to be pushed.  Either oci or v2s2'
-    default: 'v2s2'
+    default: 'oci'
 
 outputs:
   registry-path:

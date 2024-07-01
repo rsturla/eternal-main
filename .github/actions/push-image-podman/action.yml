@@ -169,7 +169,7 @@ runs:
         for manifest_name in "${manifest_names_array[@]}"; do
           echo "Pushing manifest: ${manifest_name}"
           podman manifest inspect ${manifest_name}
-          ${GITHUB_ACTION_PATH}/retry.sh ${RETRIES} podman manifest push --all --format="${IMAGE_FORMAT}" ${manifest_name}
+          ${GITHUB_ACTION_PATH}/retry.sh ${RETRIES} podman manifest push --all=false --format="${IMAGE_FORMAT}" ${manifest_name}
           manifest_digests+=($(skopeo inspect docker://${manifest_name} --format '{{.Digest}}'))
         done
         echo "digest=${manifest_digests[0]}" >> $GITHUB_OUTPUT

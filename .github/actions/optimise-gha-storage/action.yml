@@ -84,8 +84,6 @@ runs:
               azure-cli \
               google-chrome-stable \
               firefox \
-              powershell \
-              microsoft-edge-stable \
               mono-devel
             sudo apt-get autoremove -y
             sudo apt-get clean

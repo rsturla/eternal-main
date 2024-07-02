@@ -1,0 +1,30 @@
+name: Sign Image
+
+on:
+  pull_request:
+
+jobs:
+  sign-image:
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_TO_SIGN: "ghcr.io/sigstore/cosign:v1.0.0"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@0d4c9c5ea7693da7b068278f7b52bda2a190a446 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Cosign
+        uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 # v3.5.0
+
+      - name: Sign Image
+        env:
+          SIGNING_KEY: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
+          COSIGN_EXPERIMENTAL: false
+        run: |
+          cosign sign -y --key env://$SIGNING_KEY $IMAGE_TO_SIGN

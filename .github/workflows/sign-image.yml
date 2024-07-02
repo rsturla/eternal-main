@@ -27,4 +27,4 @@ jobs:
           SIGNING_KEY: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
           COSIGN_EXPERIMENTAL: false
         run: |
-          cosign sign -y --key env://$SIGNING_KEY $IMAGE_TO_SIGN
+          cosign sign -y --key env://SIGNING_KEY $IMAGE_TO_SIGN

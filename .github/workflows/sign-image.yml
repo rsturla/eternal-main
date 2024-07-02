@@ -6,6 +6,9 @@ on:
 jobs:
   sign-image:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     env:
       IMAGE_TO_SIGN: "ghcr.io/rsturla/eternal-linux/main/kinoite:pr160-91478c5-40-zstd-chunked"
     steps:
@@ -37,5 +40,4 @@ jobs:
           IMAGE_NAME: ${{ steps.get-digest.outputs.NAME }}
           IMAGE_DIGEST: ${{ steps.get-digest.outputs.DIGEST }}
         run: |
-          echo $SIGNING_KEY | wc -c
           cosign sign -y --key env://SIGNING_KEY $IMAGE_NAME@$IMAGE_DIGEST

@@ -7,7 +7,7 @@ jobs:
   sign-image:
     runs-on: ubuntu-latest
     env:
-      IMAGE_TO_SIGN: "ghcr.io/sigstore/cosign:v1.0.0"
+      IMAGE_TO_SIGN: "ghcr.io/rsturla/eternal-linux/main/kinoite:pr160-91478c5-40-zstd-chunked"
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

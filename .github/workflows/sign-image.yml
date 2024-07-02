@@ -37,6 +37,7 @@ jobs:
         env:
           SIGNING_KEY: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
           COSIGN_EXPERIMENTAL: false
+          COSIGN_PASSWORD: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
           IMAGE_NAME: ${{ steps.get-digest.outputs.NAME }}
           IMAGE_DIGEST: ${{ steps.get-digest.outputs.DIGEST }}
         run: |

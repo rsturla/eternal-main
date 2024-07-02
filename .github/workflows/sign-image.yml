@@ -37,4 +37,5 @@ jobs:
           IMAGE_NAME: ${{ steps.get-digest.outputs.NAME }}
           IMAGE_DIGEST: ${{ steps.get-digest.outputs.DIGEST }}
         run: |
+          wc -c $SIGNING_KEY
           cosign sign -y --key env://SIGNING_KEY $IMAGE_NAME@$IMAGE_DIGEST

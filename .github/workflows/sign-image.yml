@@ -1,7 +1,11 @@
 name: Sign Image
 
 on:
-  pull_request:
+  workflow_dispatch:
+    inputs:
+      image:
+        description: 'The image to sign, including the tag'
+        required: true
 
 jobs:
   sign-image:
@@ -9,8 +13,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-    env:
-      IMAGE_TO_SIGN: "ghcr.io/rsturla/eternal-linux/main/kinoite:pr160-91478c5-40-zstd-chunked"
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -24,6 +26,8 @@ jobs:
 
       - name: Get digest
         id: get-digest
+        env:
+          IMAGE_TO_SIGN: ${{ inputs.image }}
         run: |
           digest=$(skopeo inspect docker://$IMAGE_TO_SIGN --format '{{.Digest}}')
           name=$(skopeo inspect docker://$IMAGE_TO_SIGN --format '{{.Name}}')

@@ -14,7 +14,8 @@ rpm-ostree install \
   just \
   openssl \
   tmux \
-  zsh
+  zsh \
+  zstd
 
 # Remove unwanted desktop icons
 rm /usr/share/applications/htop.desktop

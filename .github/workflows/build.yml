@@ -16,7 +16,7 @@ env:
 
 jobs:
   build-base:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -101,7 +101,7 @@ jobs:
 
 
   build-nvidia:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build-base
     if: ${{ !cancelled() }}
     strategy:

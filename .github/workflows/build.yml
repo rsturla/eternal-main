@@ -64,7 +64,7 @@ jobs:
         id: build
         uses: ./.github/actions/build-image
         with:
-          builder: docker
+          builder: podman
           context: .
           dockerfile: Containerfile
           image-name: ${{ env.IMAGE_NAME }}
@@ -85,6 +85,7 @@ jobs:
           image-registry: ${{ env.IMAGE_REGISTRY }}
           registry-username: ${{ github.actor }}
           registry-password: ${{ secrets.GITHUB_TOKEN }}
+          compression-formats: gzip zstd:chunked
 
       - name: Sign Image
         uses: ./.github/actions/sign-image
@@ -164,7 +165,7 @@ jobs:
         id: build
         uses: ./.github/actions/build-image
         with:
-          builder: docker
+          builder: podman
           context: .
           dockerfile: Containerfile.nvidia
           image-name: ${{ env.IMAGE_NAME }}

@@ -64,7 +64,6 @@ jobs:
         id: build
         uses: ./.github/actions/build-image
         with:
-          builder: podman
           context: .
           dockerfile: Containerfile
           image-name: ${{ env.IMAGE_NAME }}
@@ -79,7 +78,7 @@ jobs:
         id: push
         uses: ./.github/actions/push-image
         with:
-          builder: ${{ steps.build.outputs.builder }}
+          builder: podman
           image-name: ${{ steps.build.outputs.image }}
           image-tags: ${{ steps.build.outputs.tags }}
           image-registry: ${{ env.IMAGE_REGISTRY }}
@@ -165,7 +164,6 @@ jobs:
         id: build
         uses: ./.github/actions/build-image
         with:
-          builder: podman
           context: .
           dockerfile: Containerfile.nvidia
           image-name: ${{ env.IMAGE_NAME }}
@@ -181,7 +179,7 @@ jobs:
         id: push
         uses: ./.github/actions/push-image
         with:
-          builder: ${{ steps.build.outputs.builder }}
+          builder: podman
           image-name: ${{ steps.build.outputs.image }}
           image-tags: ${{ steps.build.outputs.tags }}
           image-registry: ${{ env.IMAGE_REGISTRY }}

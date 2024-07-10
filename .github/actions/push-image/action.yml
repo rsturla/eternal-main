@@ -22,6 +22,9 @@ inputs:
     description: 'The password to authenticate with the registry'
     required: false
     default: ${{ github.token }}
+  compression-formats:
+    required: true
+    default: gzip
 
 outputs:
   registry-path:
@@ -37,13 +40,14 @@ runs:
     - name: Push (Podman)
       if: ${{ inputs.builder == 'podman' }}
       id: push-podman
-      uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2
+      uses: p5/push-to-registry@support-multiple-compression-formats
       with:
         image: ${{ inputs.image-name }}
         tags: ${{ inputs.image-tags }}
         registry: ${{ inputs.image-registry }}
         username: ${{ inputs.registry-username }}
         password: ${{ inputs.registry-password }}
+        compression-formats: ${{ inputs.compression-formats }}
 
     - name: Login (Docker)
       if: ${{ inputs.builder == 'docker' }}

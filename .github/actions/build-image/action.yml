@@ -1,4 +1,4 @@
-name: Build Image
+name: Build Image (Podman)
 
 inputs:
   context:
@@ -19,10 +19,6 @@ inputs:
     description: 'Build arguments to pass to the Docker build'
     required: false
     default: ''
-  builder:
-    description: 'The name of the builder to use (docker or podman)'
-    required: false
-    default: 'podman'
 
 outputs:
   image:
@@ -34,51 +30,20 @@ outputs:
   digest:
     description: 'The digest of the built image'
     value: ${{ steps.set-outputs.outputs.digest }}
-  builder:
-    description: 'The builder used to build the image'
-    value: ${{ inputs.builder }}
 
 runs:
   using: 'composite'
   steps:
-    - name: Build (Podman)
-      if: ${{ inputs.builder == 'podman' }}
+    - name: Build
       id: build-podman
       uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2
       with:
         context: ${{ inputs.context }}
         containerfiles: ${{ inputs.dockerfile }}
-        image: ${{ inputs.image-name }}
+        image: localhost/${{ inputs.image-name }}
         tags: ${{ inputs.image-tags }}
         build-args: ${{ inputs.build-args }}
-
-    - name: Generate Tags (Docker)
-      if: ${{ inputs.builder == 'docker' }}
-      id: generate-image-tags-docker
-      shell: bash
-      run: |
-        # Reading space-separated list into an array
-        IFS=' ' read -r -a tag_array <<< "${{ inputs.image-tags }}"
-
-        # Iterate over all tag inputs and prepend the image name
-        tags=""
-        for tag in "${tag_array[@]}"; do
-          tags+="${{ inputs.image-name }}:$tag, "
-        done
-        # Remove trailing comma and space
-        tags="${tags%, }"
-        echo "tags=$tags" >> $GITHUB_OUTPUT
-
-    - name: Build (Docker)
-      if: ${{ inputs.builder == 'docker' }}
-      id: build-docker
-      uses: docker/build-push-action@15560696de535e4014efeff63c48f16952e52dd1 # v6
-      with:
-        context: ${{ inputs.context }}
-        file: ${{ inputs.dockerfile }}
-        tags: ${{ steps.generate-image-tags-docker.outputs.tags }}
-        build-args: ${{ inputs.build-args }}
-        push: false
+        oci: false
 
     - name: Set Outputs
       id: set-outputs
@@ -86,12 +51,8 @@ runs:
       env:
         BUILDER: ${{ inputs.builder }}
       run: |
+        podman image ls
         echo "image=${{ inputs.image-name }}" >> $GITHUB_OUTPUT
-        if [ "$BUILDER" == "podman" ]; then
-          echo "tags=${{ inputs.image-tags }}" >> $GITHUB_OUTPUT
-          digest=$(podman image inspect ${{ inputs.image-name }} --format '{{.Digest}}')
-          echo "digest=$digest" >> $GITHUB_OUTPUT
-        else
-          echo "tags=${{ inputs.image-tags }}" >> $GITHUB_OUTPUT
-          echo "digest=${{ steps.build-docker.outputs.digest }}" >> $GITHUB_OUTPUT
-        fi
+        echo "tags=${{ inputs.image-tags }}" >> $GITHUB_OUTPUT
+        digest=$(podman image inspect ${{ steps.build-podman.outputs.image-with-tag }} --format '{{.Digest}}')
+        echo "digest=$digest" >> $GITHUB_OUTPUT

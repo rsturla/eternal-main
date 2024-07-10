@@ -16,7 +16,7 @@ env:
 
 jobs:
   build-base:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -62,9 +62,8 @@ jobs:
 
       - name: Build Image
         id: build
-        uses: ./.github/actions/build-image
+        uses: ./.github/actions/build-image-podman
         with:
-          builder: docker
           context: .
           dockerfile: Containerfile
           image-name: ${{ env.IMAGE_NAME }}
@@ -77,14 +76,15 @@ jobs:
 
       - name: Push Image
         id: push
-        uses: ./.github/actions/push-image
+        uses: ./.github/actions/push-image-podman
         with:
-          builder: ${{ steps.build.outputs.builder }}
           image-name: ${{ steps.build.outputs.image }}
-          image-tags: ${{ steps.build.outputs.tags }}
+          manifest-tags: ${{ steps.build.outputs.tags }}
           image-registry: ${{ env.IMAGE_REGISTRY }}
           registry-username: ${{ github.actor }}
           registry-password: ${{ secrets.GITHUB_TOKEN }}
+          compression-formats: 'gzip zstd:chunked'
+          compression-tag: ${{ steps.generate-image-tags.outputs.primary-tag }}
 
       - name: Sign Image
         uses: ./.github/actions/sign-image
@@ -100,7 +100,7 @@ jobs:
 
 
   build-nvidia:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build-base
     if: ${{ !cancelled() }}
     strategy:
@@ -162,9 +162,8 @@ jobs:
 
       - name: Build Image
         id: build
-        uses: ./.github/actions/build-image
+        uses: ./.github/actions/build-image-podman
         with:
-          builder: docker
           context: .
           dockerfile: Containerfile.nvidia
           image-name: ${{ env.IMAGE_NAME }}
@@ -178,14 +177,15 @@ jobs:
 
       - name: Push Image
         id: push
-        uses: ./.github/actions/push-image
+        uses: ./.github/actions/push-image-podman
         with:
-          builder: ${{ steps.build.outputs.builder }}
           image-name: ${{ steps.build.outputs.image }}
-          image-tags: ${{ steps.build.outputs.tags }}
+          manifest-tags: ${{ steps.build.outputs.tags }}
           image-registry: ${{ env.IMAGE_REGISTRY }}
           registry-username: ${{ github.actor }}
           registry-password: ${{ secrets.GITHUB_TOKEN }}
+          compression-formats: 'gzip zstd:chunked'
+          intermediary-tag: ${{ steps.generate-image-tags.outputs.primary-tag }}
 
       - name: Sign Image
         uses: ./.github/actions/sign-image

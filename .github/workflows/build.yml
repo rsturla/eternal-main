@@ -99,108 +99,108 @@ jobs:
           private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
 
 
-  build-nvidia:
-    runs-on: ubuntu-24.04
-    needs: build-base
-    if: ${{ !cancelled() }}
-    strategy:
-      fail-fast: false
-      matrix:
-        fedora-version: [39, 40, stable]
-        fedora-edition: [base, silverblue, kinoite]
-    permissions:
-      contents: read
-      packages: write
-      id-token: write
-    env:
-      IMAGE_NAME: eternal-linux/main/${{ matrix.fedora-edition }}
-      FEDORA_VERSION: ${{ matrix.fedora-version }}
-      COREOS_KERNEL: "N/A"
-    steps:
-      - name: Checkout
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+  # build-nvidia:
+  #   runs-on: ubuntu-24.04
+  #   needs: build-base
+  #   if: ${{ !cancelled() }}
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       fedora-version: [39, 40, stable]
+  #       fedora-edition: [base, silverblue, kinoite]
+  #   permissions:
+  #     contents: read
+  #     packages: write
+  #     id-token: write
+  #   env:
+  #     IMAGE_NAME: eternal-linux/main/${{ matrix.fedora-edition }}
+  #     FEDORA_VERSION: ${{ matrix.fedora-version }}
+  #     COREOS_KERNEL: "N/A"
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
-      - name: Optimize GHA Storage
-        uses: ./.github/actions/optimise-gha-storage
+  #     - name: Optimize GHA Storage
+  #       uses: ./.github/actions/optimise-gha-storage
 
-      - name: Generate Image Tags
-        uses: ./.github/actions/generate-image-tags
-        id: generate-image-tags
-        with:
-          image-name: ${{ env.IMAGE_REGISTRY}}/${{ env.IMAGE_NAME }}
-          major-version: ${{ env.FEDORA_VERSION }}
-          is-release: ${{ github.event_name != 'pull_request' }}
-          is-nvidia: true
+  #     - name: Generate Image Tags
+  #       uses: ./.github/actions/generate-image-tags
+  #       id: generate-image-tags
+  #       with:
+  #         image-name: ${{ env.IMAGE_REGISTRY}}/${{ env.IMAGE_NAME }}
+  #         major-version: ${{ env.FEDORA_VERSION }}
+  #         is-release: ${{ github.event_name != 'pull_request' }}
+  #         is-nvidia: true
 
-      - name: Get CoreOS Kernel Information
-        if: ${{ env.FEDORA_VERSION == 'stable' || env.FEDORA_VERSION == 'testing' }}
-        uses: ./.github/actions/get-coreos-kernel
-        id: get-coreos-kernel
-        with:
-          coreos-stream: ${{ env.FEDORA_VERSION }}
+  #     - name: Get CoreOS Kernel Information
+  #       if: ${{ env.FEDORA_VERSION == 'stable' || env.FEDORA_VERSION == 'testing' }}
+  #       uses: ./.github/actions/get-coreos-kernel
+  #       id: get-coreos-kernel
+  #       with:
+  #         coreos-stream: ${{ env.FEDORA_VERSION }}
 
-      - name: Set CoreOS Environment Variables
-        if: ${{ env.FEDORA_VERSION == 'stable' || env.FEDORA_VERSION == 'testing' }}
-        run: |
-          echo "COREOS_KERNEL=${{ steps.get-coreos-kernel.outputs.coreos-kernel-release }}" >> $GITHUB_ENV
-          echo "FEDORA_VERSION=${{ steps.get-coreos-kernel.outputs.coreos-repo-version }}" >> $GITHUB_ENV
+  #     - name: Set CoreOS Environment Variables
+  #       if: ${{ env.FEDORA_VERSION == 'stable' || env.FEDORA_VERSION == 'testing' }}
+  #       run: |
+  #         echo "COREOS_KERNEL=${{ steps.get-coreos-kernel.outputs.coreos-kernel-release }}" >> $GITHUB_ENV
+  #         echo "FEDORA_VERSION=${{ steps.get-coreos-kernel.outputs.coreos-repo-version }}" >> $GITHUB_ENV
 
-      - name: Generate Base Image Tag
-        id: generate-base-image-tag
-        env:
-          BASE_FEDORA_VERSION: ${{ matrix.fedora-version }}
-          PR_NUMBER: ${{ github.event.number }}
-          IS_PR: ${{ github.event_name == 'pull_request' }}
-        run: |
-          GIT_SHA=$(git rev-parse --short HEAD)
-          if [ $IS_PR == 'true' ]; then
-            BASE_TAG="pr${PR_NUMBER}-${GIT_SHA}-${BASE_FEDORA_VERSION}"
-          else
-            BASE_TAG="${GIT_SHA}-${BASE_FEDORA_VERSION}"
-          fi
-          echo "base-tag=${BASE_TAG}" >> $GITHUB_OUTPUT
+  #     - name: Generate Base Image Tag
+  #       id: generate-base-image-tag
+  #       env:
+  #         BASE_FEDORA_VERSION: ${{ matrix.fedora-version }}
+  #         PR_NUMBER: ${{ github.event.number }}
+  #         IS_PR: ${{ github.event_name == 'pull_request' }}
+  #       run: |
+  #         GIT_SHA=$(git rev-parse --short HEAD)
+  #         if [ $IS_PR == 'true' ]; then
+  #           BASE_TAG="pr${PR_NUMBER}-${GIT_SHA}-${BASE_FEDORA_VERSION}"
+  #         else
+  #           BASE_TAG="${GIT_SHA}-${BASE_FEDORA_VERSION}"
+  #         fi
+  #         echo "base-tag=${BASE_TAG}" >> $GITHUB_OUTPUT
 
-      - name: Build Image
-        id: build
-        uses: ./.github/actions/build-image
-        with:
-          context: .
-          dockerfile: Containerfile.nvidia
-          image-name: ${{ env.IMAGE_NAME }}
-          image-tags: |
-            ${{ steps.generate-image-tags.outputs.tags }}
-          build-args: |
-            FEDORA_VERSION=${{ env.FEDORA_VERSION }}
-            FEDORA_EDITION=${{ matrix.fedora-edition }}
-            BASE_TAG=${{ steps.generate-base-image-tag.outputs.base-tag }}
-            NVIDIA_AKMODS_TAG=${{ matrix.fedora-version }}
+  #     - name: Build Image
+  #       id: build
+  #       uses: ./.github/actions/build-image
+  #       with:
+  #         context: .
+  #         dockerfile: Containerfile.nvidia
+  #         image-name: ${{ env.IMAGE_NAME }}
+  #         image-tags: |
+  #           ${{ steps.generate-image-tags.outputs.tags }}
+  #         build-args: |
+  #           FEDORA_VERSION=${{ env.FEDORA_VERSION }}
+  #           FEDORA_EDITION=${{ matrix.fedora-edition }}
+  #           BASE_TAG=${{ steps.generate-base-image-tag.outputs.base-tag }}
+  #           NVIDIA_AKMODS_TAG=${{ matrix.fedora-version }}
 
-      - name: Push Image
-        id: push
-        uses: ./.github/actions/push-image
-        with:
-          builder: podman
-          image-name: ${{ steps.build.outputs.image }}
-          image-tags: ${{ steps.build.outputs.tags }}
-          image-registry: ${{ env.IMAGE_REGISTRY }}
-          registry-username: ${{ github.actor }}
-          registry-password: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: Push Image
+  #       id: push
+  #       uses: ./.github/actions/push-image
+  #       with:
+  #         builder: podman
+  #         image-name: ${{ steps.build.outputs.image }}
+  #         image-tags: ${{ steps.build.outputs.tags }}
+  #         image-registry: ${{ env.IMAGE_REGISTRY }}
+  #         registry-username: ${{ github.actor }}
+  #         registry-password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Sign Image
-        uses: ./.github/actions/sign-image
-        if: github.event_name != 'pull_request'
-        with:
-          registry: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}
-          registry-provider: ghcr.io
-          registry-username: ${{ github.actor }}
-          registry-password: ${{ secrets.GITHUB_TOKEN }}
-          digest: ${{ steps.push.outputs.digest }}
-          private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
-          private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
+  #     - name: Sign Image
+  #       uses: ./.github/actions/sign-image
+  #       if: github.event_name != 'pull_request'
+  #       with:
+  #         registry: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}
+  #         registry-provider: ghcr.io
+  #         registry-username: ${{ github.actor }}
+  #         registry-password: ${{ secrets.GITHUB_TOKEN }}
+  #         digest: ${{ steps.push.outputs.digest }}
+  #         private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
+  #         private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
 
 
   check:
-    needs: [build-base, build-nvidia]
+    needs: [build-base]
     if: always()
     runs-on: ubuntu-latest
     steps:

@@ -24,7 +24,10 @@ jobs:
         fedora-edition: [base, silverblue, kinoite, cosmic]
         include:
           - fedora-edition: cosmic
-            source-image-registry: ghcr.io/${{ github.repository_owner }}/eternal-linux/base/cosmic
+            source-image-registry: ghcr.io/${{ github.repository_owner }}/eternal-linux/base
+        exclude:
+          - fedora-edition: cosmic
+            fedora-version: 39
     permissions:
       contents: read
       packages: write
@@ -114,7 +117,10 @@ jobs:
         fedora-edition: [base, silverblue, kinoite, cosmic]
         include:
           - fedora-edition: cosmic
-            source-image-registry: ghcr.io/${{ github.repository_owner }}/eternal-linux/base/cosmic
+            source-image-registry: ghcr.io/${{ github.repository_owner }}/eternal-linux/base
+        exclude:
+          - fedora-edition: cosmic
+            fedora-version: 39
     permissions:
       contents: read
       packages: write

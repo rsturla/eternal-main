@@ -113,7 +113,10 @@ jobs:
       fail-fast: false
       matrix:
         fedora-version: [39, 40, stable]
-        fedora-edition: [base, silverblue, kinoite]
+        fedora-edition: [base, silverblue, kinoite, cosmic]
+        exclude:
+          - fedora-version: 39
+            fedora-edition: cosmic
     permissions:
       contents: read
       packages: write

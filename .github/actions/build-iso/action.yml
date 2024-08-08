@@ -1,0 +1,85 @@
+name: Build Image
+
+inputs:
+  flatpak-manifest-list:
+    description: "The list of Flatpak packages to include in the image"
+    required: true
+  installer-version:
+    description: "The version of the Fedora installer to use"
+    required: true
+  image-registry:
+    description: "The registry to pull the image from"
+    required: true
+  image-name:
+    description: "The name of the image to build"
+    required: true
+  image-tag:
+    description: "The tag to apply to the image"
+    required: true
+
+outputs:
+  iso-file:
+    description: "The ISO file location"
+    value: ""
+  checksum-file:
+    description: "The checksum file location"
+    value: ""
+
+runs:
+  using: "composite"
+  steps:
+    - name: Get Flatpak dependencies
+      id: flatpak-dependencies
+      env:
+        IMAGE_FULL: ${{ inputs.image-registry }}/${{ inputs.image-name }}:${{ inputs.image-tag }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        IMAGE="${IMAGE_FULL}"
+
+        # Create temporary directory
+        TEMP_FLATPAK_INSTALL_DIR=$(mktemp -d -p /tmp flatpak-XXXXXX)
+
+        # Read the list of Flatpak packages from the manifest
+        FLATPAK_REFS=()
+        while IFS= read -r line; do
+          FLATPAK_REFS+=("$line")
+        done < "${{ inputs.flatpak-manifest-list }}"
+
+        # Generate installation script
+        cat <<EOF > "${TEMP_FLATPAK_INSTALL_DIR}/install-flatpaks.sh"
+        mkdir -p /flatpak/flatpak /flatpak/triggers
+        mkdir /var/tmp
+        chmod -R 1777 /var/tmp
+        flatpak config --system --set languages "*"
+        flatpak remote add --system flathub https://flathub.org/repo/flathub.flatpakrepo
+        flatpak install --system -y flathub ${FLATPAK_REFS[@]}
+        ostree refs --repo=\${FLATPAK_SYSTEM_DIR}/repo | grep '^deploy/' | grep -v 'org\.freedesktop\.Platform\.openh264' | sed 's/^deploy\///g' > /output/flatpaks-with-deps
+        EOF
+        docker run --rm --privileged \
+          --entrypoint /bin/bash \
+          -e FLATPAK_SYSTEM_DIR=/flatpak/flatpak \
+          -e FLATPAK_TRIGGERS_DIR=/flatpak/triggers \
+          -v ${FLATPAK_REFS_DIR}:/output \
+          -v ${TEMP_FLATPAK_INSTALL_DIR}:/temp_flatpak_install_dir \
+          ${IMAGE} /temp_flatpak_install_dir/install-flatpaks.sh
+        docker rmi ${IMAGE}
+
+    - name: Build ISO
+      uses: jasonn3/build-container-installer@v1.2.2
+      id: build-iso
+      with:
+        arch: x86_64
+        image_name: ${{ inputs.image-name }}
+        image_repo: ${{ inputs.image-registry }}
+        image_tag: ${{ inputs.image-tag }}
+        variant: Kinoite
+        version: ${{ inputs.installer-version }}
+        secure_boot_key_url: "https://github.com/rsturla/akmods/raw/main/_certs/public_key.der"
+        enrollment_password: "password"
+        iso_name: "${{ inputs.image-name }}-${{ inputs.installer-version }}-${{ inputs.image-tag }}.iso"
+        enable_cache_dnf: false
+        enable_cache_skopeo: false
+        flatpak_remote_refs_dir: ${{ inputs.flatpak-manifest-list }}
+        enable_flatpak_dependencies: false

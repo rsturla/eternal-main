@@ -1,0 +1,22 @@
+name: Build ISOs
+
+on:
+  pull_request:
+    paths:
+      - ".github/actions/build-iso/**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build ISO
+        uses: ./.github/actions/build-iso
+        with:
+          flatpak-manifest-list: ./flatpaks.txt
+          installer-version: 40
+          image-registry: ghcr.io/rsturla/eternal-linux/main
+          image-name: silverblue
+          image-tag: 40

@@ -25,6 +25,9 @@ jobs:
         include:
           - fedora-edition: cosmic
             image-registry: ghcr.io/rsturla/eternal-linux/base
+        exclude:
+          - fedora-version: 39
+            fedora-edition: cosmic
     permissions:
       contents: read
       packages: write

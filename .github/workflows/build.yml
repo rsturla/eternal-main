@@ -21,7 +21,10 @@ jobs:
       fail-fast: false
       matrix:
         fedora-version: [39, 40, stable]
-        fedora-edition: [base, silverblue, kinoite]
+        fedora-edition: [base, silverblue, kinoite, cosmic]
+        include:
+          - fedora-edition: cosmic
+            image-registry: ghcr.io/rsturla/eternal-linux/base
     permissions:
       contents: read
       packages: write
@@ -71,6 +74,7 @@ jobs:
           image-tags: |
             ${{ steps.generate-image-tags.outputs.tags }}
           build-args: |
+            IMAGE_REGISTRY=${{ env.IMAGE_REGISTRY }}
             FEDORA_VERSION=${{ env.FEDORA_VERSION }}
             FEDORA_EDITION=${{ matrix.fedora-edition }}
             COREOS_KERNEL=${{ env.COREOS_KERNEL }}
@@ -97,7 +101,6 @@ jobs:
           digest: ${{ steps.push.outputs.digest }}
           private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
           private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
-
 
   build-nvidia:
     runs-on: ubuntu-latest
@@ -198,7 +201,6 @@ jobs:
           digest: ${{ steps.push.outputs.digest }}
           private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
           private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
-
 
   check:
     needs: [build-base, build-nvidia]

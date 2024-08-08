@@ -34,7 +34,7 @@ runs:
         IMAGE_FULL: ${{ inputs.image-registry }}/${{ inputs.image-name }}:${{ inputs.image-tag }}
       shell: bash
       run: |
-        set -euo pipefail
+        set -euox pipefail
 
         IMAGE="${IMAGE_FULL}"
 
@@ -80,7 +80,7 @@ runs:
         version: ${{ inputs.installer-version }}
         secure_boot_key_url: "https://github.com/rsturla/akmods/raw/main/_certs/public_key.der"
         enrollment_password: "password"
-        iso_name: "${{ inputs.image-name }}-${{ inputs.installer-version }}-${{ inputs.image-tag }}.iso"
+        iso_name: "${{ inputs.image-name }}-${{ inputs.image-tag }}.iso"
         enable_cache_dnf: false
         enable_cache_skopeo: false
         flatpak_remote_refs_dir: ${{ inputs.flatpak-manifest-list }}

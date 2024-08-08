@@ -74,7 +74,7 @@ jobs:
           image-tags: |
             ${{ steps.generate-image-tags.outputs.tags }}
           build-args: |
-            ${{ matrix.image-registry != null && 'IMAGE_REGISTRY=' + matrix.image-registry || '' }}
+            ${{ matrix.image-registry && format('IMAGE_REGISTRY={0}', matrix.image-registry) || '' }}
             FEDORA_VERSION=${{ env.FEDORA_VERSION }}
             FEDORA_EDITION=${{ matrix.fedora-edition }}
             COREOS_KERNEL=${{ env.COREOS_KERNEL }}

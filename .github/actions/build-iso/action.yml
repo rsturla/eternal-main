@@ -73,6 +73,8 @@ runs:
         cat ${FLATPAK_REFS_DIR}/flatpaks-with-deps
         wc -l ${FLATPAK_REFS_DIR}/flatpaks-with-deps
 
+        echo "FLATPAK_REFS_DIR:${FLATPAK_REFS_DIR}" >> $GITHUB_OUTPUT
+
     - name: Build ISO
       uses: rsturla/eternal-iso-builder@cleanup-action
       id: build-iso
@@ -88,5 +90,5 @@ runs:
         iso_name: "${{ inputs.image-name }}-${{ inputs.image-tag }}.iso"
         enable_cache_dnf: false
         enable_cache_skopeo: false
-        flatpak_remote_refs_dir: ${{ inputs.flatpak-manifest-list }}
+        flatpak_remote_refs_dir: ${{ steps.flatpak-dependencies.outputs.FLATPAK_REFS_DIR }}
         enable_flatpak_dependencies: false

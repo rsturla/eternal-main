@@ -18,12 +18,15 @@ inputs:
     required: true
 
 outputs:
+  iso-name:
+    description: "The name of the ISO file"
+    value: ${{ steps.build-iso.outputs.iso_name }}
   iso-file:
     description: "The ISO file location"
-    value: ""
+    value: ${{ steps.build-iso.outputs.iso_path }}
   checksum-file:
     description: "The checksum file location"
-    value: ""
+    value: ${{ steps.build-iso.outputs.checksum_path }}-CHECKSUM
 
 runs:
   using: "composite"

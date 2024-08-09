@@ -14,9 +14,22 @@ jobs:
 
       - name: Build ISO
         uses: ./.github/actions/build-iso
+        id: build
         with:
           flatpak-manifest-list: ./flatpaks.txt
           installer-version: 40
           image-registry: ghcr.io/rsturla/eternal-linux/main
           image-name: silverblue
           image-tag: 40
+
+      - name: Upload ISO to GitHub
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.build.outputs.iso-name }}-abc
+          path: |
+            ${{ steps.build.outputs.iso-file }}
+            ${{ steps.build.outputs.checksum-file }}
+          if-no-files-found: error
+          retention-days: 5
+          compression-level: 0
+          overwrite: true

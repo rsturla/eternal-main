@@ -48,6 +48,9 @@ jobs:
             cat "${manifest}" >> "${FLATPAK_REFS_DIR}/flatpaks.txt"
           done
 
+          echo "Flatpak manifests combined into ${FLATPAK_REFS_DIR}/flatpaks.txt"
+          cat "${FLATPAK_REFS_DIR}/flatpaks.txt"
+
           # Read the list of Flatpak packages from the manifest
           FLATPAK_REFS=()
           while IFS= read -r line; do

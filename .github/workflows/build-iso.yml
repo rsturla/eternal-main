@@ -5,6 +5,10 @@ on:
     paths:
       - ".github/actions/build-iso/**"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}-iso
+  cancel-in-progress: true
+
 jobs:
   build:
     uses: ./.github/workflows/_build-iso.yml

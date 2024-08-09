@@ -19,3 +19,6 @@ rpm-ostree install \
 
 # Remove unwanted desktop icons
 rm /usr/share/applications/htop.desktop
+
+# Setup Git LFS
+git lfs install

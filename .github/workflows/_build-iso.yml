@@ -57,9 +57,7 @@ jobs:
           flatpak config --system --set languages "*"
           flatpak remote-add --system flathub https://flathub.org/repo/flathub.flatpakrepo
           flatpak install --system -y flathub ${FLATPAK_REFS[@]}
-          ostree refs --repo=\${FLATPAK_SYSTEM_DIR}/repo | grep '^deploy/' | grep -v 'org\.freedesktop\.Platform\.openh264' | sed 's/^deploy\///g' > /output/flatpaks_with_deps
-          cat /output/flatpaks_with_deps
-          wc -l /output/flatpaks_with_deps
+          ostree refs --repo=\${FLATPAK_SYSTEM_DIR}/repo | grep '^deploy/' | grep -v 'org\.freedesktop\.Platform\.openh264' | sed 's/^deploy\///g' > /output/flatpaks-with-deps
           EOF
           docker run --rm --privileged \
             --entrypoint /bin/bash \
@@ -69,10 +67,7 @@ jobs:
             -v ${TEMP_FLATPAK_INSTALL_DIR}:/temp_flatpak_install_dir \
             ${IMAGE} /temp_flatpak_install_dir/install-flatpaks.sh
           docker rmi ${IMAGE}
-          ls -la
-          ls -la ${FLATPAK_REFS_DIR}
           cat ${FLATPAK_REFS_DIR}/flatpaks-with-deps
-          wc -l ${FLATPAK_REFS_DIR}/flatpaks-with-deps
 
           echo "FLATPAK_REFS_DIR=${FLATPAK_REFS_DIR}" >> $GITHUB_OUTPUT
 

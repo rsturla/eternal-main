@@ -68,7 +68,7 @@ jobs:
           cat ${FLATPAK_REFS_DIR}/flatpaks-with-deps
           wc -l ${FLATPAK_REFS_DIR}/flatpaks-with-deps
 
-          echo "FLATPAK_REFS_DIR:${FLATPAK_REFS_DIR}" >> $GITHUB_OUTPUT
+          echo "FLATPAK_REFS_DIR=${FLATPAK_REFS_DIR}" >> $GITHUB_OUTPUT
 
       - name: Build ISO
         uses: jasonn3/build-container-installer@v1.2.2

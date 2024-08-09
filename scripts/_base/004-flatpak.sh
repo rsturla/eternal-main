@@ -8,8 +8,6 @@ wget -q https://dl.flathub.org/repo/flathub.flatpakrepo -P /usr/etc/flatpak/remo
 systemctl enable rpm-ostreed-automatic.timer
 
 systemctl enable flatpak-system-update.timer
-systemctl enable flatpak-system-manager.service
 systemctl enable setup-system-manager.service
 systemctl --global enable flatpak-user-update.timer
-systemctl --global enable flatpak-user-manager.service
 systemctl --global enable setup-user-manager.service

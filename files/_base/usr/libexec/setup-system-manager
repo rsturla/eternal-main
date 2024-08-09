@@ -2,7 +2,7 @@
 
 # Create a hash of files so we can decide if we need to run this script
 declare -a HASHED_LOCATIONS=(
-  "/usr/bin/setup-system-manager"
+  "/usr/libexec/setup-system-manager"
   "/usr/lib/systemd/system/setup-system-manager.service"
   "/etc/eternal/setup-manager/system.d"
 )

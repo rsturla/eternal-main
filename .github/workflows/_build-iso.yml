@@ -69,6 +69,8 @@ jobs:
             -v ${TEMP_FLATPAK_INSTALL_DIR}:/temp_flatpak_install_dir \
             ${IMAGE} /temp_flatpak_install_dir/install-flatpaks.sh
           docker rmi ${IMAGE}
+          ls -la
+          ls -la ${FLATPAK_REFS_DIR}
           cat ${FLATPAK_REFS_DIR}/flatpaks-with-deps
           wc -l ${FLATPAK_REFS_DIR}/flatpaks-with-deps
 

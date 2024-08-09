@@ -38,7 +38,8 @@ jobs:
 
           # Create temporary directory
           TEMP_FLATPAK_INSTALL_DIR=$(mktemp -d -p /tmp flatpak-XXXXXX)
-          FLATPAK_REFS_DIR=$(mktemp -d -p /tmp flatpak-refs-XXXXXX)
+          FLATPAK_REFS_DIR=./flatpak-refs
+          FLATPAK_REFS_DIR_ABS=$(realpath "${FLATPAK_REFS_DIR}")
           cp "${{ inputs.flatpak-manifest-list }}" "${FLATPAK_REFS_DIR}/flatpaks.txt"
 
           # Read the list of Flatpak packages from the manifest
@@ -63,7 +64,7 @@ jobs:
             --entrypoint /bin/bash \
             -e FLATPAK_SYSTEM_DIR=/flatpak/flatpak \
             -e FLATPAK_TRIGGERS_DIR=/flatpak/triggers \
-            -v ${FLATPAK_REFS_DIR}:/output \
+            -v ${FLATPAK_REFS_DIR_ABS}:/output \
             -v ${TEMP_FLATPAK_INSTALL_DIR}:/temp_flatpak_install_dir \
             ${IMAGE} /temp_flatpak_install_dir/install-flatpaks.sh
           docker rmi ${IMAGE}

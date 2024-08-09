@@ -69,7 +69,7 @@ runs:
         docker rmi ${IMAGE}
 
     - name: Build ISO
-      uses: jasonn3/build-container-installer@v1.2.2
+      uses: rsturla/eternal-iso-builder@cleanup-action
       id: build-iso
       with:
         arch: x86_64

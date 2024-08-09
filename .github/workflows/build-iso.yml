@@ -22,6 +22,11 @@ jobs:
           - 39-nvidia
           - 40-nvidia
           - stable-nvidia
+        exclude:
+          - image-name: cosmic
+            image-tag: 39
+          - image-name: cosmic
+            image-tag: 39-nvidia
     with:
       image-name: ${{ matrix.image-name }}
       image-registry: ghcr.io/rsturla/eternal-linux/main

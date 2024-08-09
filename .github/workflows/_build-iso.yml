@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
       - name: Get Flatpak dependencies
         id: flatpak-dependencies
@@ -80,7 +80,7 @@ jobs:
           echo "FLATPAK_REFS_DIR=${FLATPAK_REFS_DIR}" >> $GITHUB_OUTPUT
 
       - name: Build ISO
-        uses: jasonn3/build-container-installer@v1.2.2
+        uses: jasonn3/build-container-installer@ceccfc98ef73825152095431bfa85c796f174c7a # v1.2.2
         id: build-iso
         with:
           arch: x86_64
@@ -98,7 +98,7 @@ jobs:
           enable_flatpak_dependencies: false
 
       - name: Upload ISO to GitHub
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@834a144ee995460fba8ed112a2fc961b36a5ec5a # v4
         with:
           name: ${{ inputs.image-name }}-${{ inputs.image-tag }}-iso
           path: |

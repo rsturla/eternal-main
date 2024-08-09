@@ -91,7 +91,7 @@ jobs:
       - name: Upload ISO to GitHub
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.build.outputs.iso-name }}-abc
+          name: ${{ steps.build-iso.outputs.iso_name }}-abc
           path: |
             ${{ steps.build-iso.outputs.iso_path }}
             ${{ steps.build-iso.outputs.iso_path }}-CHECKSUM

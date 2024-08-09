@@ -11,6 +11,10 @@ on:
     - cron: "0 */12 * * *"
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}-build
+  cancel-in-progress: true
+
 env:
   IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
 

@@ -93,8 +93,8 @@ jobs:
         with:
           name: ${{ steps.build-iso.outputs.iso_name }}-abc
           path: |
-            ${{ steps.build-iso.outputs.iso_path }}
-            ${{ steps.build-iso.outputs.iso_path }}-CHECKSUM
+            ${{ steps.build-iso.outputs.iso_path }}/${{ steps.build-iso.outputs.iso_name }}
+            ${{ steps.build-iso.outputs.iso_path }}/${{ steps.build-iso.outputs.iso_name }}-CHECKSUM
           if-no-files-found: error
           retention-days: 5
           compression-level: 0

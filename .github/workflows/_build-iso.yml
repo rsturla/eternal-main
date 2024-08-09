@@ -12,7 +12,7 @@ on:
       image-tag:
         required: true
         type: string
-      flatpak-manifest-list:
+      flatpak-manifest-lists:
         required: true
         type: string
       installer-version:
@@ -41,13 +41,18 @@ jobs:
           FLATPAK_REFS_DIR=./flatpak-refs
           FLATPAK_REFS_DIR_ABS=$(realpath "${FLATPAK_REFS_DIR}")
           mkdir -p "${FLATPAK_REFS_DIR}"
-          cp "${{ inputs.flatpak-manifest-list }}" "${FLATPAK_REFS_DIR}/flatpaks.txt"
+
+          # Combine the list of Flatpak manifests into a single file
+          IFS=',' read -ra FLATPAK_MANIFEST_LISTS <<< "${{ inputs.flatpak-manifest-lists }}"
+          for manifest in "${FLATPAK_MANIFEST_LISTS[@]}"; do
+            cat "${manifest}" >> "${FLATPAK_REFS_DIR}/flatpaks.txt"
+          done
 
           # Read the list of Flatpak packages from the manifest
           FLATPAK_REFS=()
           while IFS= read -r line; do
             FLATPAK_REFS+=("$line")
-          done < "${{ inputs.flatpak-manifest-list }}"
+          done < "${FLATPAK_REFS_DIR}/flatpaks.txt"
 
           # Generate installation script
           cat <<EOF > "${TEMP_FLATPAK_INSTALL_DIR}/install-flatpaks.sh"
@@ -92,7 +97,7 @@ jobs:
       - name: Upload ISO to GitHub
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.build-iso.outputs.iso_name }}-abc
+          name: ${{ inputs.image-name }}-${{ inputs.image-tag }}-iso
           path: |
             ${{ steps.build-iso.outputs.iso_path }}/${{ steps.build-iso.outputs.iso_name }}
             ${{ steps.build-iso.outputs.iso_path }}/${{ steps.build-iso.outputs.iso_name }}-CHECKSUM

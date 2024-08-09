@@ -70,6 +70,8 @@ runs:
           -v ${TEMP_FLATPAK_INSTALL_DIR}:/temp_flatpak_install_dir \
           ${IMAGE} /temp_flatpak_install_dir/install-flatpaks.sh
         docker rmi ${IMAGE}
+        cat ${FLATPAK_REFS_DIR}/flatpaks-with-deps
+        wc -l ${FLATPAK_REFS_DIR}/flatpaks-with-deps
 
     - name: Build ISO
       uses: rsturla/eternal-iso-builder@cleanup-action

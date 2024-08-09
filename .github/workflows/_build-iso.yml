@@ -38,7 +38,7 @@ jobs:
 
           # Create temporary directory
           TEMP_FLATPAK_INSTALL_DIR=$(mktemp -d -p /tmp flatpak-XXXXXX)
-          FLATPAK_REFS_DIR=$(mktemp -d -p ${{ github.workspace }} flatpak-refs-XXXXXX)
+          FLATPAK_REFS_DIR=$(mktemp -d -p /tmp flatpak-refs-XXXXXX)
           cp "${{ inputs.flatpak-manifest-list }}" "${FLATPAK_REFS_DIR}/flatpaks.txt"
 
           # Read the list of Flatpak packages from the manifest
@@ -56,6 +56,8 @@ jobs:
           flatpak remote-add --system flathub https://flathub.org/repo/flathub.flatpakrepo
           flatpak install --system -y flathub ${FLATPAK_REFS[@]}
           ostree refs --repo=\${FLATPAK_SYSTEM_DIR}/repo | grep '^deploy/' | grep -v 'org\.freedesktop\.Platform\.openh264' | sed 's/^deploy\///g' > /output/flatpaks_with_deps
+          cat /output/flatpaks_with_deps
+          wc -l /output/flatpaks_with_deps
           EOF
           docker run --rm --privileged \
             --entrypoint /bin/bash \

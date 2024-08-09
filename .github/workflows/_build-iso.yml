@@ -46,7 +46,7 @@ jobs:
           manifest_list=$(echo "${{ inputs.flatpak-manifest-lists }}" | sed '/^$/d')
           manifest_list=$(echo "$manifest_list" | sed '/^$/d')
           for manifest in $manifest_list; do
-            cat "${{ inputs.flatpak-manifest-lists }}/${manifest}" >> "${FLATPAK_REFS_DIR}/flatpaks.txt"
+            cat "${manifest}" >> "${FLATPAK_REFS_DIR}/flatpaks.txt
           done
 
           echo "Flatpak manifests combined into ${FLATPAK_REFS_DIR}/flatpaks.txt"

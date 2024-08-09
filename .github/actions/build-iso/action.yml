@@ -1,4 +1,5 @@
 name: Build Image
+description: "Build an ISO file for Atomic Fedora distributions with Flatpak dependencies"
 
 inputs:
   flatpak-manifest-list:

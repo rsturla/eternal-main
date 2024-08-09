@@ -43,9 +43,10 @@ jobs:
           mkdir -p "${FLATPAK_REFS_DIR}"
 
           # Combine the list of Flatpak manifests into a single file
-          IFS=$'\n' read -ra FLATPAK_MANIFEST_LISTS <<< "${{ inputs.flatpak-manifest-lists }}"
-          for manifest in "${FLATPAK_MANIFEST_LISTS[@]}"; do
-            cat "${manifest}" >> "${FLATPAK_REFS_DIR}/flatpaks.txt"
+          manifest_list=$(echo "${{ inputs.flatpak-manifest-lists }}" | sed '/^$/d')
+          manifest_list=$(echo "$manifest_list" | sed '/^$/d')
+          for manifest in $manifest_list; do
+            cat "${{ inputs.flatpak-manifest-lists }}/${manifest}.txt" >> "${FLATPAK_REFS_DIR}/flatpaks.txt"
           done
 
           echo "Flatpak manifests combined into ${FLATPAK_REFS_DIR}/flatpaks.txt"

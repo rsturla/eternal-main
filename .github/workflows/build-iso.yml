@@ -3,7 +3,7 @@ name: Build ISOs
 on:
   pull_request:
     paths:
-      - ".github/actions/build-iso/**"
+      - ".github/workflows/*build-iso.yml"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref || github.run_id }}-iso

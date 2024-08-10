@@ -14,6 +14,12 @@
       "matchManagers": [
         "github-actions"
       ]
+    },
+    {
+      // Do not pin digest for jasonn3/build-container-installer GitHub Action
+      "matchUpdateTypes": ["pin", "digest", "pinDigest"],
+      "matchPackageNames": ["jasonn3/build-container-installer"],
+      "enabled": false
     }
   ],
 

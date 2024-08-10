@@ -2,11 +2,10 @@
 
 set -euox pipefail
 
-cp /etc/bashrc /usr/etc/bashrc
-cat <<'EOF' >> /usr/etc/bashrc
+cat <<'EOF' >> /etc/bashrc
 for file in /etc/bashrc.d/*.sh; do
   source "$file"
 done
 EOF
 
-mkdir -p /usr/etc/bashrc.d
+mkdir -p /etc/bashrc.d

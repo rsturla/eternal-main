@@ -2,8 +2,8 @@
 
 set -euox pipefail
 
-mkdir -p /usr/etc/flatpak/remotes.d
-wget -q https://dl.flathub.org/repo/flathub.flatpakrepo -P /usr/etc/flatpak/remotes.d
+mkdir -p /etc/flatpak/remotes.d
+wget -q https://dl.flathub.org/repo/flathub.flatpakrepo -P /etc/flatpak/remotes.d
 
 systemctl enable rpm-ostreed-automatic.timer
 

@@ -3,15 +3,15 @@ description: Verify an OCI image against a public key using cosign
 
 inputs:
   cosign-version:
-    description: 'The version of cosign to use'
+    description: "The version of cosign to use"
     required: false
-    default: 'v2.2.2'
+    default: "v2.2.2"
   public-key:
-    description: 'The location of the public key to verify against'
-    default: 'https://raw.githubusercontent.com/rsturla/eternal-main/main/files/usr/etc/pki/containers/eternal-linux.pub'
+    description: "The location of the public key to verify against"
+    default: "https://raw.githubusercontent.com/rsturla/eternal-main/main/files/etc/pki/containers/eternal-linux.pub"
     required: false
   image:
-    description: 'The image to verify - e.g. ghcr.io/rsturla/eternal-linux/main/silverblue:latest'
+    description: "The image to verify - e.g. ghcr.io/rsturla/eternal-linux/main/silverblue:latest"
     required: true
 
 runs:

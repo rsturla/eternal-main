@@ -13,6 +13,9 @@ inputs:
   is-nvidia:
     description: 'Does this image contain proprietary Nvidia drivers?'
     default: false
+  nvidia-type:
+    description: 'Is this the "proprietary" or "open" kernel module?'
+    default: 'proprietary'
 
 outputs:
   tags:
@@ -56,7 +59,11 @@ runs:
         TAG_SUFFIXES=()
 
         if [[ "$IS_NVIDIA_DRIVER" == true ]]; then
-          TAG_SUFFIXES+=("-nvidia")
+          if [[ "$NVIDIA_TYPE" == 'open' ]]; then
+            TAG_SUFFIXES+=("-nvidia-open")
+          else
+            TAG_SUFFIXES+=("-nvidia")
+          fi
         fi
 
         TAGS=()

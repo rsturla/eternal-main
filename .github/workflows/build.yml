@@ -118,6 +118,7 @@ jobs:
       matrix:
         fedora-version: [39, 40, stable]
         fedora-edition: [base, silverblue, kinoite, cosmic]
+        nvidia-type: [open, proprietary]
         exclude:
           - fedora-version: 39
             fedora-edition: cosmic
@@ -144,6 +145,7 @@ jobs:
           major-version: ${{ env.FEDORA_VERSION }}
           is-release: ${{ github.event_name != 'pull_request' }}
           is-nvidia: true
+          nvidia-type: ${{ matrix.nvidia-type }}
 
       - name: Get CoreOS Kernel Information
         if: ${{ env.FEDORA_VERSION == 'stable' || env.FEDORA_VERSION == 'testing' }}
@@ -187,7 +189,7 @@ jobs:
             FEDORA_VERSION=${{ env.FEDORA_VERSION }}
             FEDORA_EDITION=${{ matrix.fedora-edition }}
             BASE_TAG=${{ steps.generate-base-image-tag.outputs.base-tag }}
-            NVIDIA_AKMODS_TAG=${{ matrix.fedora-version }}
+            NVIDIA_AKMODS_TAG=${{ matrix.fedora-version }}${{ matrix.nvidia-type == 'open' || "-open" }}
 
       - name: Push Image
         id: push

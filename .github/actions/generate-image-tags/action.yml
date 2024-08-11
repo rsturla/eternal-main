@@ -80,7 +80,11 @@ runs:
 
         PRIMARY_TAG="pr$PR_NUMBER-$(git rev-parse --short HEAD)-$MAJOR_VERSION"
         if [[ "$IS_NVIDIA_DRIVER" == true ]]; then
-          PRIMARY_TAG="$PRIMARY_TAG-nvidia"
+          if [[ "$NVIDIA_TYPE" == 'open' ]]; then
+            PRIMARY_TAG+="-nvidia-open"
+          else
+            PRIMARY_TAG+="-nvidia"
+          fi
         fi
 
         echo "Generated primary tag: $PRIMARY_TAG"
@@ -138,7 +142,10 @@ runs:
 
         PRIMARY_TAG="$(git rev-parse --short HEAD)-$MAJOR_VERSION"
         if [[ "$IS_NVIDIA_DRIVER" == true ]]; then
-          PRIMARY_TAG="$PRIMARY_TAG-nvidia"
+          if [[ "$NVIDIA_TYPE" == 'open' ]]; then
+            PRIMARY_TAG+="-nvidia-open"
+          else
+            PRIMARY_TAG+="-nvidia"
         fi
 
         echo "Generated primary tag: $PRIMARY_TAG"

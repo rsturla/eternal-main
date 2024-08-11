@@ -91,7 +91,6 @@ jobs:
         uses: ./.github/actions/rechunk-image
         with:
           image-ref: ${{ steps.build.outputs.image }}
-          previous-image-ref: ${{ env.IMAGE_REGISTRY}}/${{ env.IMAGE_NAME }}
           chunk-count: 68
 
       - name: Push Image

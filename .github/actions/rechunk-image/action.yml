@@ -23,6 +23,7 @@ runs:
       shell: bash
       run: |
         podman save ${{ inputs.image-ref }} -o image.tar
+        podman image rm ${{ inputs.image-ref }}
         sudo podman load -i image.tar
         rm -f image.tar
 
@@ -37,5 +38,6 @@ runs:
       shell: bash
       run: |
         sudo podman save ${{ inputs.image-ref }} -o image.tar
+        sudo podman image rm ${{ inputs.image-ref }}
         podman load -i image.tar
         rm -f image.tar

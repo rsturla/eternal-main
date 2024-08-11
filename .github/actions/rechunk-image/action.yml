@@ -38,4 +38,7 @@ runs:
       shell: bash
       run: |
         IMAGE=$(podman pull ${{ steps.rechunk.outputs.ref }})
+        podman image ls
+        sudo podman image ls
         sudo rm -rf ${{ steps.rechunk.outputs.output }}
+        podman image tag $IMAGE ${{ inputs.image-ref }}

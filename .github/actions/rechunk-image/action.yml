@@ -1,6 +1,10 @@
 name: Rechunk Image
 
 inputs:
+  builder:
+    description: "The name of the builder to use (docker or podman)"
+    required: false
+    default: "podman"
   image-ref:
     description: "Reference to the image to rechunk"
     required: true
@@ -22,8 +26,8 @@ runs:
     - name: Transfer Image to Rootful Podman
       shell: bash
       run: |
-        podman save ${{ inputs.image-ref }} -o image.tar
-        podman image rm ${{ inputs.image-ref }}
+        ${{ inputs.builder }} save ${{ inputs.image-ref }} -o image.tar
+        ${{ inputs.builder }} image rm ${{ inputs.image-ref }}
         sudo podman load -i image.tar
         rm -f image.tar
 
@@ -37,6 +41,6 @@ runs:
     - name: Transfer Image to Rootless Podman
       shell: bash
       run: |
-        IMAGE=$(podman pull ${{ steps.rechunk.outputs.ref }})
+        IMAGE=$(${{ inputs.builder }} pull ${{ steps.rechunk.outputs.ref }})
         sudo rm -rf ${{ steps.rechunk.outputs.output }}
-        podman image tag $IMAGE ${{ inputs.image-ref }}
+        ${{ inputs.builder }} image tag $IMAGE ${{ inputs.image-ref }}

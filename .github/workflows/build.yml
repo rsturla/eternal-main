@@ -89,8 +89,8 @@ jobs:
       - name: Rechunk
         uses: ./.github/actions/rechunk-image
         with:
+          builder: ${{ steps.build.outputs.builder }}
           image-ref: ${{ steps.build.outputs.image }}:${{ steps.generate-image-tags.outputs.primary-tag }}
-          chunk-count: 68
 
       - name: Push Image
         id: push
@@ -185,7 +185,7 @@ jobs:
         id: build
         uses: ./.github/actions/build-image
         with:
-          builder: podman
+          builder: docker
           context: .
           dockerfile: Containerfile.nvidia
           image-name: ${{ env.IMAGE_NAME }}
@@ -201,6 +201,7 @@ jobs:
       - name: Rechunk Image
         uses: ./.github/actions/rechunk-image
         with:
+          builder: ${{ steps.build.outputs.builder }}
           image-ref: ${{ steps.build.outputs.image }}:${{ steps.generate-image-tags.outputs.primary-tag }}
 
       - name: Push Image

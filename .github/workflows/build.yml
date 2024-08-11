@@ -202,7 +202,6 @@ jobs:
         uses: ./.github/actions/rechunk-image
         with:
           image-ref: ${{ steps.build.outputs.image }}:${{ steps.generate-image-tags.outputs.primary-tag }}
-          chunk-count: 68
 
       - name: Push Image
         id: push

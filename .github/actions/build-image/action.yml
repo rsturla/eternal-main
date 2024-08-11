@@ -53,6 +53,11 @@ runs:
         build-args: ${{ inputs.build-args }}
         oci: true
 
+    - name: Remove Parent Image (Podman)
+      if: ${{ inputs.builder == 'podman' }}
+      run: |
+        podman rmi ${{ inputs.image-name }}
+
     - name: Generate Tags (Docker)
       if: ${{ inputs.builder == 'docker' }}
       id: generate-image-tags-docker

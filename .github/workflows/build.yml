@@ -53,7 +53,6 @@ jobs:
         uses: ./.github/actions/generate-image-tags
         id: generate-image-tags
         with:
-          # image-name: ${{ env.IMAGE_REGISTRY}}/${{ env.IMAGE_NAME }}
           image-name: localhost/${{ env.IMAGE_NAME }}
           major-version: ${{ env.FEDORA_VERSION }}
           is-release: ${{ github.event_name != 'pull_request' }}
@@ -148,7 +147,7 @@ jobs:
         uses: ./.github/actions/generate-image-tags
         id: generate-image-tags
         with:
-          image-name: ${{ env.IMAGE_REGISTRY}}/${{ env.IMAGE_NAME }}
+          image-name: localhost/${{ env.IMAGE_NAME }}
           major-version: ${{ env.FEDORA_VERSION }}
           is-release: ${{ github.event_name != 'pull_request' }}
           is-nvidia: true
@@ -186,7 +185,7 @@ jobs:
         id: build
         uses: ./.github/actions/build-image
         with:
-          builder: docker
+          builder: podman
           context: .
           dockerfile: Containerfile.nvidia
           image-name: ${{ env.IMAGE_NAME }}
@@ -198,6 +197,12 @@ jobs:
             BASE_TAG=${{ steps.generate-base-image-tag.outputs.base-tag }}
             ${{ matrix.nvidia-type == 'open' && format('NVIDIA_AKMODS_IMAGE={0}', 'ghcr.io/rsturla/akmods/nvidia-open') || '' }}
             NVIDIA_AKMODS_TAG=${{ matrix.fedora-version }}
+
+      - name: Rechunk Image
+        uses: ./.github/actions/rechunk-image
+        with:
+          image-ref: ${{ steps.build.outputs.image }}:${{ steps.generate-image-tags.outputs.primary-tag }}
+          chunk-count: 68
 
       - name: Push Image
         id: push

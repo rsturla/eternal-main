@@ -29,6 +29,7 @@ runs:
         ${{ inputs.builder }} save ${{ inputs.image-ref }} -o image.tar
         ${{ inputs.builder }} image rm ${{ inputs.image-ref }}
         IMAGE=$(sudo podman load -i image.tar)
+        echo "IMAGE: $IMAGE"
         sudo podman tag $IMAGE ${{ inputs.image-ref }}
         rm -f image.tar
 

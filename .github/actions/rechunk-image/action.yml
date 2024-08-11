@@ -19,10 +19,15 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: List Images
+    - name: Export Image
       shell: bash
       run: |
-        podman image ls
+        podman save ${{ inputs.image-ref }} -o image.tar
+
+    - name: Import Image
+      shell: bash
+      run: |
+        sudo podman load -i image.tar
 
     - name: Rechunk Image
       id: rechunk

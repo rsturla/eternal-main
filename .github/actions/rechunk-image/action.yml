@@ -22,7 +22,9 @@ runs:
     - name: Transfer Image to Rootful Podman
       shell: bash
       run: |
-        podman save ${{ inputs.image-ref }} | sudo podman load
+        podman save ${{ inputs.image-ref }} -o image.tar
+        sudo podman load -i image.tar
+        rm -f image.tar
 
     - name: Rechunk Image
       id: rechunk
@@ -31,14 +33,9 @@ runs:
         ref: ${{ inputs.image-ref }}
         skip_compression: ${{ inputs.skip-compression }}
 
-    - name: Retag Image
-      shell: bash
-      run: |
-        IMAGE=$(podman pull ${{ steps.rechunk.outputs.ref }}
-        sudo rm -rf ${{ steps.rechunk.outputs.output }}
-        podman tag $IMAGE ${{ inputs.image-ref }}
-
     - name: Transfer Image to Rootless Podman
       shell: bash
       run: |
-        sudo podman save ${{ inputs.image-ref }} | podman load
+        sudo podman save ${{ inputs.image-ref }} -o image.tar
+        podman load -i image.tar
+        rm -f image.tar

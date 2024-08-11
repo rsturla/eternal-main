@@ -37,8 +37,5 @@ runs:
     - name: Transfer Image to Rootless Podman
       shell: bash
       run: |
-        sudo podman image ls
-        sudo podman save ${{ inputs.image-ref }} -o image.tar
-        sudo podman image rm ${{ inputs.image-ref }}
-        podman load -i image.tar
-        rm -f image.tar
+        IMAGE=$(podman pull ${{ steps.rechunk.outputs.ref }})
+        sudo rm -rf ${{ steps.rechunk.outputs.output }}

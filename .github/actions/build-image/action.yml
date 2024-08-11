@@ -53,24 +53,6 @@ runs:
         build-args: ${{ inputs.build-args }}
         oci: true
 
-    - name: Remove Parent Image (Podman)
-      if: ${{ inputs.builder == 'podman' }}
-      shell: bash
-      run: |
-        podman image ls
-        IMAGE_TO_KEEP=${{ steps.build-podman.outputs.image-with-tag }}
-        IMAGE_ID_TO_KEEP=$(podman image inspect $IMAGE_TO_KEEP --format '{{.Id}}')
-        echo "IMAGE_TO_KEEP=$IMAGE_TO_KEEP"
-        for image in $(podman images --format '{{.Repository}}:{{.Tag}}'); do
-          if [ "$image" != "$IMAGE_TO_KEEP" ]; then
-            IMAGE_ID=$(podman image inspect $image --format '{{.Id}}')
-            if [ "$IMAGE_ID" != "$IMAGE_ID_TO_KEEP" ]; then
-              podman rmi $image
-            fi
-          fi
-        done
-        podman image ls
-
     - name: Generate Tags (Docker)
       if: ${{ inputs.builder == 'docker' }}
       id: generate-image-tags-docker

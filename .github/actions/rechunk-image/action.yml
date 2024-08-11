@@ -1,0 +1,48 @@
+name: Rechunk Image
+
+inputs:
+  builder:
+    description: "The name of the builder to use (docker or podman)"
+    required: false
+    default: "podman"
+  image-ref:
+    description: "Reference to the image to rechunk"
+    required: true
+  previous-image-ref:
+    description: "Reference to the previous image"
+    required: false
+  skip-compression:
+    description: "Skip compression of the image"
+    required: false
+    default: "true"
+  chunk-count:
+    description: "Number of chunks to split the image into"
+    required: true
+    default: "68"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Transfer Image to Rootful Podman
+      shell: bash
+      run: |
+        ${{ inputs.builder }} save ${{ inputs.image-ref }} -o image.tar
+        ${{ inputs.builder }} image rm ${{ inputs.image-ref }}
+        IMAGE=$(sudo podman load -i image.tar)
+        echo "IMAGE: $IMAGE"
+        sudo podman tag $IMAGE ${{ inputs.image-ref }}
+        rm -f image.tar
+
+    - name: Rechunk Image
+      id: rechunk
+      uses: hhd-dev/rechunk@v0.8.1
+      with:
+        ref: ${{ inputs.image-ref }}
+        skip_compression: ${{ inputs.skip-compression }}
+
+    - name: Transfer Image to Rootless Podman
+      shell: bash
+      run: |
+        IMAGE=$(${{ inputs.builder }} pull ${{ steps.rechunk.outputs.ref }})
+        sudo rm -rf ${{ steps.rechunk.outputs.output }}
+        ${{ inputs.builder }} image tag $IMAGE ${{ inputs.image-ref }}

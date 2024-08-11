@@ -90,7 +90,7 @@ jobs:
       - name: Rechunk
         uses: ./.github/actions/rechunk-image
         with:
-          image-ref: localhost/${{ steps.build.outputs.image }}:${{ steps.generate-image-tags.outputs.primary-tag }}
+          image-ref: ${{ steps.build.outputs.image }}:${{ steps.generate-image-tags.outputs.primary-tag }}
           chunk-count: 68
 
       - name: Push Image

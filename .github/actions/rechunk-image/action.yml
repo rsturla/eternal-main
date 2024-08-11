@@ -19,15 +19,10 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Export Image
+    - name: Transfer Image to Rootful Podman
       shell: bash
       run: |
-        podman save ${{ inputs.image-ref }} -o image.tar
-
-    - name: Import Image
-      shell: bash
-      run: |
-        sudo podman load -i image.tar
+        sudo podman image scp $(whoami)@localhost::${{ inputs.image-ref }}
 
     - name: Rechunk Image
       id: rechunk

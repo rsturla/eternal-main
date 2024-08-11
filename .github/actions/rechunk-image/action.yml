@@ -22,7 +22,8 @@ runs:
     - name: Transfer Image to Rootful Podman
       shell: bash
       run: |
-        sudo podman image scp $(whoami)@localhost::${{ inputs.image-ref }}
+        sudo podman image scp $(whoami)@localhost::${{ inputs.image-ref }} root@localhost::
+        podman image rm ${{ inputs.image-ref }}
 
     - name: Rechunk Image
       id: rechunk
@@ -37,3 +38,9 @@ runs:
         IMAGE=$(podman pull ${{ steps.rechunk.outputs.ref }}
         sudo rm -rf ${{ steps.rechunk.outputs.output }}
         podman tag $IMAGE ${{ inputs.image-ref }}
+
+    - name: Transfer Image to Rootless Podman
+      shell: bash
+      run: |
+        sudo podman image scp $(whoami)@localhost::${{ inputs.image-ref }}
+        podman image rm ${{ inputs.image-ref }}

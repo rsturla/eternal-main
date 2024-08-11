@@ -46,6 +46,7 @@ runs:
       id: generate-tags-pull-request
       env:
         IS_NVIDIA_DRIVER: ${{ inputs.is-nvidia }}
+        NVIDIA_TYPE: ${{ inputs.nvidia-type }}
         IMAGE_NAME: ${{ inputs.image-name }}
         MAJOR_VERSION: ${{ inputs.major-version }}
         PR_NUMBER: ${{ github.event.number }}
@@ -104,6 +105,7 @@ runs:
       id: generate-tags
       env:
         IS_NVIDIA_DRIVER: ${{ inputs.is-nvidia }}
+        NVIDIA_TYPE: ${{ inputs.nvidia-type }}
         IMAGE_NAME: ${{ inputs.image-name }}
         MAJOR_VERSION: ${{ inputs.major-version }}
       run: |
@@ -116,7 +118,11 @@ runs:
         TAG_SUFFIXES=()
 
         if [[ "$IS_NVIDIA_DRIVER" == true ]]; then
-          TAG_SUFFIXES+=("-nvidia")
+          if [[ "$NVIDIA_TYPE" == 'open' ]]; then
+            TAG_SUFFIXES+=("-nvidia-open")
+          else
+            TAG_SUFFIXES+=("-nvidia")
+          fi
         fi
 
         TAGS=()

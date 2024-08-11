@@ -1,0 +1,34 @@
+name: Rechunk Image
+
+inputs:
+  image-ref:
+    description: "Reference to the image to rechunk"
+    required: true
+  previous-image-ref:
+    description: "Reference to the previous image"
+    required: false
+  skip-compression:
+    description: "Skip compression of the image"
+    required: false
+    default: "true"
+  chunk-count:
+    description: "Number of chunks to split the image into"
+    required: true
+    default: "68"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Rechunk Image
+      id: rechunk
+      uses: hhd-dev/rechunk@v0.8.1
+      with:
+        ref: ${{ inputs.image-ref }}
+        skip_compression: ${{ inputs.skip-compression }}
+
+    - name: Retag Image
+      shell: bash
+      run: |
+        IMAGE=$(podman pull ${{ steps.rechunk.outputs.ref }}
+        sudo rm -rf ${{ steps.rechunk.outputs.output_ }}
+        podman tag $IMAGE ${{ inputs.image-ref }}

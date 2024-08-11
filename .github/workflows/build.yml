@@ -53,7 +53,8 @@ jobs:
         uses: ./.github/actions/generate-image-tags
         id: generate-image-tags
         with:
-          image-name: ${{ env.IMAGE_REGISTRY}}/${{ env.IMAGE_NAME }}
+          # image-name: ${{ env.IMAGE_REGISTRY}}/${{ env.IMAGE_NAME }}
+          image-name: localhost/${{ env.IMAGE_NAME }}
           major-version: ${{ env.FEDORA_VERSION }}
           is-release: ${{ github.event_name != 'pull_request' }}
 
@@ -85,6 +86,13 @@ jobs:
             FEDORA_VERSION=${{ env.FEDORA_VERSION }}
             FEDORA_EDITION=${{ matrix.fedora-edition }}
             COREOS_KERNEL=${{ env.COREOS_KERNEL }}
+
+      - name: Rechunk
+        uses: ./.github/actions/rechunk-image
+        with:
+          image-ref: ${{ steps.build.outputs.image }}
+          previous-image-ref: ${{ env.IMAGE_REGISTRY}}/${{ env.IMAGE_NAME }}
+          chunk-count: 68
 
       - name: Push Image
         id: push

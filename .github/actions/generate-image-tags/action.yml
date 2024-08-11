@@ -2,39 +2,39 @@ name: Generate Image Tags
 
 inputs:
   image-name:
-    description: 'Name of the image'
+    description: "Name of the image"
     required: true
   major-version:
-    description: 'Major version of the image'
+    description: "Major version of the image"
     required: true
   is-release:
-    description: 'Is this a release version of the Docker image?'
-    default: false
+    description: "Is this a release version of the Docker image?"
+    default: "false"
   is-nvidia:
-    description: 'Does this image contain proprietary Nvidia drivers?'
-    default: false
+    description: "Does this image contain proprietary Nvidia drivers?"
+    default: "false"
   nvidia-type:
     description: 'Is this the "proprietary" or "open" kernel module?'
-    default: 'proprietary'
+    default: "proprietary"
 
 outputs:
   tags:
-    description: 'Generated tags for the OCI image'
+    description: "Generated tags for the OCI image"
     value: ${{ steps.set-outputs.outputs.TAGS }}
   tags-concat:
-    description: 'Generated tags for the OCI image (comma separated)'
+    description: "Generated tags for the OCI image (comma separated)"
     value: ${{ steps.set-outputs.outputs.TAGS_CONCAT }}
   names-full:
-    description: 'Full names of the OCI image tags'
+    description: "Full names of the OCI image tags"
     value: ${{ steps.set-outputs.outputs.NAMES_FULL }}
   names-full-concat:
-    description: 'Full names of the OCI image tags (comma separated)'
+    description: "Full names of the OCI image tags (comma separated)"
     value: ${{ steps.set-outputs.outputs.NAMES_FULL_CONCAT }}
   primary-tag:
-    description: 'Primary tag for the OCI image'
+    description: "Primary tag for the OCI image"
     value: ${{ steps.set-outputs.outputs.PRIMARY_TAG }}
   primary-name-full:
-    description: 'Full name of the OCI image with primary tag'
+    description: "Full name of the OCI image with primary tag"
     value: ${{ steps.set-outputs.outputs.PRIMARY_NAME_FULL }}
 
 runs:

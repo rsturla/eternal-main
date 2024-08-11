@@ -30,5 +30,5 @@ runs:
       shell: bash
       run: |
         IMAGE=$(podman pull ${{ steps.rechunk.outputs.ref }}
-        sudo rm -rf ${{ steps.rechunk.outputs.output_ }}
+        sudo rm -rf ${{ steps.rechunk.outputs.output }}
         podman tag $IMAGE ${{ inputs.image-ref }}

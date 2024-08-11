@@ -55,6 +55,7 @@ runs:
 
     - name: Remove Parent Image (Podman)
       if: ${{ inputs.builder == 'podman' }}
+      shell: bash
       run: |
         podman image ls
         IMAGE_TO_KEEP=${{ steps.build-podman.outputs.image-with-tag }}

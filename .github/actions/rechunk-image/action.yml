@@ -28,7 +28,8 @@ runs:
       run: |
         ${{ inputs.builder }} save ${{ inputs.image-ref }} -o image.tar
         ${{ inputs.builder }} image rm ${{ inputs.image-ref }}
-        sudo podman load -i image.tar
+        IMAGE=$(sudo podman load -i image.tar)
+        sudo podman tag $IMAGE ${{ inputs.image-ref }}
         rm -f image.tar
 
     - name: Rechunk Image

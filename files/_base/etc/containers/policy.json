@@ -77,6 +77,13 @@
                 }
             ]
         },
+        "docker-archive": {
+            "": [
+                {
+                    "type": "insecureAcceptAnything"
+                }
+            ]
+        },
         "tarball": {
             "": [
                 {

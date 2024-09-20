@@ -46,6 +46,7 @@ jobs:
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
       - name: Optimize GHA Storage
+        if: ${{ matrix.arch == 'x64' }}
         uses: ./.github/actions/optimise-gha-storage
 
       - name: Generate Image Tags
@@ -180,6 +181,7 @@ jobs:
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
       - name: Optimize GHA Storage
+        if: ${{ matrix.arch == 'x64' }}
         uses: ./.github/actions/optimise-gha-storage
 
       - name: Generate Image Tags

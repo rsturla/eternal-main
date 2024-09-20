@@ -20,12 +20,13 @@ env:
 
 jobs:
   build-base:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.arch == 'x64' && 'ubuntu-latest' || format('runs-on,runner=1cpu-linux-{0},run-id={1}', matrix.arch, github.run_id) }}
     strategy:
       fail-fast: false
       matrix:
         fedora-version: [40, stable]
         fedora-edition: [silverblue, kinoite, cosmic]
+        arch: [x64, arm64]
         include:
           - fedora-edition: cosmic
             image-registry: ghcr.io/rsturla/eternal-linux/base
@@ -37,6 +38,7 @@ jobs:
       IMAGE_NAME: eternal-linux/main/${{ matrix.fedora-edition }}
       FEDORA_VERSION: ${{ matrix.fedora-version }}
       COREOS_KERNEL: "N/A"
+      ARCH: ${{ matrix.arch == 'x64' && 'x86_64' || format('{0}', matrix.arch) }}
     outputs:
       base-image-tag: ${{ steps.generate-image-tags.outputs.primary-tag }}
     steps:
@@ -53,6 +55,8 @@ jobs:
           image-name: ${{ env.IMAGE_REGISTRY}}/${{ env.IMAGE_NAME }}
           major-version: ${{ env.FEDORA_VERSION }}
           is-release: ${{ github.event_name != 'pull_request' }}
+          arch: ${{ env.ARCH }}
+          is-manifest: false
 
       - name: Get CoreOS Kernel Information
         if: ${{ env.FEDORA_VERSION == 'stable' || env.FEDORA_VERSION == 'testing' }}
@@ -106,8 +110,53 @@ jobs:
           private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
           private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
 
-  build-nvidia:
+  manifest:
+    if: ${{ github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
+    needs: build-base
+    strategy:
+      fail-fast: false
+      matrix:
+        fedora-version: [40, stable]
+        fedora-edition: [silverblue, kinoite, cosmic]
+    env:
+      IMAGE_NAME: eternal-linux/main/${{ matrix.fedora-edition }}
+      FEDORA_VERSION: ${{ matrix.fedora-version }}
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    steps:
+      - name: Generate Image tags
+        id: generate-tags
+        uses: ./.github/actions/generate-image-tags
+        with:
+          image-name: ${{ env.IMAGE_REGISTRY}}/${{ env.IMAGE_NAME }}
+          major-version: ${{ env.FEDORA_VERSION }}
+          is-release: ${{ github.event_name != 'pull_request' }}
+          is-manifest: true
+
+      - name: Create Manifest
+        run: |
+          podman manifest create ${{ env.IMAGE_NAME }}
+          podman manifest add --all ${{ env.IMAGE_NAME }} ${{ steps.generate-tags.outputs.primary-name-full }}-x86_64
+          podman manifest add --all ${{ env.IMAGE_NAME }} ${{ steps.generate-tags.outputs.primary-name-full }}-arm64
+
+      - name: Login to GHCR
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push Manifest
+        run: |
+          for tag in ${{ steps.generate-tags.outputs.names-full }}; do
+            podman manifest push --all=false ${{ env.IMAGE_NAME }} $tag
+          done
+
+  build-nvidia:
+    runs-on: ${{ matrix.arch == 'x64' && 'ubuntu-latest' || format('runs-on,runner=1cpu-linux-{0},run-id={1}', matrix.arch, github.run_id) }}
     needs: build-base
     if: ${{ !cancelled() }}
     strategy:
@@ -116,6 +165,7 @@ jobs:
         fedora-version: [40, stable]
         fedora-edition: [silverblue, kinoite, cosmic]
         nvidia-type: [open]
+        arch: [x64]
     permissions:
       contents: read
       packages: write
@@ -124,6 +174,7 @@ jobs:
       IMAGE_NAME: eternal-linux/main/${{ matrix.fedora-edition }}
       FEDORA_VERSION: ${{ matrix.fedora-version }}
       COREOS_KERNEL: "N/A"
+      ARCH: ${{ matrix.arch == 'x64' && 'x86_64' || format('{0}', matrix.arch) }}
     steps:
       - name: Checkout
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
@@ -140,6 +191,8 @@ jobs:
           is-release: ${{ github.event_name != 'pull_request' }}
           is-nvidia: true
           nvidia-type: ${{ matrix.nvidia-type }}
+          arch: ${{ env.ARCH }}
+          is-manifest: false
 
       - name: Get CoreOS Kernel Information
         if: ${{ env.FEDORA_VERSION == 'stable' || env.FEDORA_VERSION == 'testing' }}
@@ -208,6 +261,54 @@ jobs:
           digest: ${{ steps.push.outputs.digest }}
           private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
           private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
+
+    manifest:
+    if: ${{ github.event_name != 'pull_request' }}
+    runs-on: ubuntu-latest
+    needs: build-base
+    strategy:
+      fail-fast: false
+      matrix:
+        fedora-version: [40, stable]
+        fedora-edition: [silverblue, kinoite, cosmic]
+        nvidia-type: [open]
+    env:
+      IMAGE_NAME: eternal-linux/main/${{ matrix.fedora-edition }}
+      FEDORA_VERSION: ${{ matrix.fedora-version }}
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    steps:
+      - name: Generate Image tags
+        id: generate-tags
+        uses: ./.github/actions/generate-image-tags
+        with:
+          image-name: ${{ env.IMAGE_REGISTRY}}/${{ env.IMAGE_NAME }}
+          major-version: ${{ env.FEDORA_VERSION }}
+          is-nvidia: true
+          nvidia-type: ${{ matrix.nvidia-type }}
+          is-release: ${{ github.event_name != 'pull_request' }}
+          is-manifest: true
+
+      - name: Create Manifest
+        run: |
+          podman manifest create ${{ env.IMAGE_NAME }}
+          podman manifest add --all ${{ env.IMAGE_NAME }} ${{ steps.generate-tags.outputs.primary-name-full }}-x86_64
+          podman manifest add --all ${{ env.IMAGE_NAME }} ${{ steps.generate-tags.outputs.primary-name-full }}-arm64
+
+      - name: Login to GHCR
+        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push Manifest
+        run: |
+          for tag in ${{ steps.generate-tags.outputs.names-full }}; do
+            podman manifest push --all=false ${{ env.IMAGE_NAME }} $tag
+          done
 
   check:
     needs: [build-base, build-nvidia]

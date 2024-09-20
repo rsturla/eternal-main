@@ -112,7 +112,6 @@ jobs:
           private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
 
   manifest:
-    if: ${{ github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
     needs: build-base
     strategy:
@@ -265,7 +264,6 @@ jobs:
           private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
 
   manifest-nvidia:
-    if: ${{ github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
     needs: build-nvidia
     strategy:

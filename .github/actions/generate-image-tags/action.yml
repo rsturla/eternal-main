@@ -16,6 +16,12 @@ inputs:
   nvidia-type:
     description: 'Is this the "proprietary" or "open" kernel module?'
     default: 'proprietary'
+  arch:
+    description: 'Architecture of the image'
+    default: 'x86_64'
+  is-manifest:
+    description: 'Is this a manifest image?'
+    default: false
 
 outputs:
   tags:
@@ -50,6 +56,8 @@ runs:
         IMAGE_NAME: ${{ inputs.image-name }}
         MAJOR_VERSION: ${{ inputs.major-version }}
         PR_NUMBER: ${{ github.event.number }}
+        ARCH: ${{ inputs.arch }}
+        IS_MANIFEST: ${{ inputs.is-manifest }}
       run: |
         echo "Generating tags for pull request..."
 
@@ -71,16 +79,28 @@ runs:
         for TAG in "${TAGS_PRE_SUFFIX[@]}"; do
           if [[ -n "$TAG_SUFFIXES" ]]; then
             for SUFFIX in "${TAG_SUFFIXES[@]}"; do
-              TAGS+=("$TAG$SUFFIX")
+              if [[ "$IS_MANIFEST" != true ]]; then
+                TAGS+=("$TAG-$SUFFIX-$ARCH")
+              else
+                TAGS+=("$TAG-$SUFFIX")
+              fi
             done
           else
-            TAGS+=("$TAG")
+            if [[ "$IS_MANIFEST" != true ]]; then
+              TAGS+=("$TAG-$ARCH")
+            else
+              TAGS+=("$TAG")
+            fi
           fi
         done
 
         PRIMARY_TAG="pr$PR_NUMBER-$(git rev-parse --short HEAD)-$MAJOR_VERSION"
         if [[ "$IS_NVIDIA_DRIVER" == true ]]; then
-          PRIMARY_TAG="$PRIMARY_TAG-nvidia"
+          if [[ "$IS_MANIFEST" != true ]]; then
+            PRIMARY_TAG="$PRIMARY_TAG-nvidia-$ARCH"
+          else
+            PRIMARY_TAG="$PRIMARY_TAG-nvidia"
+          fi
         fi
 
         echo "Generated primary tag: $PRIMARY_TAG"
@@ -108,6 +128,8 @@ runs:
         NVIDIA_TYPE: ${{ inputs.nvidia-type }}
         IMAGE_NAME: ${{ inputs.image-name }}
         MAJOR_VERSION: ${{ inputs.major-version }}
+        ARCH: ${{ inputs.arch }}
+        IS_MANIFEST: ${{ inputs.is-manifest }}
       run: |
         echo "Generating tags for release..."
 
@@ -129,16 +151,28 @@ runs:
         for TAG in "${TAGS_PRE_SUFFIX[@]}"; do
           if [[ -n "$TAG_SUFFIXES" ]]; then
             for SUFFIX in "${TAG_SUFFIXES[@]}"; do
-              TAGS+=("$TAG$SUFFIX")
+              if [[ "$IS_MANIFEST" != true ]]; then
+                TAGS+=("$TAG-$SUFFIX-$ARCH")
+              else
+                TAGS+=("$TAG$SUFFIX")
+              fi
             done
           else
-            TAGS+=("$TAG")
+            if [[ "$IS_MANIFEST" != true ]]; then
+              TAGS+=("$TAG-$ARCH")
+            else
+              TAGS+=("$TAG")
+            fi
           fi
         done
 
         PRIMARY_TAG="$(git rev-parse --short HEAD)-$MAJOR_VERSION"
         if [[ "$IS_NVIDIA_DRIVER" == true ]]; then
-          PRIMARY_TAG="$PRIMARY_TAG-nvidia"
+          if [[ "$IS_MANIFEST" != true ]]; then
+            PRIMARY_TAG="$PRIMARY_TAG-nvidia-$ARCH"
+          else
+            PRIMARY_TAG="$PRIMARY_TAG-nvidia"
+          fi
         fi
 
         echo "Generated primary tag: $PRIMARY_TAG"

@@ -28,7 +28,7 @@ fi
 
 KERNEL_VERSION=$COREOS_KERNEL
 KERNEL_MAJOR_MINOR_PATCH=$(echo $KERNEL_VERSION | cut -d '-' -f 1)
-KERNEL_RELEASE=$(echo $KERNEL_VERSION | cut -d '-' -f 2)
+KERNEL_RELEASE=$(echo $KERNEL_VERSION | cut -d '-' -f 2 | rev | cut -d '.' -f 2- | rev)
 ARCH=$(uname -m)
 rpm-ostree override replace --experimental \
     https://kojipkgs.fedoraproject.org//packages/kernel/$KERNEL_MAJOR_MINOR_PATCH/$KERNEL_RELEASE/$ARCH/kernel-$KERNEL_MAJOR_MINOR_PATCH-$KERNEL_RELEASE.$ARCH.rpm \

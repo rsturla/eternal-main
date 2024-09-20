@@ -29,9 +29,9 @@ jobs:
         env:
           IMAGE_TO_SIGN: ${{ inputs.image }}
         run: |
-          podman pull quay.io/skopeo/stable:latest
-          digest=$(podman run quay.io/skopeo/stable:latest inspect docker://$IMAGE_TO_SIGN --format '{{.Digest}}')
-          name=$(podman run quay.io/skopeo/stable:latest inspect docker://$IMAGE_TO_SIGN --format '{{.Name}}')
+          docker pull quay.io/skopeo/stable:latest
+          digest=$(docker run quay.io/skopeo/stable:latest inspect docker://$IMAGE_TO_SIGN --format '{{.Digest}}')
+          name=$(docker run quay.io/skopeo/stable:latest inspect docker://$IMAGE_TO_SIGN --format '{{.Name}}')
           echo "DIGEST=$digest" >> $GITHUB_OUTPUT
           echo "NAME=$name" >> $GITHUB_OUTPUT
 

@@ -71,8 +71,8 @@ runs:
           docker image push "${image}"
         done
 
-        podman pull quay.io/skopeo/stable:latest
-        digest=$(podman run quay.io/skopeo/stable:latest inspect docker://${tags[0]} --format '{{.Digest}}')
+        docker pull quay.io/skopeo/stable:latest
+        digest=$(docker run quay.io/skopeo/stable:latest inspect docker://${tags[0]} --format '{{.Digest}}')
 
         # Set the outputs
         echo "registry-path=${tags[0]}" >> $GITHUB_OUTPUT

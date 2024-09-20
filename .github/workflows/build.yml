@@ -8,7 +8,7 @@ on:
     branches:
       - main
   schedule:
-    - cron: "0 */12 * * *"
+    - cron: "30 0 * * 1" # Every Monday at 12:30am
   workflow_dispatch:
 
 concurrency:
@@ -24,14 +24,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        fedora-version: [39, 40, stable]
-        fedora-edition: [base, silverblue, kinoite, cosmic]
+        fedora-version: [40, stable]
+        fedora-edition: [silverblue, kinoite, cosmic]
         include:
           - fedora-edition: cosmic
             image-registry: ghcr.io/rsturla/eternal-linux/base
-        exclude:
-          - fedora-version: 39
-            fedora-edition: cosmic
     permissions:
       contents: read
       packages: write
@@ -116,12 +113,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        fedora-version: [39, 40, stable]
-        fedora-edition: [base, silverblue, kinoite, cosmic]
-        nvidia-type: [open, proprietary]
-        exclude:
-          - fedora-version: 39
-            fedora-edition: cosmic
+        fedora-version: [40, stable]
+        fedora-edition: [silverblue, kinoite, cosmic]
+        nvidia-type: [open]
     permissions:
       contents: read
       packages: write

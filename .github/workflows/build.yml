@@ -86,7 +86,9 @@ jobs:
       - name: Prepare Rechunk
         run: |
           sudo apt update && sudo apt install systemd-container
+          podman image ls
           sudo podman image scp $(whoami)@localhost::${{ steps.build.outputs.image }}@${{ steps.build.outputs.digest }} root@localhost::
+          sudo podman image ls
           podman rmi $(podman image ls -qa) --force
 
       - name: Push Image

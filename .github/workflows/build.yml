@@ -85,6 +85,7 @@ jobs:
 
       - name: Prepare Rechunk
         run: |
+          set -euox pipefail
           sudo apt update && sudo apt install systemd-container
           podman image ls
           sudo podman image scp $(whoami)@localhost::${{ steps.build.outputs.image }}:${{ steps.generate-image-tags.outputs.primary-tag }} root@localhost::

@@ -116,7 +116,7 @@ jobs:
           private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
 
   build-nvidia:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build-base
     if: ${{ !cancelled() }}
     strategy:
@@ -194,6 +194,15 @@ jobs:
             BASE_TAG=${{ steps.generate-base-image-tag.outputs.base-tag }}
             ${{ matrix.nvidia-type == 'open' && format('NVIDIA_AKMODS_IMAGE={0}', 'ghcr.io/rsturla/akmods/nvidia-open') || '' }}
             NVIDIA_AKMODS_TAG=${{ matrix.fedora-version }}
+
+      - name: Rechunk
+        id: rechunk
+        uses: ./.github/actions/rechunk
+        with:
+          builder: ${{ steps.build.outputs.builder }}
+          ref: ${{ steps.build.outputs.image }}:${{ steps.generate-image-tags.outputs.primary-tag }}
+          prev-ref: ${{ env.IMAGE_REGISTRY }}/${{ steps.build.outputs.image }}:${{ steps.generate-image-tags.outputs.primary-tag }}
+          tags: ${{ steps.build.outputs.tags }}
 
       - name: Push Image
         id: push

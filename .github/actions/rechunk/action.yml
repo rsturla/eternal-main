@@ -49,7 +49,7 @@ runs:
       with:
         rechunk: ghcr.io/hhd-dev/rechunk:v0.8.6
         ref: ${{ inputs.ref }}
-        skip_compress: true
+        skip_compression: true
         prev-ref: ${{ inputs.prev-ref }}
 
     - name: Load Rechunked Image (Podman)
@@ -62,6 +62,7 @@ runs:
         for tag in ${{ steps.build_image.outputs.tags }}; do
           podman tag $IMAGE ${{ env.IMAGE_NAME }}:${tag}
         done
+        podman image ls
 
     - name: Load Rechunked Image (Docker)
       if: ${{ inputs.builder == 'docker' }}
@@ -73,3 +74,4 @@ runs:
         for tag in ${{ steps.build_image.outputs.tags }}; do
           docker tag $IMAGE ${{ env.IMAGE_NAME }}:${tag}
         done
+        docker image ls

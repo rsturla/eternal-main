@@ -17,7 +17,9 @@ inputs:
     default: ''
 
 steps:
-  - name: Prepare Rechunk
+  - name: Prepare Rechunk (Podman)
+    if: ${{ inputs.builder == 'podman' }}
+    shell: bash
     env:
       SOURCE_IMAGE: ${{ inputs.ref }}
     run: |
@@ -28,6 +30,17 @@ steps:
       sudo podman image ls
       podman rmi $(podman image ls -qa) --force
 
+  - name: Prepare Rechunk (Docker)
+    if: ${{ inputs.builder == 'docker' }}
+    shell: bash
+    env:
+      SOURCE_IMAGE: ${{ inputs.ref }}
+    run: |
+      set -euox pipefail
+      docker save $(docker image ls --format '{{.Repository}}:{{.Tag}}' | grep ${SOURCE_IMAGE}) | sudo podman load
+      sudo podman image ls
+      docker rmi $(docker image ls -qa) --force
+
   - name: Rechunk Image
     id: rechunk
     uses: hhd-dev/rechunk@v0.8.6
@@ -37,11 +50,24 @@ steps:
       skip_compress: true
       prev-ref: ${{ inputs.prev-ref }}
 
-  - name: Load Rechunked Image
+  - name: Load Rechunked Image (Podman)
+    if: ${{ inputs.builder == 'podman' }}
+    shell: bash
     run: |
       sudo podman rmi $(sudo podman image ls -qa) --force
       IMAGE=$(podman pull ${{ steps.rechunk.outputs.ref }})
       sudo rm -rf ${{ steps.rechunk.outputs.output }}
       for tag in ${{ steps.build_image.outputs.tags }}; do
         podman tag $IMAGE ${{ env.IMAGE_NAME }}:${tag}
+      done
+
+  - name: Load Rechunked Image (Docker)
+    if: ${{ inputs.builder == 'docker' }}
+    shell: bash
+    run: |
+      sudo podman rmi $(sudo podman image ls -qa) --force
+      IMAGE=$(docker pull ${{ steps.rechunk.outputs.ref }})
+      sudo rm -rf ${{ steps.rechunk.outputs.output }}
+      for tag in ${{ steps.build_image.outputs.tags }}; do
+        docker tag $IMAGE ${{ env.IMAGE_NAME }}:${tag}
       done

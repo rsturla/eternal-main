@@ -83,33 +83,14 @@ jobs:
             FEDORA_EDITION=${{ matrix.fedora-edition }}
             COREOS_KERNEL=${{ env.COREOS_KERNEL }}
 
-      - name: Prepare Rechunk
-        run: |
-          set -euox pipefail
-          sudo apt update && sudo apt install systemd-container
-          podman image ls
-          sudo podman image scp $(whoami)@localhost::${{ steps.build.outputs.image }}:${{ steps.generate-image-tags.outputs.primary-tag }} root@localhost::
-          sudo podman image ls
-          podman rmi $(podman image ls -qa) --force
-
-      - name: Rechunk Image
+      - name: Rechunk
         id: rechunk
-        uses: hhd-dev/rechunk@v0.8.6
+        uses: ./.github/actions/rechunk
         with:
-          rechunk: ghcr.io/hhd-dev/rechunk:v0.8.6
+          builder: ${{ steps.build.outputs.builder }}
           ref: ${{ steps.build.outputs.image }}:${{ steps.generate-image-tags.outputs.primary-tag }}
-          skip_compress: true
           prev-ref: ${{ env.IMAGE_REGISTRY }}/${{ steps.build.outputs.image }}:${{ steps.generate-image-tags.outputs.primary-tag }}
-
-      - name: Load Rechunked Image
-        run: |
-          sudo podman rmi $(sudo podman image ls -qa) --force
-          IMAGE=$(podman pull ${{ steps.rechunk.outputs.ref }})
-          sudo rm -rf ${{ steps.rechunk.outputs.output }}
-          for tag in ${{ steps.build.outputs.tags }}; do
-            podman tag $IMAGE ${{ env.IMAGE_NAME }}:${tag}
-          done
-          podman image ls
+          tags: ${{ steps.build.outputs.tags }}
 
       - name: Push Image
         id: push

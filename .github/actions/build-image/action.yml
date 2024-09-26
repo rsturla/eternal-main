@@ -88,8 +88,12 @@ runs:
       run: |
         echo "image=${{ inputs.image-name }}" >> $GITHUB_OUTPUT
         if [ "$BUILDER" == "podman" ]; then
+          # Reading space-separated list into an array
+          IFS=' ' read -r -a tag_array <<< "${{ inputs.image-tags }}"
+          single_tag="${tag_array[0]}"
+
           echo "tags=${{ inputs.image-tags }}" >> $GITHUB_OUTPUT
-          digest=$(podman image inspect ${{ inputs.image-name }} --format '{{.Digest}}')
+          digest=$(podman image inspect ${{ inputs.image-name }}:$single_tag --format '{{.Digest}}')
           echo "digest=$digest" >> $GITHUB_OUTPUT
         else
           echo "tags=${{ inputs.image-tags }}" >> $GITHUB_OUTPUT

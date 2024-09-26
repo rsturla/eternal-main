@@ -71,7 +71,7 @@ jobs:
         id: build
         uses: ./.github/actions/build-image
         with:
-          builder: docker
+          builder: podman
           context: .
           dockerfile: Containerfile
           image-name: ${{ env.IMAGE_NAME }}

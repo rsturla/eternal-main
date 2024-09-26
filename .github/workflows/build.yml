@@ -83,6 +83,12 @@ jobs:
             FEDORA_EDITION=${{ matrix.fedora-edition }}
             COREOS_KERNEL=${{ env.COREOS_KERNEL }}
 
+      - name: Prepare Rechunk
+        run: |
+          sudo apt update && sudo apt install systemd-container
+          sudo podman image scp $(whoami)@localhost::${{ steps.build.outputs.image }}@${{ steps.build.outputs.digest }} root@localhost::
+          podman rmi $(podman image ls -qa) --force
+
       - name: Push Image
         id: push
         uses: ./.github/actions/push-image

@@ -43,10 +43,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
-      - name: Maximize build space
-        uses: ublue-os/remove-unwanted-software@v7
-        with:
-          remove-codeql: true
+      # - name: Maximize build space
+      #   uses: ublue-os/remove-unwanted-software@v7
+      #   with:
+      #     remove-codeql: true
 
       - name: Generate Image Tags
         uses: ./.github/actions/generate-image-tags
@@ -73,7 +73,7 @@ jobs:
         id: build
         uses: ./.github/actions/build-image
         with:
-          builder: podman
+          builder: docker
           context: .
           dockerfile: Containerfile
           image-name: ${{ env.IMAGE_NAME }}

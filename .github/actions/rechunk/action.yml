@@ -58,7 +58,7 @@ runs:
       run: |
         sudo podman rmi $(sudo podman image ls -qa) --force
         IMAGE=$(podman pull ${{ steps.rechunk.outputs.ref }})
-        tags=${{ inputs.tags }}
+        tags="${{ inputs.tags }}"
         sudo rm -rf ${{ steps.rechunk.outputs.location }}
         IFS=' ' read -r -a tag_array <<< "$tags"
         for tag in "${tag_array[@]}"; do
@@ -72,9 +72,10 @@ runs:
       run: |
         sudo podman rmi $(sudo podman image ls -qa) --force
         IMAGE=$(docker pull ${{ steps.rechunk.outputs.ref }})
-        sudo rm -rf ${{ steps.rechunk.outputs.output }}
-        IFS=' ' read -r -a tags <<< ${{ inputs.tags }}
-        for tag in "${tags[@]}"; do
+        tags="${{ inputs.tags }}"
+        sudo rm -rf ${{ steps.rechunk.outputs.location }}
+        IFS=' ' read -r -a tag_array <<< "$tags"
+        for tag in "${tag_array[@]}"; do
           docker tag $IMAGE ${{ env.IMAGE_NAME }}:${tag}
         done
         docker image ls

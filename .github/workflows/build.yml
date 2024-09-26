@@ -43,8 +43,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
-      - name: Optimize GHA Storage
-        uses: ./.github/actions/optimise-gha-storage
+      # - name: Optimize GHA Storage
+      #   uses: ./.github/actions/optimise-gha-storage
 
       - name: Generate Image Tags
         uses: ./.github/actions/generate-image-tags

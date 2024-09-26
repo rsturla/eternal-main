@@ -87,6 +87,7 @@ jobs:
 
       - name: Rechunk
         id: rechunk
+        if: false
         uses: ./.github/actions/rechunk
         with:
           builder: ${{ steps.build.outputs.builder }}
@@ -201,6 +202,7 @@ jobs:
 
       - name: Rechunk
         id: rechunk
+        if: false
         uses: ./.github/actions/rechunk
         with:
           builder: ${{ steps.build.outputs.builder }}

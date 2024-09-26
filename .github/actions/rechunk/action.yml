@@ -70,8 +70,10 @@ runs:
       if: ${{ inputs.builder == 'docker' }}
       shell: bash
       run: |
+        set -euox pipefail
         sudo podman rmi $(sudo podman image ls -qa) --force
-        IMAGE=$(docker pull ${{ steps.rechunk.outputs.ref }})
+        IMAGE="temporary-image:latest"
+        skopeo copy oci-archive:${{ steps.rechunk.outputs.location }} docker-daemon:${IMAGE}
         tags="${{ inputs.tags }}"
         sudo rm -rf ${{ steps.rechunk.outputs.location }}
         IFS=' ' read -r -a tag_array <<< "$tags"

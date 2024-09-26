@@ -20,7 +20,7 @@ env:
 
 jobs:
   build-base:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -43,8 +43,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
-      - name: Optimize GHA Storage
-        uses: ./.github/actions/optimise-gha-storage
+      - name: Maximize build space
+        uses: ublue-os/remove-unwanted-software@v7
+        with:
+          remove-codeql: true
 
       - name: Generate Image Tags
         uses: ./.github/actions/generate-image-tags
@@ -83,6 +85,16 @@ jobs:
             FEDORA_EDITION=${{ matrix.fedora-edition }}
             COREOS_KERNEL=${{ env.COREOS_KERNEL }}
 
+      - name: Rechunk
+        id: rechunk
+        if: false
+        uses: ./.github/actions/rechunk
+        with:
+          builder: ${{ steps.build.outputs.builder }}
+          ref: ${{ steps.build.outputs.image }}:${{ steps.generate-image-tags.outputs.primary-tag }}
+          prev-ref: ${{ env.IMAGE_REGISTRY }}/${{ steps.build.outputs.image }}:${{ steps.generate-image-tags.outputs.primary-tag }}
+          tags: ${{ steps.build.outputs.tags }}
+
       - name: Push Image
         id: push
         uses: ./.github/actions/push-image
@@ -107,7 +119,7 @@ jobs:
           private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
 
   build-nvidia:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build-base
     if: ${{ !cancelled() }}
     strategy:
@@ -128,8 +140,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
-      - name: Optimize GHA Storage
-        uses: ./.github/actions/optimise-gha-storage
+      - name: Maximize build space
+        uses: ublue-os/remove-unwanted-software@v7
+        with:
+          remove-codeql: true
 
       - name: Generate Image Tags
         uses: ./.github/actions/generate-image-tags
@@ -185,6 +199,16 @@ jobs:
             BASE_TAG=${{ steps.generate-base-image-tag.outputs.base-tag }}
             ${{ matrix.nvidia-type == 'open' && format('NVIDIA_AKMODS_IMAGE={0}', 'ghcr.io/rsturla/akmods/nvidia-open') || '' }}
             NVIDIA_AKMODS_TAG=${{ matrix.fedora-version }}
+
+      - name: Rechunk
+        id: rechunk
+        if: false
+        uses: ./.github/actions/rechunk
+        with:
+          builder: ${{ steps.build.outputs.builder }}
+          ref: ${{ steps.build.outputs.image }}:${{ steps.generate-image-tags.outputs.primary-tag }}
+          prev-ref: ${{ env.IMAGE_REGISTRY }}/${{ steps.build.outputs.image }}:${{ steps.generate-image-tags.outputs.primary-tag }}
+          tags: ${{ steps.build.outputs.tags }}
 
       - name: Push Image
         id: push

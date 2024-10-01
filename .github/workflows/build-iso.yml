@@ -30,17 +30,12 @@ jobs:
           - kinoite
           - cosmic
         image-tag:
-          - 39
           - 40
+          - 41
           - stable
-          - 39-nvidia
           - 40-nvidia
+          - 41-nvidia
           - stable-nvidia
-        exclude:
-          - image-name: cosmic
-            image-tag: 39
-          - image-name: cosmic
-            image-tag: 39-nvidia
     with:
       image-name: ${{ matrix.image-name }}
       image-registry: ghcr.io/rsturla/eternal-linux/main

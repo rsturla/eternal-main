@@ -32,8 +32,3 @@ if ! [[ "$FEDORA_VERSION" =~ ^[0-9]+$ ]]; then
   echo "Error: --version must be a number"
   exit 1
 fi
-
-# bootupctl only works on versions greater than or equal to 40
-if [[ "$FEDORA_VERSION" -ge 40 ]]; then
-  /usr/bin/bootupctl backend generate-update-metadata
-fi

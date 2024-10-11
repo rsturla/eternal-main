@@ -8,7 +8,7 @@ on:
     branches:
       - main
   schedule:
-    - cron: "30 0 * * 1" # Every Monday at 12:30am
+    - cron: "30 0 */2 * *" # Every other day at 12:30am
   workflow_dispatch:
 
 concurrency:

@@ -27,7 +27,6 @@ jobs:
       matrix:
         image-name:
           - silverblue
-          - kinoite
           - cosmic
         image-tag:
           - 40

@@ -25,6 +25,10 @@ on:
       r2-bucket:
         required: false
         type: string
+      arch:
+        required: false
+        type: string
+        default: x86_64
 
 jobs:
   build:
@@ -90,7 +94,7 @@ jobs:
         uses: jasonn3/build-container-installer@a1ce6da2d6c1af0561bec053366d0f3aa7e38743 # v1.2.3
         id: build-iso
         with:
-          arch: x86_64
+          arch: ${{ inputs.arch }}
           image_name: ${{ inputs.image-name }}
           image_repo: ${{ inputs.image-registry }}
           image_tag: ${{ inputs.image-tag }}

@@ -25,7 +25,6 @@ on:
       r2-bucket:
         required: false
         type: string
-        default: eternal-linux
 
 jobs:
   build:

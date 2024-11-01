@@ -87,7 +87,7 @@ jobs:
           echo "FLATPAK_REFS_DIR=${FLATPAK_REFS_DIR}" >> $GITHUB_OUTPUT
 
       - name: Build ISO
-        uses: jasonn3/build-container-installer@v1.2.2
+        uses: jasonn3/build-container-installer@a1ce6da2d6c1af0561bec053366d0f3aa7e38743 # v1.2.3
         id: build-iso
         with:
           arch: x86_64

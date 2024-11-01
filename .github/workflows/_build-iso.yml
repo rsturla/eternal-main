@@ -18,6 +18,13 @@ on:
       installer-version:
         required: true
         type: number
+      upload-to-cloudflare:
+        required: false
+        type: boolean
+        default: false
+      r2-bucket:
+        required: false
+        type: string
 
 jobs:
   build:
@@ -98,13 +105,25 @@ jobs:
           enable_flatpak_dependencies: false
 
       - name: Upload ISO to GitHub
-        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4
+        if: inputs.upload-to-r2 == false
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.image-name }}-${{ inputs.image-tag }}-iso
           path: |
             ${{ steps.build-iso.outputs.iso_path }}/${{ steps.build-iso.outputs.iso_name }}
-            ${{ steps.build-iso.outputs.iso_path }}/${{ steps.build-iso.outputs.iso_name }}-CHECKSUM
-          if-no-files-found: error
-          retention-days: 10
-          compression-level: 5
-          overwrite: true
+
+      - name: Upload ISO to CloudFlare R2
+        if: inputs.upload-to-cloudflare == true
+        shell: bash
+        env:
+          RCLONE_CONFIG_R2_TYPE: s3
+          RCLONE_CONFIG_R2_PROVIDER: Cloudflare
+          RCLONE_CONFIG_R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          RCLONE_CONFIG_R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          RCLONE_CONFIG_R2_REGION: auto
+          RCLONE_CONFIG_R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          SOURCE_FILE: ${{ steps.build-iso.outputs.iso_path }}/${{ steps.build-iso.outputs.iso_name }}
+          DEST_BUCKET: ${{ inputs.r2-bucket }}
+        run: |
+          curl https://rclone.org/install.sh | sudo bash
+          rclone copy $SOURCE_FILE R2:$DEST_BUCKET

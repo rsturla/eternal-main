@@ -45,9 +45,8 @@ runs:
 
     - name: Rechunk Image
       id: rechunk
-      uses: hhd-dev/rechunk@v0.8.6
+      uses: hhd-dev/rechunk@v1.0.1
       with:
-        rechunk: ghcr.io/hhd-dev/rechunk:v0.8.6
         ref: ${{ inputs.ref }}
         skip_compression: true
         prev-ref: ${{ inputs.prev-ref }}

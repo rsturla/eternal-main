@@ -102,7 +102,7 @@ jobs:
           version: ${{ inputs.installer-version }}
           secure_boot_key_url: "https://github.com/rsturla/akmods/raw/main/_certs/public_key.der"
           enrollment_password: "password"
-          iso_name: "${{ inputs.image-name }}-${{ inputs.image-tag }}.iso"
+          iso_name: "${{ inputs.image-name }}-${{ inputs.image-tag }}-${{ inputs.arch }}.iso"
           enable_cache_dnf: false
           enable_cache_skopeo: false
           flatpak_remote_refs_dir: ${{ steps.flatpak-dependencies.outputs.FLATPAK_REFS_DIR }}
@@ -112,7 +112,7 @@ jobs:
         if: inputs.upload-to-cloudflare == false
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.image-name }}-${{ inputs.image-tag }}-iso
+          name: ${{ inputs.image-name }}-${{ inputs.image-tag }}-${{ inputs.arch }}-iso
           path: |
             ${{ steps.build-iso.outputs.iso_path }}/${{ steps.build-iso.outputs.iso_name }}
 

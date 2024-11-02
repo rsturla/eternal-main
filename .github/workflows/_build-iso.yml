@@ -109,7 +109,7 @@ jobs:
           enable_flatpak_dependencies: false
 
       - name: Upload ISO to GitHub
-        if: inputs.upload-to-r2 == false
+        if: inputs.upload-to-cloudflare == false
         uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.image-name }}-${{ inputs.image-tag }}-iso

@@ -45,76 +45,76 @@ jobs:
         run: |
           set -euox pipefail
 
-      #    IMAGE="${IMAGE_FULL}"
+          IMAGE="${IMAGE_FULL}"
 
-      #    # Create temporary directory
-      #    TEMP_FLATPAK_INSTALL_DIR=$(mktemp -d -p /tmp flatpak-XXXXXX)
-      #    FLATPAK_REFS_DIR=./flatpak-refs
-      #    FLATPAK_REFS_DIR_ABS=$(realpath "${FLATPAK_REFS_DIR}")
-      #    mkdir -p "${FLATPAK_REFS_DIR}"
+          # Create temporary directory
+          TEMP_FLATPAK_INSTALL_DIR=$(mktemp -d -p /tmp flatpak-XXXXXX)
+          FLATPAK_REFS_DIR=./flatpak-refs
+          FLATPAK_REFS_DIR_ABS=$(realpath "${FLATPAK_REFS_DIR}")
+          mkdir -p "${FLATPAK_REFS_DIR}"
 
-      #    # Combine the list of Flatpak manifests into a single file
-      #    manifest_list=$(echo "${{ inputs.flatpak-manifest-lists }}" | sed '/^$/d')
-      #    for manifest in $manifest_list; do
-      #      cat "${manifest}" >> "${FLATPAK_REFS_DIR}/flatpaks.txt"
-      #    done
+          # Combine the list of Flatpak manifests into a single file
+          manifest_list=$(echo "${{ inputs.flatpak-manifest-lists }}" | sed '/^$/d')
+          for manifest in $manifest_list; do
+            cat "${manifest}" >> "${FLATPAK_REFS_DIR}/flatpaks.txt"
+          done
 
-      #    echo "Flatpak manifests combined into ${FLATPAK_REFS_DIR}/flatpaks.txt"
-      #    cat "${FLATPAK_REFS_DIR}/flatpaks.txt"
+          echo "Flatpak manifests combined into ${FLATPAK_REFS_DIR}/flatpaks.txt"
+          cat "${FLATPAK_REFS_DIR}/flatpaks.txt"
 
-      #    # Read the list of Flatpak packages from the manifest
-      #    FLATPAK_REFS=()
-      #    while IFS= read -r line; do
-      #      FLATPAK_REFS+=("$line")
-      #    done < "${FLATPAK_REFS_DIR}/flatpaks.txt"
+          # Read the list of Flatpak packages from the manifest
+          FLATPAK_REFS=()
+          while IFS= read -r line; do
+            FLATPAK_REFS+=("$line")
+          done < "${FLATPAK_REFS_DIR}/flatpaks.txt"
 
-      #    # Generate installation script
-      #    cat <<EOF > "${TEMP_FLATPAK_INSTALL_DIR}/install-flatpaks.sh"
-      #    mkdir -p /flatpak/flatpak /flatpak/triggers
-      #    mkdir /var/tmp
-      #    chmod -R 1777 /var/tmp
-      #    flatpak config --system --set languages "*"
-      #    flatpak remote-add --system flathub https://flathub.org/repo/flathub.flatpakrepo
-      #    flatpak install --system -y flathub ${FLATPAK_REFS[@]}
-      #    ostree refs --repo=\${FLATPAK_SYSTEM_DIR}/repo | grep '^deploy/' | grep -v 'org\.freedesktop\.Platform\.openh264' | sed 's/^deploy\///g' > /output/flatpaks-with-deps
-      #    EOF
-      #    docker run --rm --privileged \
-      #      --entrypoint /bin/bash \
-      #      -e FLATPAK_SYSTEM_DIR=/flatpak/flatpak \
-      #      -e FLATPAK_TRIGGERS_DIR=/flatpak/triggers \
-      #      -v ${FLATPAK_REFS_DIR_ABS}:/output \
-      #      -v ${TEMP_FLATPAK_INSTALL_DIR}:/temp_flatpak_install_dir \
-      #      ${IMAGE} /temp_flatpak_install_dir/install-flatpaks.sh
-      #    docker rmi ${IMAGE}
-      #    cat ${FLATPAK_REFS_DIR}/flatpaks-with-deps
+          # Generate installation script
+          cat <<EOF > "${TEMP_FLATPAK_INSTALL_DIR}/install-flatpaks.sh"
+          mkdir -p /flatpak/flatpak /flatpak/triggers
+          mkdir /var/tmp
+          chmod -R 1777 /var/tmp
+          flatpak config --system --set languages "*"
+          flatpak remote-add --system flathub https://flathub.org/repo/flathub.flatpakrepo
+          flatpak install --system -y flathub ${FLATPAK_REFS[@]}
+          ostree refs --repo=\${FLATPAK_SYSTEM_DIR}/repo | grep '^deploy/' | grep -v 'org\.freedesktop\.Platform\.openh264' | sed 's/^deploy\///g' > /output/flatpaks-with-deps
+          EOF
+          docker run --rm --privileged \
+            --entrypoint /bin/bash \
+            -e FLATPAK_SYSTEM_DIR=/flatpak/flatpak \
+            -e FLATPAK_TRIGGERS_DIR=/flatpak/triggers \
+            -v ${FLATPAK_REFS_DIR_ABS}:/output \
+            -v ${TEMP_FLATPAK_INSTALL_DIR}:/temp_flatpak_install_dir \
+            ${IMAGE} /temp_flatpak_install_dir/install-flatpaks.sh
+          docker rmi ${IMAGE}
+          cat ${FLATPAK_REFS_DIR}/flatpaks-with-deps
 
-      #    echo "FLATPAK_REFS_DIR=${FLATPAK_REFS_DIR}" >> $GITHUB_OUTPUT
+          echo "FLATPAK_REFS_DIR=${FLATPAK_REFS_DIR}" >> $GITHUB_OUTPUT
 
-      #- name: Build ISO
-      #  uses: jasonn3/build-container-installer@a1ce6da2d6c1af0561bec053366d0f3aa7e38743 # v1.2.3
-      #  id: build-iso
-      #  with:
-      #    arch: ${{ inputs.arch }}
-      #    image_name: ${{ inputs.image-name }}
-      #    image_repo: ${{ inputs.image-registry }}
-      #    image_tag: ${{ inputs.image-tag }}
-      #    variant: Kinoite
-      #    version: ${{ inputs.installer-version }}
-      #    secure_boot_key_url: "https://github.com/rsturla/akmods/raw/main/_certs/public_key.der"
-      #    enrollment_password: "password"
-      #    iso_name: "${{ inputs.image-name }}-${{ inputs.image-tag }}.iso"
-      #    enable_cache_dnf: false
-      #    enable_cache_skopeo: false
-      #    flatpak_remote_refs_dir: ${{ steps.flatpak-dependencies.outputs.FLATPAK_REFS_DIR }}
-      #    enable_flatpak_dependencies: false
+      - name: Build ISO
+        uses: jasonn3/build-container-installer@a1ce6da2d6c1af0561bec053366d0f3aa7e38743 # v1.2.3
+        id: build-iso
+        with:
+          arch: ${{ inputs.arch }}
+          image_name: ${{ inputs.image-name }}
+          image_repo: ${{ inputs.image-registry }}
+          image_tag: ${{ inputs.image-tag }}
+          variant: Kinoite
+          version: ${{ inputs.installer-version }}
+          secure_boot_key_url: "https://github.com/rsturla/akmods/raw/main/_certs/public_key.der"
+          enrollment_password: "password"
+          iso_name: "${{ inputs.image-name }}-${{ inputs.image-tag }}.iso"
+          enable_cache_dnf: false
+          enable_cache_skopeo: false
+          flatpak_remote_refs_dir: ${{ steps.flatpak-dependencies.outputs.FLATPAK_REFS_DIR }}
+          enable_flatpak_dependencies: false
 
-      #- name: Upload ISO to GitHub
-      #  if: inputs.upload-to-cloudflare == false
-      #  uses: actions/upload-artifact@v4
-      #  with:
-      #    name: ${{ inputs.image-name }}-${{ inputs.image-tag }}-iso
-      #    path: |
-      #      ${{ steps.build-iso.outputs.iso_path }}/${{ steps.build-iso.outputs.iso_name }}
+      - name: Upload ISO to GitHub
+        if: inputs.upload-to-cloudflare == false
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.image-name }}-${{ inputs.image-tag }}-iso
+          path: |
+            ${{ steps.build-iso.outputs.iso_path }}/${{ steps.build-iso.outputs.iso_name }}
 
       - name: Upload ISO to CloudFlare R2
         if: inputs.upload-to-cloudflare == true
@@ -126,10 +126,9 @@ jobs:
           RCLONE_CONFIG_R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           RCLONE_CONFIG_R2_REGION: auto
           RCLONE_CONFIG_R2_ENDPOINT: https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.r2.cloudflarestorage.com
-          #SOURCE_FILE: ${{ steps.build-iso.outputs.iso_path }}/${{ steps.build-iso.outputs.iso_name }}
+          SOURCE_FILE: ${{ steps.build-iso.outputs.iso_path }}/${{ steps.build-iso.outputs.iso_name }}
           DEST_BUCKET: ${{ inputs.r2-bucket }}
         run: |
           sudo apt-get update
           sudo apt-get install -y rclone
-          echo "Hello World" > test.txt
-          rclone copy ./test.txt R2:$DEST_BUCKET
+          rclone copy $SOURCE_FILE R2:$DEST_BUCKET

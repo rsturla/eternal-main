@@ -76,11 +76,11 @@ generate_tags() {
     tags+=("$IMAGE_NAME:$os_version-$os_edition-$(date +%Y%m%d%H%M%S)")
     tags+=("$IMAGE_NAME:$os_version-$os_edition-$(date +%Y%m%d)")
 
-    # If a GitHub ref is available, add a tag with the ref
-    if [[ -n "${GITHUB_REF:-}" ]]; then
-        local ref_tag="${GITHUB_REF##*/}"
-        tags+=("$IMAGE_NAME:$os_version-$os_edition-$ref_tag")
-        tags+=("$IMAGE_NAME:$os_version-$os_edition-$ref_tag-$(date +%Y%m%d%H%M%S)")
+    # If a GitHub sha is available, add a tag with the ref
+    if [[ -n "${GITHUB_SHA:-}" ]]; then
+        local ref_tag="${GITHUB_SHA::8}"
+        tags+=("$IMAGE_NAME:$os_version-$os_edition-$sha_tag")
+        tags+=("$IMAGE_NAME:$os_version-$os_edition-$sha_tag-$(date +%Y%m%d%H%M%S)")
     fi
 
     echo "${tags[@]}"

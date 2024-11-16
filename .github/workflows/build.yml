@@ -62,7 +62,7 @@ jobs:
           FEDORA_EDITION: ${{ matrix.fedora-edition }}
           IS_RECHUNK: ${{ github.event_name != 'pull_request' && true || false }}
           IS_SIGN_IMAGE: ${{ github.event_name != 'pull_request' && true || false }}
-        runs: |
+        run: |
           ./.github/scripts/build-image.sh \
             --containerfile ./Containerfile \
             --image-name $IMAGE_NAME \
@@ -78,7 +78,7 @@ jobs:
           IMAGE_NAME: ${{ env.IMAGE_NAME }}
           IMAGE_REGISTRY: ${{ env.IMAGE_REGISTRY }}
           IS_SIGN_IMAGE: ${{ github.event_name != 'pull_request' && true || false }}
-        runs: |
+        run: |
           ./.github/scripts/push-image.sh \
             SOURCE_IMAGE=$SOURCE_IMAGE \
             IMAGE_NAME=$IMAGE_NAME \

@@ -19,7 +19,7 @@ usage() {
     echo "  --image-name IMAGE_NAME        Name of the image (required)"
     echo "  --os-version OS_VERSION        OS version (required)"
     echo "  --os-edition OS_EDITION        OS edition (required)"
-    echo "  --is-rechunk                   Flag to indicate whether to rechunk (default: false)"
+    echo "  --is-rechunk true|false        Whether to rechunk the image (default: false)"
     echo "  --meta-out-file META_OUT_FILE  Path to the metadata output file"
     exit 1
 }
@@ -44,8 +44,8 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         --is-rechunk)
-            IS_RECHUNK=true
-            shift
+            IS_RECHUNK="$2"
+            shift 2
             ;;
         --meta-out-file)
             META_OUT_FILE="$2"

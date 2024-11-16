@@ -41,8 +41,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
-      - name: Maximize build space
-        uses: ublue-os/remove-unwanted-software@517622d6452028f266b7ba4cc9a123b5f58a6b53 # v7
+      # - name: Maximize build space
+      #   uses: ublue-os/remove-unwanted-software@517622d6452028f266b7ba4cc9a123b5f58a6b53 # v7
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
@@ -58,7 +58,6 @@ jobs:
           FEDORA_VERSION: ${{ env.FEDORA_VERSION }}
           FEDORA_EDITION: ${{ matrix.fedora-edition }}
           IS_RECHUNK: ${{ github.event_name != 'pull_request' && true || false }}
-          IS_SIGN_IMAGE: ${{ github.event_name != 'pull_request' && true || false }}
         run: |
           ./.github/scripts/build-image.sh \
             --containerfile ./Containerfile \

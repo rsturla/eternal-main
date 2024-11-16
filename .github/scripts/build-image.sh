@@ -95,6 +95,8 @@ echo "Building image with tags: ${tags[@]}"
 podman build \
     -f "$CONTAINERFILE" \
     $tag_args \
+    --build-arg FEDORA_VERSION="$OS_VERSION" \
+    --build-arg FEDORA_EDITION="$OS_EDITION" \
     .
 
 # Output metadata to the specified file

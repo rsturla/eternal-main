@@ -3,7 +3,6 @@
 set -euox pipefail
 
 # Install the required packages
-rpm-ostree install \
-    power-profiles-daemon
+dnf install -y power-profiles-daemon
 
 systemctl enable power-profiles-daemon

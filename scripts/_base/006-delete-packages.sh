@@ -2,7 +2,7 @@
 
 set -euox pipefail
 
-rpm-ostree override remove \
+dnf remove -y \
   ffmpeg-free \
   firefox \
   firefox-langpacks \

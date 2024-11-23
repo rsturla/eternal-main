@@ -2,4 +2,4 @@
 
 set -euox pipefail
 
-rpm-ostree install adw-gtk3-theme
+dnf install -y adw-gtk3-theme

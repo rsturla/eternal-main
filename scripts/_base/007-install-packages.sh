@@ -2,9 +2,8 @@
 
 set -euox pipefail
 
-rpm-ostree install \
+dnf install -y \
   bootc \
-  bootupd \
   direnv \
   distrobox \
   ffmpeg \

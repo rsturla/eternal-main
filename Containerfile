@@ -19,5 +19,4 @@ RUN chmod +x /tmp/scripts/*.sh /tmp/scripts/_${FEDORA_EDITION}/*.sh && \
     /tmp/scripts/setup.sh --version ${FEDORA_VERSION} --base ${FEDORA_EDITION} --coreos-kernel ${COREOS_KERNEL} && \
     /tmp/scripts/cleanup.sh --version ${FEDORA_VERSION} --base ${FEDORA_EDITION} \
     && \
-    rm -rf /tmp/* /var/* && \
-    ostree container commit
+    rm -rf /tmp/* /var/*

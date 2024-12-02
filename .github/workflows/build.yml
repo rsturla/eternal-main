@@ -30,9 +30,9 @@ jobs:
           - fedora-edition: cosmic
             image-registry: ghcr.io/rsturla/eternal-linux/base
           - fedora-edition: silverblue
-            image-registry: quay.io/fedora/fedora-silverblue
+            image-registry: quay.io/fedora/fedora-
           - fedora-edition: kinoite
-            image-registry: quay.io/fedora/fedora-kinoite
+            image-registry: quay.io/fedora/fedora-
     permissions:
       contents: read
       packages: write

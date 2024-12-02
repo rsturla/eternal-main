@@ -28,7 +28,7 @@ jobs:
         fedora-edition: [silverblue, kinoite, cosmic]
         include:
           - fedora-edition: cosmic
-            image-registry: ghcr.io/rsturla/eternal-linux/base/cosmic
+            image-registry: ghcr.io/rsturla/eternal-linux/base/fedora-cosmic
           - fedora-edition: silverblue
             image-registry: quay.io/fedora/fedora-silverblue
           - fedora-edition: kinoite

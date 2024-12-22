@@ -7,7 +7,10 @@ wget https://copr.fedorainfracloud.org/coprs/ublue-os/staging/repo/fedora-$(rpm 
 dnf remove -y \
   gnome-software-rpm-ostree
 
-dnf upgrade -y \
+dnf remove -y \
+  gnome-software
+
+dnf install -y \
   --repo=copr:copr.fedorainfracloud.org:ublue-os:staging \
   gnome-software
 

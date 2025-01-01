@@ -34,4 +34,5 @@ RUN chmod +x /tmp/akmods/scripts/*.sh && \
   && \
   echo "import '/usr/share/eternal/nvidia.just'" >> /usr/share/eternal/justfile \
   && \
-  rm -rf /var/* /tmp/*
+  ls -la /usr/lib/modules && \
+  bootc container lint

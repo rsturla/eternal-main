@@ -99,6 +99,9 @@ jobs:
           prev-ref: ${{ env.IMAGE_REGISTRY }}/${{ steps.build.outputs.image }}:${{ steps.generate-image-tags.outputs.primary-tag }}
           tags: ${{ steps.build.outputs.tags }}
 
+      - name: Login to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
       - name: Push Image
         id: push
         uses: ./.github/actions/push-image
@@ -213,6 +216,9 @@ jobs:
           ref: ${{ steps.build.outputs.image }}:${{ steps.generate-image-tags.outputs.primary-tag }}
           prev-ref: ${{ env.IMAGE_REGISTRY }}/${{ steps.build.outputs.image }}:${{ steps.generate-image-tags.outputs.primary-tag }}
           tags: ${{ steps.build.outputs.tags }}
+
+      - name: Login to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Push Image
         id: push

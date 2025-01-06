@@ -63,6 +63,7 @@ runs:
         podman build \
           $BUILD_ARG_FLAGS \
           $TAGS_FLAGS \
+          -f ${{ inputs.dockerfile }} \
           ${{ inputs.context }}
 
         digest=$(podman image inspect ${{ inputs.image-name }}:${tag_array[0]} --format "{{.Digest}}")
@@ -90,6 +91,7 @@ runs:
         docker build \
           $BUILD_ARG_FLAGS \
           $TAGS_FLAGS \
+          -f ${{ inputs.dockerfile }} \
           ${{ inputs.context }}
 
         digest=$(docker image inspect ${{ inputs.image-name }}:${tag_array[0]} --format "{{.Id}}")

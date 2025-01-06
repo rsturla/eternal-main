@@ -17,7 +17,7 @@ inputs:
     description: "The tags to apply to the image"
     required: true
   build-args:
-    description: "Build arguments to pass to the Docker build"
+    description: "Build arguments to pass to the Docker build.  Newline separated list of key=value pairs."
     required: false
     default: ""
   builder:
@@ -46,14 +46,17 @@ runs:
       if: ${{ inputs.builder == 'podman' }}
       id: build-podman
       shell: bash
+      env:
+        BUILD_ARGS_INPUT: ${{ inputs.build-args }}
       run: |
-        BUILD_ARG_FLAGS=""
-        if [ -n "${{ inputs.build-args }}" ]; then
-          IFS=' ' read -r -a build_args_array <<< "${{ inputs.build-args }}"
-          for build_arg in "${build_args_array[@]}"; do
-            BUILD_ARG_FLAGS+="--build-arg $build_arg "
-          done
-        fi
+        BUILD_ARGS=()
+        while IFS= read -r build_arg; do
+          if [ -z "$build_arg" ]; then
+            continue
+          fi
+          BUILD_ARGS+=("--build-arg $build_arg")
+        done <<< "${BUILD_ARGS_INPUT}"
+
         TAGS_FLAGS=""
         IFS=' ' read -r -a tag_array <<< "${{ inputs.image-tags }}"
         for tag in "${tag_array[@]}"; do
@@ -61,7 +64,7 @@ runs:
         done
 
         podman build \
-          $BUILD_ARG_FLAGS \
+          "${BUILD_ARGS[@]}" \
           $TAGS_FLAGS \
           -f ${{ inputs.dockerfile }} \
           ${{ inputs.context }}
@@ -73,14 +76,18 @@ runs:
       if: ${{ inputs.builder == 'docker' }}
       id: build-docker
       shell: bash
+      env:
+        BUILD_ARGS_INPUT: ${{ inputs.build-args }}
       run: |
-        BUILD_ARG_FLAGS=""
-        if [ -n "${{ inputs.build-args }}" ]; then
-          IFS=' ' read -r -a build_args_array <<< "${{ inputs.build-args }}"
-          for build_arg in "${build_args_array[@]}"; do
-            BUILD_ARG_FLAGS+="--build-arg $build_arg "
-          done
-        fi
+        set -ex
+
+        BUILD_ARGS=()
+        while IFS= read -r build_arg; do
+          if [ -z "$build_arg" ]; then
+            continue
+          fi
+          BUILD_ARGS+=("--build-arg $build_arg")
+        done <<< "${BUILD_ARGS_INPUT}"
 
         TAGS_FLAGS=""
         IFS=' ' read -r -a tag_array <<< "${{ inputs.image-tags }}"
@@ -89,7 +96,7 @@ runs:
         done
 
         docker build \
-          $BUILD_ARG_FLAGS \
+          ${BUILD_ARGS[@]} \
           $TAGS_FLAGS \
           -f ${{ inputs.dockerfile }} \
           ${{ inputs.context }}

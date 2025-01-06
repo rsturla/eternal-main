@@ -64,7 +64,7 @@ runs:
         done
 
         podman build \
-          "${BUILD_ARGS[@]}" \
+          ${BUILD_ARGS[@]} \
           $TAGS_FLAGS \
           -f ${{ inputs.dockerfile }} \
           ${{ inputs.context }}
@@ -79,8 +79,6 @@ runs:
       env:
         BUILD_ARGS_INPUT: ${{ inputs.build-args }}
       run: |
-        set -ex
-
         BUILD_ARGS=()
         while IFS= read -r build_arg; do
           if [ -z "$build_arg" ]; then

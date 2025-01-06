@@ -24,11 +24,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        fedora-version: [40, 41, stable]
+        fedora-version: [41, stable]
         fedora-edition: [silverblue, kinoite, cosmic]
         include:
           - fedora-edition: cosmic
-            image-registry: ghcr.io/rsturla/eternal-linux/base
+            image-registry: ghcr.io/rsturla/eternal-linux/base/fedora-cosmic
+          - fedora-edition: silverblue
+            image-registry: quay.io/fedora/fedora-silverblue
+          - fedora-edition: kinoite
+            image-registry: quay.io/fedora/fedora-kinoite
     permissions:
       contents: read
       packages: write
@@ -125,7 +129,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        fedora-version: [40, 41, stable]
+        fedora-version: [41, stable]
         fedora-edition: [silverblue, kinoite, cosmic]
         nvidia-type: [open]
     permissions:

@@ -23,7 +23,10 @@
             "ghcr.io/rsturla/eternal-linux": [
                 {
                     "type": "sigstoreSigned",
-                    "keyPath": "/etc/pki/containers/eternal-linux.pub",
+                    "keyPaths": [
+                        "/etc/pki/containers/eternal-linux.pub",
+                        "/etc/pki/containers/eternal-linux-backup.pub"
+                    ],
                     "signedIdentity": {
                         "type": "matchRepository"
                     }

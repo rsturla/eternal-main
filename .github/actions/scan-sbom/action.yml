@@ -23,7 +23,7 @@ runs:
   steps:
     - name: Scan SBOM
       id: scan
-      uses: anchore/scan-action@5ed195cc06065322983cae4bb31e2a751feb86fd # v5
+      uses: anchore/scan-action@abae793926ec39a78ab18002bc7fc45bbbd94342 # v6
       with:
         sbom: ${{ inputs.sbom-file }}
         output-format: ${{ inputs.output-format }}
@@ -32,7 +32,7 @@ runs:
     - name: Upload SBOM Artifact
       if: inputs.artifact-name != '' && always()
       id: upload
-      uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4
+      uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4
       with:
         name: ${{ inputs.artifact-name }}
         path: ${{ steps.scan.outputs.json || steps.scan.outputs.sarif }}

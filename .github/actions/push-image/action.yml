@@ -1,57 +1,56 @@
 name: Push Image
+description: "Pushes a container image to a registry using Podman or Docker"
 
 inputs:
   image-name:
-    description: 'The name of the image to build'
+    description: "The name of the image to build"
     required: true
   image-tags:
-    description: 'The tags to apply to the image'
+    description: "The tags to apply to the image"
     required: true
   image-registry:
-    description: 'The registry to push the image to'
+    description: "The registry to push the image to"
     required: true
   builder:
-    description: 'The name of the builder to use (docker or podman)'
+    description: "The name of the builder to use (docker or podman)"
     required: false
-    default: 'podman'
-  registry-username:
-    description: 'The username to authenticate with the registry'
-    required: false
-    default: ${{ github.actor }}
-  registry-password:
-    description: 'The password to authenticate with the registry'
-    required: false
-    default: ${{ github.token }}
+    default: "podman"
 
 outputs:
   registry-path:
-    description: 'The path to the pushed image in the registry'
+    description: "The path to the pushed image in the registry"
     value: ${{ steps.set-outputs.outputs.registry-path }}
   digest:
-    description: 'The digest of the image in the registry'
+    description: "The digest of the image in the registry"
     value: ${{ steps.set-outputs.outputs.digest }}
 
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
     - name: Push (Podman)
       if: ${{ inputs.builder == 'podman' }}
       id: push-podman
-      uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2
-      with:
-        image: ${{ inputs.image-name }}
-        tags: ${{ inputs.image-tags }}
-        registry: ${{ inputs.image-registry }}
-        username: ${{ inputs.registry-username }}
-        password: ${{ inputs.registry-password }}
+      shell: bash
+      run: |
+        # Convert the tags to an array
+        IFS=' ' read -ra TAGS <<< "${{ inputs.image-tags }}"
+        tags=()
 
-    - name: Login (Docker)
-      if: ${{ inputs.builder == 'docker' }}
-      uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3
-      with:
-        registry: ${{ inputs.image-registry }}
-        username: ${{ inputs.registry-username }}
-        password: ${{ inputs.registry-password }}
+        # Push the image with each tag
+        for tag in "${TAGS[@]}"; do
+          image="${{ inputs.image-registry }}/${{ inputs.image-name }}:${tag}"
+          echo "IMAGE=${image}"
+          tags+=("${image}")
+          podman tag "${{ inputs.image-name }}:${tag}" "${image}"
+          podman push --digestfile /tmp/digestfile "${image}"
+        done
+
+        # Get the digest of the first tag
+        digest=$(cat /tmp/digestfile)
+
+        # Set the outputs
+        echo "registry-path=${tags[0]}" >> $GITHUB_OUTPUT
+        echo "digest=${digest}" >> $GITHUB_OUTPUT
 
     - name: Push (Docker)
       if: ${{ inputs.builder == 'docker' }}

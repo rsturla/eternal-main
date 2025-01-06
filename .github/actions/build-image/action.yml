@@ -1,84 +1,107 @@
 name: Build Image
+description: "Builds a container image using Podman or Docker"
 
 inputs:
   context:
-    description: 'The build context directory'
+    description: "The build context directory"
     required: false
-    default: '.'
+    default: "."
   dockerfile:
-    description: 'The path to the Dockerfile to build'
+    description: "The path to the Dockerfile to build"
     required: false
-    default: 'Containerfile'
+    default: "Containerfile"
   image-name:
-    description: 'The name of the image to build'
+    description: "The name of the image to build"
     required: true
   image-tags:
-    description: 'The tags to apply to the image'
+    description: "The tags to apply to the image"
     required: true
   build-args:
-    description: 'Build arguments to pass to the Docker build'
+    description: "Build arguments to pass to the Docker build.  Newline separated list of key=value pairs."
     required: false
-    default: ''
+    default: ""
   builder:
-    description: 'The name of the builder to use (docker or podman)'
+    description: "The name of the builder to use (docker or podman)"
     required: false
-    default: 'podman'
+    default: "podman"
 
 outputs:
   image:
-    description: 'The name of the built image'
+    description: "The name of the built image"
     value: ${{ steps.set-outputs.outputs.image }}
   tags:
-    description: 'The tags applied to the built image'
+    description: "The tags applied to the built image"
     value: ${{ steps.set-outputs.outputs.tags }}
   digest:
-    description: 'The digest of the built image'
+    description: "The digest of the built image"
     value: ${{ steps.set-outputs.outputs.digest }}
   builder:
-    description: 'The builder used to build the image'
+    description: "The builder used to build the image"
     value: ${{ inputs.builder }}
 
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
     - name: Build (Podman)
       if: ${{ inputs.builder == 'podman' }}
       id: build-podman
-      uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2
-      with:
-        context: ${{ inputs.context }}
-        containerfiles: ${{ inputs.dockerfile }}
-        image: ${{ inputs.image-name }}
-        tags: ${{ inputs.image-tags }}
-        build-args: ${{ inputs.build-args }}
-
-    - name: Generate Tags (Docker)
-      if: ${{ inputs.builder == 'docker' }}
-      id: generate-image-tags-docker
       shell: bash
+      env:
+        BUILD_ARGS_INPUT: ${{ inputs.build-args }}
       run: |
-        # Reading space-separated list into an array
-        IFS=' ' read -r -a tag_array <<< "${{ inputs.image-tags }}"
+        BUILD_ARGS=()
+        while IFS= read -r build_arg; do
+          if [ -z "$build_arg" ]; then
+            continue
+          fi
+          BUILD_ARGS+=("--build-arg $build_arg")
+        done <<< "${BUILD_ARGS_INPUT}"
 
-        # Iterate over all tag inputs and prepend the image name
-        tags=""
+        TAGS_FLAGS=""
+        IFS=' ' read -r -a tag_array <<< "${{ inputs.image-tags }}"
         for tag in "${tag_array[@]}"; do
-          tags+="${{ inputs.image-name }}:$tag, "
+          TAGS_FLAGS+="--tag ${{ inputs.image-name }}:$tag "
         done
-        # Remove trailing comma and space
-        tags="${tags%, }"
-        echo "tags=$tags" >> $GITHUB_OUTPUT
+
+        podman build \
+          ${BUILD_ARGS[@]} \
+          $TAGS_FLAGS \
+          -f ${{ inputs.dockerfile }} \
+          ${{ inputs.context }}
+
+        digest=$(podman image inspect ${{ inputs.image-name }}:${tag_array[0]} --format "{{.Digest}}")
+        echo "digest=$digest" >> $GITHUB_OUTPUT
 
     - name: Build (Docker)
       if: ${{ inputs.builder == 'docker' }}
       id: build-docker
-      uses: docker/build-push-action@48aba3b46d1b1fec4febb7c5d0c644b249a11355 # v6
-      with:
-        context: ${{ inputs.context }}
-        file: ${{ inputs.dockerfile }}
-        tags: ${{ steps.generate-image-tags-docker.outputs.tags }}
-        build-args: ${{ inputs.build-args }}
-        push: false
+      shell: bash
+      env:
+        BUILD_ARGS_INPUT: ${{ inputs.build-args }}
+      run: |
+        BUILD_ARGS=()
+        while IFS= read -r build_arg; do
+          if [ -z "$build_arg" ]; then
+            continue
+          fi
+          BUILD_ARGS+=("--build-arg $build_arg")
+        done <<< "${BUILD_ARGS_INPUT}"
+
+        TAGS_FLAGS=""
+        IFS=' ' read -r -a tag_array <<< "${{ inputs.image-tags }}"
+        for tag in "${tag_array[@]}"; do
+          TAGS_FLAGS+="--tag ${{ inputs.image-name }}:$tag "
+        done
+
+        docker build \
+          --progress=plain \
+          ${BUILD_ARGS[@]} \
+          $TAGS_FLAGS \
+          -f ${{ inputs.dockerfile }} \
+          ${{ inputs.context }}
+
+        digest=$(docker image inspect ${{ inputs.image-name }}:${tag_array[0]} --format "{{.Id}}")
+        echo "digest=$digest" >> $GITHUB_OUTPUT
 
     - name: Set Outputs
       id: set-outputs
@@ -88,13 +111,8 @@ runs:
       run: |
         echo "image=${{ inputs.image-name }}" >> $GITHUB_OUTPUT
         if [ "$BUILDER" == "podman" ]; then
-          # Reading space-separated list into an array
-          IFS=' ' read -r -a tag_array <<< "${{ inputs.image-tags }}"
-          single_tag="${tag_array[0]}"
-
           echo "tags=${{ inputs.image-tags }}" >> $GITHUB_OUTPUT
-          digest=$(podman image inspect ${{ inputs.image-name }}:$single_tag --format '{{.Digest}}')
-          echo "digest=$digest" >> $GITHUB_OUTPUT
+          echo "digest=${{ steps.build-podman.outputs.digest }}" >> $GITHUB_OUTPUT
         else
           echo "tags=${{ inputs.image-tags }}" >> $GITHUB_OUTPUT
           echo "digest=${{ steps.build-docker.outputs.digest }}" >> $GITHUB_OUTPUT

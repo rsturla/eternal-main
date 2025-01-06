@@ -94,6 +94,7 @@ runs:
         done
 
         docker build \
+          --progress=plain \
           ${BUILD_ARGS[@]} \
           $TAGS_FLAGS \
           -f ${{ inputs.dockerfile }} \

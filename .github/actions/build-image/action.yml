@@ -68,33 +68,32 @@ runs:
         digest=$(podman image inspect ${{ inputs.image-name }}:${tag_array[0]} --format "{{.Digest}}")
         echo "digest=$digest" >> $GITHUB_OUTPUT
 
-    - name: Generate Tags (Docker)
-      if: ${{ inputs.builder == 'docker' }}
-      id: generate-image-tags-docker
-      shell: bash
-      run: |
-        # Reading space-separated list into an array
-        IFS=' ' read -r -a tag_array <<< "${{ inputs.image-tags }}"
-
-        # Iterate over all tag inputs and prepend the image name
-        tags=""
-        for tag in "${tag_array[@]}"; do
-          tags+="${{ inputs.image-name }}:$tag, "
-        done
-        # Remove trailing comma and space
-        tags="${tags%, }"
-        echo "tags=$tags" >> $GITHUB_OUTPUT
-
     - name: Build (Docker)
       if: ${{ inputs.builder == 'docker' }}
       id: build-docker
-      uses: docker/build-push-action@48aba3b46d1b1fec4febb7c5d0c644b249a11355 # v6
-      with:
-        context: ${{ inputs.context }}
-        file: ${{ inputs.dockerfile }}
-        tags: ${{ steps.generate-image-tags-docker.outputs.tags }}
-        build-args: ${{ inputs.build-args }}
-        push: false
+      shell: bash
+      run: |
+        BUILD_ARG_FLAGS=""
+        if [ -n "${{ inputs.build-args }}" ]; then
+          IFS=' ' read -r -a build_args_array <<< "${{ inputs.build-args }}"
+          for build_arg in "${build_args_array[@]}"; do
+            BUILD_ARG_FLAGS+="--build-arg $build_arg "
+          done
+        fi
+
+        TAGS_FLAGS=""
+        IFS=' ' read -r -a tag_array <<< "${{ inputs.image-tags }}"
+        for tag in "${tag_array[@]}"; do
+          TAGS_FLAGS+="--tag ${{ inputs.image-name }}:$tag "
+        done
+
+        docker build \
+          $BUILD_ARG_FLAGS \
+          $TAGS_FLAGS \
+          ${{ inputs.context }}
+
+        digest=$(docker image inspect ${{ inputs.image-name }}:${tag_array[0]} --format "{{.Id}}")
+        echo "digest=$digest" >> $GITHUB_OUTPUT
 
     - name: Set Outputs
       id: set-outputs
@@ -104,10 +103,6 @@ runs:
       run: |
         echo "image=${{ inputs.image-name }}" >> $GITHUB_OUTPUT
         if [ "$BUILDER" == "podman" ]; then
-          # Reading space-separated list into an array
-          IFS=' ' read -r -a tag_array <<< "${{ inputs.image-tags }}"
-          single_tag="${tag_array[0]}"
-
           echo "tags=${{ inputs.image-tags }}" >> $GITHUB_OUTPUT
           echo "digest=${{ steps.build-podman.outputs.digest }}" >> $GITHUB_OUTPUT
         else

@@ -33,6 +33,9 @@ jobs:
             image-registry: quay.io/fedora/fedora-silverblue
           - fedora-edition: kinoite
             image-registry: quay.io/fedora/fedora-kinoite
+        exclude:
+          - fedora-version: 41
+            fedora-edition: cosmic
     permissions:
       contents: read
       packages: write

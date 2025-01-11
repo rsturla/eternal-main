@@ -138,6 +138,9 @@ jobs:
         fedora-version: [41, stable]
         fedora-edition: [silverblue, kinoite, cosmic]
         nvidia-type: [open]
+        exclude:
+          - fedora-version: 41
+            fedora-edition: cosmic
     permissions:
       contents: read
       packages: write

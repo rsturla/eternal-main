@@ -12,7 +12,9 @@ KERNEL_VERSION=$COREOS_KERNEL
 KERNEL_MAJOR_MINOR_PATCH=$(echo $KERNEL_VERSION | cut -d '-' -f 1)
 KERNEL_RELEASE=$(echo $KERNEL_VERSION | cut -d '-' -f 2 | rev | cut -d '.' -f 2- | rev)
 ARCH=$(uname -m)
-rpm-ostree override replace --experimental \
+
+dnf remove -y kernel{,-core,-modules,-modules-core,-modules-extra}
+dnf install -y \
     https://kojipkgs.fedoraproject.org//packages/kernel/$KERNEL_MAJOR_MINOR_PATCH/$KERNEL_RELEASE/$ARCH/kernel-$KERNEL_MAJOR_MINOR_PATCH-$KERNEL_RELEASE.$ARCH.rpm \
     https://kojipkgs.fedoraproject.org//packages/kernel/$KERNEL_MAJOR_MINOR_PATCH/$KERNEL_RELEASE/$ARCH/kernel-core-$KERNEL_MAJOR_MINOR_PATCH-$KERNEL_RELEASE.$ARCH.rpm \
     https://kojipkgs.fedoraproject.org//packages/kernel/$KERNEL_MAJOR_MINOR_PATCH/$KERNEL_RELEASE/$ARCH/kernel-modules-$KERNEL_MAJOR_MINOR_PATCH-$KERNEL_RELEASE.$ARCH.rpm \

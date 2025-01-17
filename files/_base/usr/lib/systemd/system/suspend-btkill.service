@@ -1,0 +1,13 @@
+[Unit]
+Description=Kill power to Bluetooth adapters on suspend
+Before=sleep.target
+StopWhenUnneeded=yes
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/sbin/rfkill block bluetooth
+ExecStop=/usr/sbin/rfkill unblock bluetooth
+
+[Install]
+WantedBy=sleep.target

@@ -12,10 +12,10 @@ ARG FEDORA_VERSION
 ARG FEDORA_KERNEL_FLAVOR
 
 COPY kmods/_certs /tmp/certs
-COPY kmods/${KMOD_NAME}/scripts /tmp/scripts
-COPY kmods/${KMOD_NAME}/scripts/build /tmp/scripts
-COPY kmods/${KMOD_NAME}/*.spec /tmp/rpm-specs/
-COPY kmods/${KMOD_NAME}/build-files /tmp/files
+COPY kmods/nvidia-open/scripts /tmp/scripts
+COPY kmods/nvidia-open/scripts/build /tmp/scripts
+COPY kmods/nvidia-open/*.spec /tmp/rpm-specs/
+COPY kmods/nvidia-open/build-files /tmp/files
 
 RUN chmod +x /tmp/scripts/*.sh && \
     /tmp/scripts/000-replace-kernel.sh ${FEDORA_KERNEL_FLAVOR} && \

@@ -25,7 +25,8 @@ dnf install -y \
   sbsigntools \
   openssl
 
-gem install fpm
+mkdir -p /root/.local/share/gem/ruby/cache
+gem install fpm --no-user-install --clear-sources
 
 if [[ ! -s "/tmp/certs/private_key.priv" ]]; then
     echo "WARNING: Using test signing key. Run './generate-akmods-key' for production builds."

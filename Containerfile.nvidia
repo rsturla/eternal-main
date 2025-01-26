@@ -13,7 +13,6 @@ ARG FEDORA_KERNEL_FLAVOR
 
 COPY kmods/_certs /tmp/certs
 COPY kmods/nvidia-open/scripts /tmp/scripts
-COPY kmods/nvidia-open/scripts/build /tmp/scripts
 COPY kmods/nvidia-open/*.spec /tmp/rpm-specs/
 COPY kmods/nvidia-open/build-files /tmp/files
 

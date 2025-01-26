@@ -4,12 +4,13 @@ ARG FEDORA_EDITION=base
 ARG BASE_IMAGE=ghcr.io/rsturla/eternal-linux/main/${FEDORA_EDITION}
 ARG BASE_TAG=${FEDORA_VERSION}
 ARG BASE_IMAGE_FULL=${BASE_IMAGE}:41
-
+ARG COREOS_KERNEL
 
 FROM quay.io/fedora/fedora:${FEDORA_VERSION} AS builder
 
 ARG FEDORA_VERSION
 ARG FEDORA_KERNEL_FLAVOR
+ARG COREOS_KERNEL
 
 COPY kmods/_certs /tmp/certs
 COPY kmods/nvidia-open/scripts /tmp/scripts

@@ -210,8 +210,7 @@ jobs:
             FEDORA_VERSION=${{ env.FEDORA_VERSION }}
             FEDORA_EDITION=${{ matrix.fedora-edition }}
             BASE_TAG=${{ steps.generate-base-image-tag.outputs.base-tag }}
-            ${{ matrix.nvidia-type == 'open' && format('NVIDIA_AKMODS_IMAGE={0}', 'ghcr.io/rsturla/akmods/nvidia-open') || '' }}
-            NVIDIA_AKMODS_TAG=${{ matrix.fedora-version }}
+            COREOS_KERNEL=${{ env.COREOS_KERNEL }}
 
       - name: Rechunk
         id: rechunk

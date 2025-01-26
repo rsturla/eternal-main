@@ -5,11 +5,26 @@ ARG BASE_IMAGE=ghcr.io/rsturla/eternal-linux/main/${FEDORA_EDITION}
 ARG BASE_TAG=${FEDORA_VERSION}
 ARG BASE_IMAGE_FULL=${BASE_IMAGE}:${BASE_TAG}
 
-ARG NVIDIA_AKMODS_IMAGE=ghcr.io/rsturla/akmods/nvidia
-ARG NVIDIA_AKMODS_TAG=${FEDORA_VERSION}
 
+FROM quay.io/fedora/fedora:${FEDORA_VERSION} AS builder
 
-FROM ${NVIDIA_AKMODS_IMAGE}:${NVIDIA_AKMODS_TAG} as akmods-nvidia
+ARG FEDORA_VERSION
+ARG FEDORA_KERNEL_FLAVOR
+
+COPY kmods/_certs /tmp/certs
+COPY kmods/${KMOD_NAME}/scripts /tmp/scripts
+COPY kmods/${KMOD_NAME}/scripts/build /tmp/scripts
+COPY kmods/${KMOD_NAME}/*.spec /tmp/rpm-specs/
+COPY kmods/${KMOD_NAME}/build-files /tmp/files
+
+RUN chmod +x /tmp/scripts/*.sh && \
+    /tmp/scripts/000-replace-kernel.sh ${FEDORA_KERNEL_FLAVOR} && \
+    /tmp/scripts/001-install-build-deps.sh && \
+    /tmp/scripts/002-build.sh && \
+    /tmp/scripts/999-final.sh
+
+RUN rpm -ql /rpms/*.rpm
+
 
 
 FROM ${BASE_IMAGE_FULL} as base-nvidia

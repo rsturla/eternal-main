@@ -15,6 +15,7 @@ sed -i 's@enabled=0@enabled=1@g' /etc/yum.repos.d/fedora-updates-archive.repo
 
 # enable RPMs with alternatives to create them in this image build
 mkdir -p /var/lib/alternatives
+mkdir -p /root/.local/share/gem/ruby/cache
 
 dnf install -y \
   akmods \
@@ -25,7 +26,6 @@ dnf install -y \
   sbsigntools \
   openssl
 
-mkdir -p /root/.local/share/gem/ruby/cache
 gem install fpm --no-user-install --clear-sources
 
 if [[ ! -s "/tmp/certs/private_key.priv" ]]; then

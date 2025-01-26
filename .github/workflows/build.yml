@@ -130,7 +130,7 @@ jobs:
 
   build-nvidia:
     runs-on: ubuntu-24.04
-    needs: build-base
+    # needs: build-base
     if: ${{ !cancelled() }}
     strategy:
       fail-fast: false

@@ -23,7 +23,11 @@ dnf install -y \
   dnf-plugins-core \
   rpmrebuild \
   sbsigntools \
-  openssl
+  openssl \
+  gcc \
+  make \
+  rubygems \
+  rpm-build
 
 gem install fpm --no-user-install --clear-sources
 

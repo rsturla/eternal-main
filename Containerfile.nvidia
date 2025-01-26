@@ -4,9 +4,9 @@ ARG FEDORA_EDITION=base
 ARG BASE_IMAGE=ghcr.io/rsturla/eternal-linux/main/${FEDORA_EDITION}
 ARG BASE_TAG=${FEDORA_VERSION}
 ARG BASE_IMAGE_FULL=${BASE_IMAGE}:41
-ARG COREOS_KERNEL
+ARG COREOS_KERNEL="N/A"
 
-FROM quay.io/fedora/fedora:${FEDORA_VERSION} AS builder
+FROM ${BASE_IMAGE_FULL} AS builder
 
 ARG FEDORA_VERSION
 ARG FEDORA_KERNEL_FLAVOR
@@ -18,7 +18,6 @@ COPY kmods/nvidia-open/*.spec /tmp/rpm-specs/
 COPY kmods/nvidia-open/build-files /tmp/files
 
 RUN chmod +x /tmp/scripts/*.sh && \
-    /tmp/scripts/000-replace-kernel.sh ${FEDORA_KERNEL_FLAVOR} && \
     /tmp/scripts/001-install-build-deps.sh && \
     /tmp/scripts/002-build.sh && \
     /tmp/scripts/999-final.sh

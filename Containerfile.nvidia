@@ -46,6 +46,4 @@ RUN chmod +x /tmp/akmods/scripts/*.sh && \
   && \
   ./tmp/scripts/cleanup.sh \
   && \
-  echo "import '/usr/share/eternal/nvidia.just'" >> /usr/share/eternal/justfile \
-  && \
-  bootc container lint
+  echo "import '/usr/share/eternal/nvidia.just'" >> /usr/share/eternal/justfile

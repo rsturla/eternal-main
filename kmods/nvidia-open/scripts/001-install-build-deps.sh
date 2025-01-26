@@ -19,7 +19,11 @@ mkdir -p /var/lib/alternatives
 dnf install -y \
   akmods \
   mock \
-  ruby-devel
+  ruby-devel \
+  dnf-plugins-core \
+  rpmrebuild \
+  sbsigntools \
+  openssl
 
 gem install fpm
 

@@ -1,0 +1,35 @@
+name: Build Image
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+concurrency:
+  group: build-${{ github.workflow }}-${{ github.ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    uses: ./.github/workflows/_build-image.yml
+    strategy:
+      fail-fast: false
+      matrix:
+        fedora-version: [40, 41]
+        desktop-environment: [base, gnome, kde, cosmic]
+        kernel-flavor: [default, stable]
+    with:
+      image-name: main/${{ matrix.desktop-environment }}
+      desktop-environment: ${{ matrix.desktop-environment }}
+      major-version: ${{ matrix.fedora-version }}
+      is-release: ${{ (github.event_name == 'schedule' || github.event_name == 'push') && startsWith(github.ref, 'refs/heads/main') }}
+      platforms: amd64 arm64
+      kernel-flavor: ${{ matrix.kernel-flavor }}

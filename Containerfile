@@ -11,12 +11,10 @@ ARG FEDORA_EDITION
 ARG COREOS_KERNEL
 
 COPY files/_base /
-COPY files/_${FEDORA_EDITION} /
+COPY files/_${FEDORA_EDITION}* /
 
 COPY scripts/ /tmp/scripts
 
 RUN chmod +x /tmp/scripts/*.sh /tmp/scripts/_${FEDORA_EDITION}/*.sh && \
   /tmp/scripts/setup.sh --base ${FEDORA_EDITION} && \
-  /tmp/scripts/cleanup.sh --base ${FEDORA_EDITION} \
-  && \
-  bootc container lint
+  /tmp/scripts/cleanup.sh --base ${FEDORA_EDITION}

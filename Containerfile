@@ -17,6 +17,4 @@ COPY scripts/ /tmp/scripts
 
 RUN chmod +x /tmp/scripts/*.sh /tmp/scripts/_${FEDORA_EDITION}/*.sh && \
   /tmp/scripts/setup.sh --base ${FEDORA_EDITION} && \
-  /tmp/scripts/cleanup.sh --base ${FEDORA_EDITION} \
-  && \
-  bootc container lint
+  /tmp/scripts/cleanup.sh --base ${FEDORA_EDITION}

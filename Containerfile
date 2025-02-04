@@ -11,7 +11,7 @@ ARG FEDORA_EDITION
 ARG COREOS_KERNEL
 
 COPY files/_base /
-COPY files/_${FEDORA_EDITION} /
+COPY files/_${FEDORA_EDITION}* /
 
 COPY scripts/ /tmp/scripts
 

@@ -2,22 +2,22 @@ name: Rechunk Image
 
 inputs:
   builder:
-    description: 'The name of the builder to use (docker or podman)'
+    description: "The name of the builder to use (docker or podman)"
     required: false
-    default: 'podman'
+    default: "podman"
   ref:
-    description: 'The reference to the image to rechunk'
+    description: "The reference to the image to rechunk"
     required: true
   prev-ref:
-    description: 'The reference to the previous image'
+    description: "The reference to the previous image"
     required: false
   tags:
-    description: 'The tags to apply to the rechunked image'
+    description: "The tags to apply to the rechunked image"
     required: false
-    default: ''
+    default: ""
 
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
     - name: Prepare Rechunk (Podman)
       if: ${{ inputs.builder == 'podman' }}
@@ -45,12 +45,19 @@ runs:
 
     - name: Rechunk Image
       id: rechunk
-      uses: hhd-dev/rechunk@341e1298e827bc60cfe19d71539ca42d08c89cfe # v1.1.3
-      with:
-        rechunk: ghcr.io/hhd-dev/rechunk:v1.1.3
-        ref: ${{ inputs.ref }}
-        skip_compression: true
-        prev-ref: ${{ inputs.prev-ref }}
+      shell: bash
+      env:
+        SOURCE_IMAGE: ${{ inputs.ref }}
+      run: |
+        sudo podman run --rm --privileged --security-opt=label=disable \
+          -v /var/lib/containers:/var/lib/containers \
+          -v /var/tmp:/var/tmp \
+          -v $(pwd):/output \
+          quay.io/fedora/fedora-bootc:rawhide \
+          rpm-ostree experimental compose build-chunked-oci --bootc --format-version=1 --from ${SOURCE_IMAGE} --output oci:/output/base-chunked
+
+        echo "ref=base-chunked:latest" >> $GITHUB_OUTPUT
+        echo "location=base-chunked" >> $GITHUB_OUTPUT
 
     - name: Load Rechunked Image (Podman)
       if: ${{ inputs.builder == 'podman' }}

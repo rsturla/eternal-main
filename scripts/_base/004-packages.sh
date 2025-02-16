@@ -22,6 +22,7 @@ dnf group install -y \
   -x dos2unix \
   -x dosfstools \
   -x dracut-config-rescue \
+  -x libreoffice-* \
   core \
   fonts \
   hardware-support \

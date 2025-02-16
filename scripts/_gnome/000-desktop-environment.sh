@@ -6,7 +6,6 @@ dnf -y install \
   -x PackageKit \
   -x PackageKit-command-not-found \
   -x gnome-software-fedora-langpacks \
-  -x libreoffice-* \
   "NetworkManager-adsl" \
   "gdm" \
   "gnome-backgrounds" \

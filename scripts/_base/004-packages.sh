@@ -2,6 +2,9 @@
 
 set -euox pipefail
 
+dnf config-manager --save \
+    --setopt=exclude=rootfiles
+
 dnf group install -y \
   -x rsyslog* \
 	-x cockpit \

@@ -2,8 +2,11 @@
 
 set -euox pipefail
 
-dnf install -y 'dnf5-command(config-manager)'
-dnf install -y 'dnf5-command(copr)'
+dnf install -y \
+  'dnf5-command(config-manager)' \
+  'dnf5-command(copr)'
+
+dnf --version
 
 dnf config-manager setopt exclude=rootfiles
 

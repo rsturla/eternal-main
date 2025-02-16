@@ -2,8 +2,10 @@
 
 set -euox pipefail
 
-dnf config-manager --save \
-    --setopt=exclude=rootfiles
+dnf install -y 'dnf5-command(config-manager)'
+dnf install -y 'dnf5-command(copr)'
+
+dnf config-manager setopt exclude=rootfiles
 
 dnf group install -y \
   -x rsyslog* \

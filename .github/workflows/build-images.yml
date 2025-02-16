@@ -23,7 +23,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        fedora-version: [40, 41]
+        fedora-version: [41]
         desktop-environment: [base, gnome, kde, cosmic]
         kernel-flavor: [default, stable]
     with:

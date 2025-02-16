@@ -13,7 +13,7 @@ mkdir -p /usr/share/backgrounds/cosmic
 # Copy the wallpapers
 for wallpaper in /tmp/wallpapers/original/*; do
     wallpaper_name=$(basename $wallpaper)
-    curl -L https://media.githubusercontent.com/media/pop-os/cosmic-wallpapers/master/original/$wallpaper_name -o /usr/share/backgrounds/cosmic/$wallpaper_name
+    curl -fsSL https://media.githubusercontent.com/media/pop-os/cosmic-wallpapers/master/original/$wallpaper_name -o /usr/share/backgrounds/cosmic/$wallpaper_name
 done
 
 # Clean up

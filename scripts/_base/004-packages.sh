@@ -8,7 +8,7 @@ dnf install -y \
 
 dnf --version
 
-dnf config-manager setopt exclude=rootfiles,PackageKit*,
+dnf config-manager setopt exclude=rootfiles
 
 dnf group install -y \
   -x rsyslog* \

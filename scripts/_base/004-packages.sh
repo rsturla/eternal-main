@@ -23,6 +23,7 @@ dnf group install -y \
   -x dosfstools \
   -x dracut-config-rescue \
   -x libreoffice-* \
+  -x unoconv \
   core \
   fonts \
   hardware-support \

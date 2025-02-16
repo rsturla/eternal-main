@@ -9,8 +9,7 @@ ARG MAJOR_VERSION
 ARG DESKTOP_ENVIRONMENT
 ARG COREOS_KERNEL
 
-COPY files/_base /
-COPY files/_${DESKTOP_ENVIRONMENT}* /
+COPY files/_base files/_${DESKTOP_ENVIRONMENT}* /
 COPY scripts/ /tmp/scripts
 
 RUN chmod +x /tmp/scripts/*.sh /tmp/scripts/_${DESKTOP_ENVIRONMENT}/*.sh && \

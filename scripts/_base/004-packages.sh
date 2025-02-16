@@ -17,6 +17,10 @@ dnf group install -y \
 	-x crontabs \
 	-x PackageKit \
 	-x PackageKit-command-not-found \
+  -x abrt-* \
+  -x dos2unix \
+  -x dosfstools \
+  -x dracut-config-rescue \
   core \
   fonts \
   hardware-support \

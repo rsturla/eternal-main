@@ -7,7 +7,6 @@ dnf -y install \
 	-x PackageKit-command-not-found \
 	-x gnome-software-fedora-langpacks \
 	"NetworkManager-adsl" \
-	"centos-backgrounds" \
 	"gdm" \
 	"gnome-bluetooth" \
 	"gnome-color-manager" \

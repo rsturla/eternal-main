@@ -2,7 +2,7 @@
 
 set -euox pipefail
 
-dnf5 config-manager unsetopt exclude
+dnf config-manager unsetopt exclude
 sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/rpmfusion-{free,nonfree}{,-updates,-updates-testing}.repo
 
 # Generate initramfs

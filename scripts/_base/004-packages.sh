@@ -9,6 +9,7 @@ dnf install -y \
 dnf --version
 
 dnf config-manager setopt exclude=rootfiles
+dnf config-manager setopt install_weak_deps=False
 
 dnf group install -y \
   -x rsyslog* \

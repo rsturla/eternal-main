@@ -12,6 +12,7 @@ dnf -y install \
   "gnome-bluetooth" \
   "gnome-color-manager" \
   "gnome-control-center" \
+  "gnome-disk-utility" \
   "gnome-initial-setup" \
   "gnome-remote-desktop" \
   "gnome-session-wayland-session" \
@@ -19,6 +20,7 @@ dnf -y install \
   "gnome-shell" \
   "gnome-software" \
   "gnome-user-docs" \
+  "gnome-user-share" \
   "gvfs-fuse" \
   "gvfs-goa" \
   "gvfs-gphoto2" \

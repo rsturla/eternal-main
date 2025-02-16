@@ -24,6 +24,9 @@ dnf group install -y \
   -x dracut-config-rescue \
   -x libreoffice-* \
   -x unoconv \
+  -x deltarpm \
+  -x mediawriter \
+  -x rhythmbox \
   core \
   fonts \
   hardware-support \

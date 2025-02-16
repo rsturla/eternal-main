@@ -13,3 +13,5 @@ QUALIFIED_KERNEL="$(rpm -qa | grep -P 'kernel-(|'"$KERNEL_SUFFIX"'-)(\d+\.\d+\.\
 
 # Clear out unsupported directories
 rm -rf /tmp/* /var/*
+
+rpm -qa

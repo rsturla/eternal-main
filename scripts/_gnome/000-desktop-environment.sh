@@ -9,7 +9,7 @@ dnf -y install \
   -x "libreoffice*" \
   "NetworkManager-adsl" \
   "gdm" \
-  "gnome-backgrounds \
+  "gnome-backgrounds" \
   "gnome-bluetooth" \
   "gnome-color-manager" \
   "gnome-control-center" \

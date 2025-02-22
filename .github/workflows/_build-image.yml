@@ -270,7 +270,7 @@ jobs:
         uses: ./.github/actions/sign-image
         # if: github.event_name != 'pull_request'
         with:
-          registry: ${{ env.IMAGE_REGISTRY }}/${{ steps.push-manifest.outputs.IMAGE }}
+          registry: ${{ steps.push-manifest.outputs.IMAGE }}
           digest: ${{ steps.push-manifest.outputs.digest }}
           private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
           private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
@@ -501,7 +501,7 @@ jobs:
         uses: ./.github/actions/sign-image
         # if: github.event_name != 'pull_request'
         with:
-          registry: ${{ env.IMAGE_REGISTRY }}/${{ steps.push-manifest.outputs.IMAGE }}
+          registry: ${{ steps.push-manifest.outputs.IMAGE }}
           digest: ${{ steps.push-manifest.outputs.digest }}
           private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
           private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}

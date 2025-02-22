@@ -39,6 +39,9 @@ on:
         required: false
         type: boolean
         default: false
+      source-image:
+        required: false
+        type: string
 
 env:
   IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
@@ -131,6 +134,7 @@ jobs:
             MAJOR_VERSION=${{ inputs.major-version }}
             DESKTOP_ENVIRONMENT=${{ inputs.desktop-environment }}
             ${{ inputs.kernel-flavor != 'default' && format('COREOS_KERNEL={0}', steps.get-coreos-kernel.outputs.coreos-kernel-release) || '' }}
+            ${{ inputs.source-image != '' && format('IMAGE_REGISTRY={0}, inputs.source-image' || '' )}}
         run: |
           set -x
 

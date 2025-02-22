@@ -24,12 +24,12 @@ jobs:
       fail-fast: false
       matrix:
         fedora-version: [41]
-        desktop-environment: [base, silverblue, kinoite, cosmic]
         kernel-flavor: [default, stable]
     with:
-      image-name: main/${{ matrix.desktop-environment }}
-      desktop-environment: ${{ matrix.desktop-environment }}
+      image-name: main/cosmic
+      desktop-environment: cosmic
       major-version: ${{ matrix.fedora-version }}
       is-release: ${{ (github.event_name == 'schedule' || github.event_name == 'push') && startsWith(github.ref, 'refs/heads/main') }}
       platforms: amd64 arm64
       kernel-flavor: ${{ matrix.kernel-flavor }}
+      source-image: quay.io/fedora-ostree-desktops/cosmic-atomic

@@ -221,6 +221,14 @@ jobs:
           echo "DIGESTS_JSON=$(echo $DIGESTS_JSON | jq -c '.')"
           echo "DIGESTS_JSON=$(echo $DIGESTS_JSON | jq -c '.')" >> $GITHUB_OUTPUT
 
+      - name: Generate Image Tags
+        uses: ./.github/actions/generate-image-tags
+        id: generate-image-tags
+        with:
+          image-name: ${{ env.IMAGE_REGISTRY}}/${{ inputs.image-name }}
+          major-version: ${{ inputs.major-version }}
+          is-release: ${{ inputs.is-release }}
+
       - name: Create Manifest
         id: create-manifest
         run: |
@@ -252,7 +260,7 @@ jobs:
         id: push_manifest
         env:
           MANIFEST: ${{ steps.create-manifest.outputs.MANIFEST }}
-          TAGS: ${{ steps.metadata.outputs.tags }}
+          TAGS: ${{ steps.generate-image-tags.outputs.tags }}
           IMAGE_REGISTRY: ${{ env.IMAGE_REGISTRY }}
           IMAGE_NAME: ${{ inputs.image-name }}
         run: |

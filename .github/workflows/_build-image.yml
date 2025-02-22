@@ -197,7 +197,7 @@ jobs:
 
       - name: Sign Image
         uses: ./.github/actions/sign-image
-        if: github.event_name != 'pull_request'
+        # if: github.event_name != 'pull_request'
         with:
           registry: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}
           registry-provider: ghcr.io

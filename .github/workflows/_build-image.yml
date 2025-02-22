@@ -233,7 +233,7 @@ jobs:
           MANIFEST: ${{ steps.create-manifest.outputs.MANIFEST }}
           DIGESTS_JSON: ${{ steps.load-outputs.outputs.DIGESTS_JSON }}
           LABELS: ${{ steps.metadata.outputs.labels }}
-          PLATFORMS: ${{ input.platforms }}
+          PLATFORMS: ${{ inputs.platforms }}
         run: |
           DIGESTS=$(echo "$DIGESTS_JSON" | jq -c '.')
           # turn the comma separated string into a list

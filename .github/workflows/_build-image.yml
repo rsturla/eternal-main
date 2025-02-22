@@ -139,7 +139,7 @@ jobs:
             ${{ inputs.kernel-flavor != 'default' && format('COREOS_KERNEL={0}', steps.get-coreos-kernel.outputs.coreos-kernel-release) || '' }}
             ${{ inputs.source-image != '' && format('IMAGE_REGISTRY={0}', inputs.source-image) || '' }}
           rechunk: ${{ inputs.rechunk }}
-          rechunk-pref-ref: ${{ env.IMAGE_REGISTRY }}/${{ inputs.image-name }}:${{ steps.generate-image-tags.outputs.stable-tag }}
+          rechunk-prev-ref: ${{ env.IMAGE_REGISTRY }}/${{ inputs.image-name }}:${{ steps.generate-image-tags.outputs.stable-tag }}
 
       - name: Push Image
         id: push
@@ -171,7 +171,7 @@ jobs:
           OUTPUT_ARTIFACT_NAME=$(echo "$IMAGE_NAME-$MAJOR_VERSION-$KERNEL_FLAVOR-$PLATFORM" | tr '/' '-')
 
           mkdir -p /tmp/outputs/digests
-          echo "${DIGEST}" > /tmp/outputs/digests/${PLATFORM}.txt
+          echo "${DIGEST}" > /tmp/outputs/digests/${PLATFORM}
 
           echo "OUTPUT_ARTIFACT_NAME=${OUTPUT_ARTIFACT_NAME}" >> $GITHUB_OUTPUT
 
@@ -182,15 +182,43 @@ jobs:
           retention-days: 1
           if-no-files-found: error
           path: |
-            /tmp/outputs/digests/*.txt
+            /tmp/outputs/digests/*
 
   manifest-base:
     needs: 
       - build-base
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Determine Build Output Name
+        id: artifact-prefix
+        env:
+          IMAGE_NAME: ${{ inputs.image-name }}
+          MAJOR_VERSION: ${{ inputs.major-version }}
+          KERNEL_FLAVOR: ${{ inputs.kernel-flavor }}
+        run: |
+          OUTPUT_ARTIFACT_PREFIX=$(echo "$IMAGE_NAME-$MAJOR_VERSION-$KERNEL_FLAVOR-" | tr '/' '-')
+          echo "OUTPUT_ARTIFACT_PREFIX=${OUTPUT_ARTIFACT_PREFIX}" >> $GITHUB_OUTPUT
+
+      - name: Fetch Build Outputs
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4
+        with:
+          pattern: ${{ steps.artifact-prefix.outputs.OUTPUT_ARTIFACT_PREFIX }}*
+          merge-multiple: true
+          path: /tmp/artifacts
+
+      - name: Load Outputs
+        id: load-outputs
+        run: |
+          DIGESTS_JSON=$(jq -n '{}')
+          for digest_file in /tmp/artifacts/*; do
+            # Extract the platform from the file name
+            PLATFORM=$(basename $digest_file)
+            DIGEST=$(cat $digest_file)
+            # Add the platform and digest to the JSON object
+            DIGESTS_JSON=$(echo "$DIGESTS_JSON" | jq --arg key "$PLATFORM" --arg value "$DIGEST" '. + {($key): $value}')
+          done
+          echo "DIGESTS_JSON=$(echo $DIGESTS_JSON | jq -c '.')"
+          echo "DIGESTS_JSON=$(echo $DIGESTS_JSON | jq -c '.')" >> $GITHUB_OUTPUT
 
   build-nvidia:
     needs: 

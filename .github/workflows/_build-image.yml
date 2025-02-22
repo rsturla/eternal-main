@@ -168,6 +168,7 @@ jobs:
 
       - name: Rechunk
         id: rechunk
+        if: ${{ inputs.rechunk }}
         uses: ./.github/actions/rechunk
         with:
           ref: ${{ env.IMAGE_REGISTRY }}/${{ steps.build.outputs.IMAGE_NAME }}:${{ steps.generate-image-tags.outputs.primary-tag }}

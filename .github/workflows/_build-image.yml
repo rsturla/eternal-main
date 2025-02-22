@@ -278,6 +278,7 @@ jobs:
   build-nvidia:
     runs-on: ${{ matrix.platform == 'amd64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }}
     needs:
+      - generate-matrix
       - build-base
     permissions:
       contents: read
@@ -355,13 +356,6 @@ jobs:
           is-nvidia: true
           nvidia-type: open
 
-      - name: Get CoreOS Kernel Information
-        if: inputs.kernel-flavor != 'default'
-        uses: ./.github/actions/get-coreos-kernel
-        id: get-coreos-kernel
-        with:
-          coreos-stream: ${{ inputs.kernel-flavor }}
-
       - name: Build Image
         id: build
         uses: ./.github/actions/build-image
@@ -403,7 +397,7 @@ jobs:
           MAJOR_VERSION: ${{ inputs.major-version }}
           KERNEL_FLAVOR: ${{ inputs.kernel-flavor }}
         run: |
-          OUTPUT_ARTIFACT_NAME=$(echo "$IMAGE_NAME-$MAJOR_VERSION-$KERNEL_FLAVOR-$PLATFORM" | tr '/' '-')
+          OUTPUT_ARTIFACT_NAME=$(echo "$IMAGE_NAME-$MAJOR_VERSION-$KERNEL_FLAVOR-nvidia-$PLATFORM" | tr '/' '-')
 
           mkdir -p /tmp/outputs/digests
           echo "${DIGEST}" > /tmp/outputs/digests/${PLATFORM}

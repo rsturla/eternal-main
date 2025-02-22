@@ -151,15 +151,6 @@ jobs:
           image-tags: ${{ steps.generate-image-tags.outputs.primary-tag }}
           image-registry: ${{ env.IMAGE_REGISTRY }}
 
-      - name: Sign Image
-        uses: ./.github/actions/sign-image
-        # if: github.event_name != 'pull_request'
-        with:
-          registry: ${{ env.IMAGE_REGISTRY }}/${{ steps.build.outputs.image }}
-          digest: ${{ steps.push.outputs.digest }}
-          private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
-          private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
-
       - name: Create Job Outputs
         id: create-job-outputs
         env:
@@ -260,7 +251,7 @@ jobs:
         run: echo ${{ secrets.GITHUB_TOKEN }} | podman login -u ${{ github.actor }} --password-stdin ghcr.io
 
       - name: Push Manifest
-        id: push_manifest
+        id: push-manifest
         env:
           MANIFEST: ${{ steps.create-manifest.outputs.MANIFEST }}
           TAGS: ${{ steps.generate-image-tags.outputs.tags }}
@@ -274,6 +265,15 @@ jobs:
           DIGEST=$(cat /tmp/digestfile)
           echo "DIGEST=$DIGEST" >> $GITHUB_OUTPUT
           echo "IMAGE=$IMAGE_REGISTRY/$IMAGE_NAME" >> $GITHUB_OUTPUT
+
+      - name: Sign Manifest
+        uses: ./.github/actions/sign-image
+        # if: github.event_name != 'pull_request'
+        with:
+          registry: ${{ env.IMAGE_REGISTRY }}/${{ steps.push-manifest.outputs.IMAGE }}
+          digest: ${{ steps.push-manifest.outputs.digest }}
+          private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
+          private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
 
   build-nvidia:
     runs-on: ${{ matrix.platform == 'amd64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }}
@@ -380,15 +380,6 @@ jobs:
           image-tags: ${{ steps.generate-image-tags.outputs.primary-tag }}
           image-registry: ${{ env.IMAGE_REGISTRY }}
 
-      - name: Sign Image
-        uses: ./.github/actions/sign-image
-        # if: github.event_name != 'pull_request'
-        with:
-          registry: ${{ env.IMAGE_REGISTRY }}/${{ steps.build.outputs.image }}
-          digest: ${{ steps.push.outputs.digest }}
-          private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
-          private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
-
       - name: Create Job Outputs
         id: create-job-outputs
         env:
@@ -415,9 +406,102 @@ jobs:
             /tmp/outputs/digests/*
 
   manifest-nvidia:
-    needs:
+    needs: 
       - build-nvidia
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+    
+      - name: Determine Build Output Name
+        id: artifact-prefix
+        env:
+          IMAGE_NAME: ${{ inputs.image-name }}
+          MAJOR_VERSION: ${{ inputs.major-version }}
+          KERNEL_FLAVOR: ${{ inputs.kernel-flavor }}
+        run: |
+          OUTPUT_ARTIFACT_PREFIX=$(echo "$IMAGE_NAME-$MAJOR_VERSION-$KERNEL_FLAVOR-nvidia-" | tr '/' '-')
+          echo "OUTPUT_ARTIFACT_PREFIX=${OUTPUT_ARTIFACT_PREFIX}" >> $GITHUB_OUTPUT
+
+      - name: Fetch Build Outputs
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4
+        with:
+          pattern: ${{ steps.artifact-prefix.outputs.OUTPUT_ARTIFACT_PREFIX }}*
+          merge-multiple: true
+          path: /tmp/artifacts
+
+      - name: Load Outputs
+        id: load-outputs
+        run: |
+          DIGESTS_JSON=$(jq -n '{}')
+          for digest_file in /tmp/artifacts/*; do
+            # Extract the platform from the file name
+            PLATFORM=$(basename $digest_file)
+            DIGEST=$(cat $digest_file)
+            # Add the platform and digest to the JSON object
+            DIGESTS_JSON=$(echo "$DIGESTS_JSON" | jq --arg key "$PLATFORM" --arg value "$DIGEST" '. + {($key): $value}')
+          done
+          echo "DIGESTS_JSON=$(echo $DIGESTS_JSON | jq -c '.')"
+          echo "DIGESTS_JSON=$(echo $DIGESTS_JSON | jq -c '.')" >> $GITHUB_OUTPUT
+
+      - name: Generate Image Tags
+        uses: ./.github/actions/generate-image-tags
+        id: generate-image-tags
+        with:
+          image-name: ${{ env.IMAGE_REGISTRY}}/${{ inputs.image-name }}
+          major-version: ${{ inputs.major-version }}
+          is-release: ${{ inputs.is-release }}
+          is-nvidia: true
+          nvidia-type: open
+
+      - name: Create Manifest
+        id: create-manifest
+        run: |
+          podman manifest create ${{ env.IMAGE_REGISTRY }}/${{ inputs.image-name }}
+          echo "MANIFEST=${{ env.IMAGE_REGISTRY }}/${{ inputs.image-name }}" >> $GITHUB_OUTPUT
+
+      - name: Populate Manifest
+        env:
+          IMAGE_NAME: ${{ inputs.image-name }}
+          IMAGE_REGISTRY: ${{ env.IMAGE_REGISTRY }}
+          MANIFEST: ${{ steps.create-manifest.outputs.MANIFEST }}
+          DIGESTS_JSON: ${{ steps.load-outputs.outputs.DIGESTS_JSON }}
+          PLATFORMS: ${{ inputs.platforms }}
+        run: |
+          DIGESTS=$(echo "$DIGESTS_JSON" | jq -c '.')
+          # turn the comma separated string into a list
+          platforms=()
+          IFS=',' read -r -a platforms <<< "${PLATFORMS}"
+          for platform in ${platforms[@]}; do
+            digest=$(echo $DIGESTS | jq -r ".$platform")
+            echo "Adding ${IMAGE_REGISTRY}/${IMAGE_NAME}@$digest for $platform"
+            podman manifest add $MANIFEST ${IMAGE_REGISTRY}/${IMAGE_NAME}@$digest --arch $platform
+          done
+
+      - name: Login to GHCR
+        run: echo ${{ secrets.GITHUB_TOKEN }} | podman login -u ${{ github.actor }} --password-stdin ghcr.io
+
+      - name: Push Manifest
+        id: push-manifest
+        env:
+          MANIFEST: ${{ steps.create-manifest.outputs.MANIFEST }}
+          TAGS: ${{ steps.generate-image-tags.outputs.tags }}
+          IMAGE_REGISTRY: ${{ env.IMAGE_REGISTRY }}
+          IMAGE_NAME: ${{ inputs.image-name }}
+        run: |
+          while IFS=' ' read -ra tag; do
+            podman manifest push --all=false --digestfile=/tmp/digestfile $MANIFEST $IMAGE_REGISTRY/$IMAGE_NAME:$tag
+          done <<< "$TAGS"
+
+          DIGEST=$(cat /tmp/digestfile)
+          echo "DIGEST=$DIGEST" >> $GITHUB_OUTPUT
+          echo "IMAGE=$IMAGE_REGISTRY/$IMAGE_NAME" >> $GITHUB_OUTPUT
+
+      - name: Sign Manifest
+        uses: ./.github/actions/sign-image
+        # if: github.event_name != 'pull_request'
+        with:
+          registry: ${{ env.IMAGE_REGISTRY }}/${{ steps.push-manifest.outputs.IMAGE }}
+          digest: ${{ steps.push-manifest.outputs.digest }}
+          private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
+          private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}

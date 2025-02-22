@@ -276,9 +276,16 @@ jobs:
           echo "IMAGE=$IMAGE_REGISTRY/$IMAGE_NAME" >> $GITHUB_OUTPUT
 
   build-nvidia:
-    needs: 
+    runs-on: ${{ matrix.platform == 'amd64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }}
+    needs:
       - build-base
-    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    strategy:
+      fail-fast: false
+      matrix: ${{fromJson(needs.generate-matrix.outputs.MATRIX)}}
     steps:
       - name: Determine Build Output Name
         id: artifact-prefix
@@ -299,6 +306,8 @@ jobs:
 
       - name: Load Outputs
         id: load-outputs
+        env:
+          PLATFORM: ${{ matrix.platform }}
         run: |
           DIGESTS_JSON=$(jq -n '{}')
           for digest_file in /tmp/artifacts/*; do
@@ -310,6 +319,105 @@ jobs:
           done
           echo "DIGESTS_JSON=$(echo $DIGESTS_JSON | jq -c '.')"
           echo "DIGESTS_JSON=$(echo $DIGESTS_JSON | jq -c '.')" >> $GITHUB_OUTPUT
+          echo "DIGEST=$(echo $DIGESTS_JSON | jq -r '.$PLATFORM')"
+
+      - name: Install dependencies
+        if: matrix.platform == 'arm64'
+        run: |
+          sudo apt update -y
+          sudo apt install -y \
+            podman \
+            skopeo \
+            jq
+
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: Maximize Build Space
+        if: inputs.maximize-build-space && matrix.platform == 'amd64'
+        uses: ublue-os/remove-unwanted-software@v8
+        with:
+          remove-codeql: true
+
+      - name: Login to GitHub Container Registry
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | podman login ghcr.io -u ${{ github.actor }} --password-stdin
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Generate Image Tags
+        uses: ./.github/actions/generate-image-tags
+        id: generate-image-tags
+        with:
+          image-name: ${{ env.IMAGE_REGISTRY}}/${{ inputs.image-name }}
+          major-version: ${{ inputs.major-version }}
+          is-release: ${{ inputs.is-release }}
+          arch: ${{ matrix.platform }}
+          is-nvidia: true
+          nvidia-type: open
+
+      - name: Get CoreOS Kernel Information
+        if: inputs.kernel-flavor != 'default'
+        uses: ./.github/actions/get-coreos-kernel
+        id: get-coreos-kernel
+        with:
+          coreos-stream: ${{ inputs.kernel-flavor }}
+
+      - name: Build Image
+        id: build
+        uses: ./.github/actions/build-image
+        with:
+          context: ${{ inputs.build-context }}
+          containerfile: ${{ inputs.containerfile }}.nvidia
+          image-name: ${{ inputs.image-name }}
+          image-tag: local
+          build-args: |
+            BASE_IMAGE_FULL=${{ env.IMAGE_REGISTRY }}/${{ inputs.image-name }}@${{ steps.load-outputs.outputs.DIGEST }}
+            MAJOR_VERSION=${{ inputs.major-version }}
+          rechunk: ${{ inputs.rechunk }}
+          rechunk-prev-ref: ${{ env.IMAGE_REGISTRY }}/${{ inputs.image-name }}:${{ steps.generate-image-tags.outputs.stable-tag }}
+
+      - name: Push Image
+        id: push
+        uses: ./.github/actions/push-image
+        with:
+          image-ref: ${{ steps.build.outputs.image }}:${{ steps.build.outputs.tag }}
+          image-name: ${{ steps.build.outputs.image }}
+          image-tags: ${{ steps.generate-image-tags.outputs.primary-tag }}
+          image-registry: ${{ env.IMAGE_REGISTRY }}
+
+      - name: Sign Image
+        uses: ./.github/actions/sign-image
+        # if: github.event_name != 'pull_request'
+        with:
+          registry: ${{ env.IMAGE_REGISTRY }}/${{ steps.build.outputs.image }}
+          digest: ${{ steps.push.outputs.digest }}
+          private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
+          private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
+
+      - name: Create Job Outputs
+        id: create-job-outputs
+        env:
+          IMAGE_NAME: ${{ inputs.image-name }}
+          DIGEST: ${{ steps.push.outputs.digest }}
+          PLATFORM: ${{ matrix.platform }}
+          MAJOR_VERSION: ${{ inputs.major-version }}
+          KERNEL_FLAVOR: ${{ inputs.kernel-flavor }}
+        run: |
+          OUTPUT_ARTIFACT_NAME=$(echo "$IMAGE_NAME-$MAJOR_VERSION-$KERNEL_FLAVOR-$PLATFORM" | tr '/' '-')
+
+          mkdir -p /tmp/outputs/digests
+          echo "${DIGEST}" > /tmp/outputs/digests/${PLATFORM}
+
+          echo "OUTPUT_ARTIFACT_NAME=${OUTPUT_ARTIFACT_NAME}" >> $GITHUB_OUTPUT
+
+      - name: Upload Output Artifacts
+        uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4
+        with:
+          name: ${{ steps.create-job-outputs.outputs.OUTPUT_ARTIFACT_NAME }}
+          retention-days: 1
+          if-no-files-found: error
+          path: |
+            /tmp/outputs/digests/*
 
   manifest-nvidia:
     needs:

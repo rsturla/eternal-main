@@ -10,7 +10,7 @@ inputs:
     required: true
   image-tags:
     description: "The tags to apply to the image"
-    required: true
+    required: false
   image-registry:
     description: "The registry to push the image to"
     required: true

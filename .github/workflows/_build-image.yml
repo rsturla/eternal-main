@@ -168,7 +168,7 @@ jobs:
           MAJOR_VERSION: ${{ inputs.major-version }}
           KERNEL_FLAVOR: ${{ inputs.kernel-flavor }}
         run: |
-          OUTPUT_ARTIFACT_NAME=$(echo "$IMAGE_NAME-$MAJOR_VERSION-$PLATFORM" | tr '/' '-')
+          OUTPUT_ARTIFACT_NAME=$(echo "$IMAGE_NAME-$MAJOR_VERSION-$KERNEL_FLAVOR-$PLATFORM" | tr '/' '-')
 
           mkdir -p /tmp/outputs/digests
           echo "${DIGEST}" > /tmp/outputs/digests/${PLATFORM}.txt

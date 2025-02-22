@@ -138,7 +138,7 @@ runs:
         NVIDIA_TYPE: ${{ inputs.nvidia-type }}
         IMAGE_NAME: ${{ inputs.image-name }}
         MAJOR_VERSION: ${{ inputs.major-version }}
-        ARCH_SUFFIX: ${{ inputs.arch }}
+        ARCH: ${{ inputs.arch }}
       run: |
         echo "Generating tags for release..."
 

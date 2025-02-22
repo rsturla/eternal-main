@@ -190,11 +190,10 @@ jobs:
         id: push
         uses: ./.github/actions/push-image
         with:
+          image-ref: ${{ steps.build.outputs.TAG }}
           image-name: ${{ steps.build.outputs.IMAGE_NAME }}
-          image-tags: ${{ steps.build.outputs.TAG }}
+          image-tags: ${{ steps.generate-image-tags.outputs.tags }}
           image-registry: ${{ env.IMAGE_REGISTRY }}
-          registry-username: ${{ github.actor }}
-          registry-password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Sign Image
         uses: ./.github/actions/sign-image

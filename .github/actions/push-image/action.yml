@@ -2,8 +2,11 @@ name: Push Image
 description: "Pushes a container image to a registry using Podman or Docker"
 
 inputs:
+  image-ref:
+    description: "The ref of the image"
+    required: true
   image-name:
-    description: "The name of the image to build"
+    description: "The name of the image to push"
     required: true
   image-tags:
     description: "The tags to apply to the image"
@@ -26,17 +29,19 @@ runs:
     - name: Push
       id: push-podman
       shell: bash
+      env:
+        IMAGE_REF: ${{ inputs.image-ref }}
       run: |
         # Convert the tags to an array
         IFS=' ' read -ra TAGS <<< "${{ inputs.image-tags }}"
+        
         tags=()
-
         # Push the image with each tag
         for tag in "${TAGS[@]}"; do
           image="${{ inputs.image-registry }}/${{ inputs.image-name }}:${tag}"
           echo "IMAGE=${image}"
           tags+=("${image}")
-          podman tag "${{ inputs.image-name }}:${tag}" "${image}"
+          podman tag "${IMAGE_REF} "${image}"
           podman push --digestfile /tmp/digestfile "${image}"
         done
 

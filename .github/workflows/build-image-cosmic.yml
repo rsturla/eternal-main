@@ -1,4 +1,4 @@
-name: Build Images
+name: Build Image Cosmic
 
 on:
   pull_request:
@@ -23,12 +23,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        fedora-version: [41]
+        major-version: [41]
         kernel-flavor: [default, stable]
     with:
       image-name: main/cosmic
       desktop-environment: cosmic
-      major-version: ${{ matrix.fedora-version }}
+      major-version: ${{ matrix.major-version }}
       is-release: ${{ (github.event_name == 'schedule' || github.event_name == 'push') && startsWith(github.ref, 'refs/heads/main') }}
       platforms: amd64 arm64
       kernel-flavor: ${{ matrix.kernel-flavor }}

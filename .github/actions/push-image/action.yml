@@ -31,9 +31,10 @@ runs:
       shell: bash
       env:
         IMAGE_REF: ${{ inputs.image-ref }}
+        IMAGE_TAGS: ${{ inputs.image-tags }}
       run: |
         # Convert the tags to an array
-        IFS=' ' read -ra TAGS <<< "${{ inputs.image-tags }}"
+        IFS=' ' read -ra TAGS <<< "${IMAGE_TAGS}"
         
         tags=()
         # Push the image with each tag
@@ -41,7 +42,7 @@ runs:
           image="${{ inputs.image-registry }}/${{ inputs.image-name }}:${tag}"
           echo "IMAGE=${image}"
           tags+=("${image}")
-          podman tag "${IMAGE_REF} "${image}"
+          podman tag "${IMAGE_REF}" "${image}"
           podman push --digestfile /tmp/digestfile "${image}"
         done
 

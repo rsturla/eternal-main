@@ -16,6 +16,10 @@ inputs:
   nvidia-type:
     description: 'Is this the "proprietary" or "open" kernel module?'
     default: 'proprietary'
+  arch:
+    description: 'The architecture of the image'
+    required: false
+    default: N/A
 
 outputs:
   tags:
@@ -56,16 +60,23 @@ runs:
         IMAGE_NAME: ${{ inputs.image-name }}
         MAJOR_VERSION: ${{ inputs.major-version }}
         PR_NUMBER: ${{ github.event.number }}
+        ARCH: ${{ inputs.arch }}
       run: |
         echo "Generating tags for pull request..."
+        ARCH_SUFFIX=""
+        if [[ "$ARCH" != "N/A" ]]; then
+          ARCH_SUFFIX="-${ARCH}"
+        fi
 
-        STABLE_TAG_PRE_SUFFIX="pr$PR_NUMBER-$MAJOR_VERSION"
-        PRIMARY_TAG_PRE_SUFFIX="pr$PR_NUMBER-$(git rev-parse --short HEAD)-$MAJOR_VERSION"
+
+        STABLE_TAG_PRE_SUFFIX="pr${PR_NUMBER}-${MAJOR_VERSION}${ARCH_SUFFIX}"
+        PRIMARY_TAG_PRE_SUFFIX="pr${PR_NUMBER}-$(git rev-parse --short HEAD)-${MAJOR_VERSION}${ARCH_SUFFIX}"
+
         TAGS_PRE_SUFFIX=(
-          "pr$PR_NUMBER-$MAJOR_VERSION"
+          "pr$PR_NUMBER-${MAJOR_VERSION}${ARCH_SUFFIX}"
         )
-        TAG_SUFFIXES=()
 
+        TAG_SUFFIXES=()
         if [[ "$IS_NVIDIA_DRIVER" == true ]]; then
           if [[ "$NVIDIA_TYPE" == 'open' ]]; then
             TAG_SUFFIXES+=("-nvidia-open")
@@ -130,10 +141,15 @@ runs:
       run: |
         echo "Generating tags for release..."
 
-        STABLE_TAG_PRE_SUFFIX="$MAJOR_VERSION"
-        PRIMARY_TAG_PRE_SUFFIX="$(git rev-parse --short HEAD)-$MAJOR_VERSION"
+        ARCH_SUFFIX=""
+        if [[ "$ARCH" != "N/A" ]]; then
+          ARCH_SUFFIX="-${ARCH}"
+        fi
+
+        STABLE_TAG_PRE_SUFFIX="${MAJOR_VERSION}${ARCH_SUFFIX}"
+        PRIMARY_TAG_PRE_SUFFIX="$(git rev-parse --short HEAD)-${MAJOR_VERSION}${ARCH_SUFFIX}"
         TAGS_PRE_SUFFIX=(
-          "$MAJOR_VERSION"
+          "${MAJOR_VERSION}${ARCH_SUFFIX}"
         )
         TAG_SUFFIXES=()
 

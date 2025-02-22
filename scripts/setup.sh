@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-FEDORA_EDITION=${FEDORA_EDITION}
+DESKTOP_ENVIRONMENT=${DESKTOP_ENVIRONMENT}
 
 for script in /tmp/scripts/_base/*.sh; do
   if [[ -f "$script" ]]; then
@@ -13,11 +13,11 @@ for script in /tmp/scripts/_base/*.sh; do
 done
 
 # If the edition is BASE, then we don't need to run the same scripts again
-if [[ "$FEDORA_EDITION" == "base" ]]; then
+if [[ "$DESKTOP_ENVIRONMENT" == "base" ]]; then
   exit 0
 fi
 
-for script in /tmp/scripts/_$FEDORA_EDITION/*.sh; do
+for script in /tmp/scripts/_$DESKTOP_ENVIRONMENT/*.sh; do
   if [[ -f "$script" ]]; then
     echo "::group::===$(basename "$script")==="
     bash "$script"

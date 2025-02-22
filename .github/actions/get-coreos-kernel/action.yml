@@ -2,20 +2,16 @@ name: Get CoreOS Kernel
 
 inputs:
   coreos-stream:
-    description: 'The CoreOS stream to pull the image from'
+    description: "The CoreOS stream to pull the image from"
     required: true
-    default: 'stable'
-  arch:
-    description: 'The image architecture to inspect'
-    required: false
-    default: 'x86_64'
+    default: "stable"
 
 outputs:
   coreos-repo-version:
-    description: 'The Fedora repository version CoreOS sources their kernel from'
+    description: "The Fedora repository version CoreOS sources their kernel from"
     value: ${{ steps.extract-fedora-version.outputs.fedora-version }}
   coreos-kernel-release:
-    description: 'The full CoreOS kernel version string'
+    description: "The full CoreOS kernel version string"
     value: ${{ steps.extract-kernel-release.outputs.kernel-release }}
 
 runs:
@@ -26,7 +22,6 @@ runs:
       shell: bash
       env:
         COREOS_STREAM: ${{ inputs.coreos-stream }}
-        ARCH: ${{ inputs.arch }}
       run: |
         docker pull quay.io/skopeo/stable:latest
         KERNEL_RELEASE=$(docker run quay.io/skopeo/stable:latest inspect docker://quay.io/fedora/fedora-coreos:$COREOS_STREAM | jq -r '.Labels["ostree.linux"] | split(".$ARCH")[0]')
@@ -38,5 +33,5 @@ runs:
       env:
         KERNEL_RELEASE: ${{ steps.extract-kernel-release.outputs.kernel-release }}
       run: |
-        FEDORA_VERSION=$(echo $KERNEL_RELEASE | grep -oP 'fc\K[0-9]+')
-        echo "fedora-version=$FEDORA_VERSION" >> $GITHUB_OUTPUT
+        MAJOR_VERSION=$(echo $KERNEL_RELEASE | grep -oP 'fc\K[0-9]+')
+        echo "fedora-version=$MAJOR_VERSION" >> $GITHUB_OUTPUT

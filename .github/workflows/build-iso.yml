@@ -1,16 +1,16 @@
 name: Build ISOs
 
 on:
-  pull_request:
-    paths:
-      - ".github/workflows/*build-iso.yml"
-      - "flatpaks/**"
-  push:
-    branches:
-      - main
-    paths:
-      - ".github/workflows/*build-iso.yml"
-      - "flatpaks/**"
+  # pull_request:
+  #   paths:
+  #     - ".github/workflows/*build-iso.yml"
+  #     - "flatpaks/**"
+  # push:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - ".github/workflows/*build-iso.yml"
+  #     - "flatpaks/**"
   schedule:
     # Every week at midnight on Monday
     - cron: "0 0 * * 1"
@@ -28,11 +28,10 @@ jobs:
         image-name:
           - silverblue
           - cosmic
+          - kinoite
         image-tag:
-          - 40
           - 41
           - stable
-          - 40-nvidia
           - 41-nvidia
           - stable-nvidia
     with:
@@ -42,4 +41,4 @@ jobs:
       flatpak-manifest-lists: |
         flatpaks/base
         flatpaks/${{ matrix.image-name }}
-      installer-version: 40
+      installer-version: 41

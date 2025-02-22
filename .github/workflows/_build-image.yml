@@ -153,7 +153,7 @@ jobs:
         uses: ./.github/actions/sign-image
         # if: github.event_name != 'pull_request'
         with:
-          registry: ${{ env.IMAGE_REGISTRY }}/${{ steps.build.outputs.IMAGE_NAME }}
+          registry: ${{ env.IMAGE_REGISTRY }}/${{ steps.build.outputs.image }}
           registry-provider: ghcr.io
           digest: ${{ steps.push.outputs.digest }}
           private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}

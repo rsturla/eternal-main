@@ -24,7 +24,7 @@ jobs:
       fail-fast: false
       matrix:
         fedora-version: [41]
-        desktop-environment: [base, gnome, kde, cosmic]
+        desktop-environment: [base, silverblue, kinoite, cosmic]
         kernel-flavor: [default, stable]
     with:
       image-name: main/${{ matrix.desktop-environment }}

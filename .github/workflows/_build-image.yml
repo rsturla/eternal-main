@@ -117,6 +117,7 @@ jobs:
           image-name: ${{ env.IMAGE_REGISTRY}}/${{ inputs.image-name }}
           major-version: ${{ inputs.major-version }}
           is-release: ${{ inputs.is-release }}
+          arch: ${{ matrix.platform }}
 
       - name: Get CoreOS Kernel Information
         if: inputs.kernel-flavor != 'default'
@@ -147,7 +148,7 @@ jobs:
         with:
           image-ref: ${{ steps.build.outputs.image }}:${{ steps.build.outputs.tag }}
           image-name: ${{ steps.build.outputs.image }}
-          image-tags: ${{ steps.generate-image-tags.outputs.tags }}
+          image-tags: ${{ steps.generate-image-tags.outputs.primary-tag }}
           image-registry: ${{ env.IMAGE_REGISTRY }}
 
       - name: Sign Image
@@ -232,7 +233,6 @@ jobs:
           IMAGE_REGISTRY: ${{ env.IMAGE_REGISTRY }}
           MANIFEST: ${{ steps.create-manifest.outputs.MANIFEST }}
           DIGESTS_JSON: ${{ steps.load-outputs.outputs.DIGESTS_JSON }}
-          LABELS: ${{ steps.metadata.outputs.labels }}
           PLATFORMS: ${{ inputs.platforms }}
         run: |
           DIGESTS=$(echo "$DIGESTS_JSON" | jq -c '.')
@@ -244,12 +244,6 @@ jobs:
             echo "Adding ${IMAGE_REGISTRY}/${IMAGE_NAME}@$digest for $platform"
             podman manifest add $MANIFEST ${IMAGE_REGISTRY}/${IMAGE_NAME}@$digest --arch $platform
           done
-
-          # Apply the labels to the manifest (separated by newlines)
-          while IFS= read -r label; do
-            echo "Applying label $label to manifest"
-            podman manifest annotate --index --annotation "$label" $MANIFEST
-          done <<< "$LABELS"
 
       - name: Login to GHCR
         run: echo ${{ secrets.GITHUB_TOKEN }} | podman login -u ${{ github.actor }} --password-stdin ghcr.io

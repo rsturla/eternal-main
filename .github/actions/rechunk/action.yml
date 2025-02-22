@@ -8,14 +8,6 @@ inputs:
     description: 'The reference to the previous image'
     required: false
 
-outputs:
-  ref: 
-    description: The reference of the rechunked image
-    value: ${{ steps.rechunk.outputs.ref }}
-  location: 
-    description: The location on the filesystem of the image
-    value: ${{ steps.rechunk.outputs.location }}
-
 runs:
   using: 'composite'
   steps:
@@ -27,3 +19,15 @@ runs:
         ref: ${{ inputs.ref }}
         skip_compression: false
         prev-ref: ${{ inputs.prev-ref }}
+
+    - name: Load Image
+      shell: bash
+      run: |
+        sudo podman rmi $(sudo podman image ls -qa) --force
+        IMAGE=$(sudo podman pull ${{ steps.rechunk.outputs.ref }})
+        tags="${{ inputs.tags }}"
+        sudo rm -rf ${{ steps.rechunk.outputs.location }}
+        IFS=' ' read -r -a tag_array <<< "$tags"
+        for tag in "${tag_array[@]}"; do
+          podman tag $IMAGE ${{ inputs.ref }}
+        done

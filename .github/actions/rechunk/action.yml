@@ -11,6 +11,10 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    - name: List Images
+      shell: bash
+      run: sudo podman image ls
+
     - name: Rechunk Image
       id: rechunk
       uses: hhd-dev/rechunk@341e1298e827bc60cfe19d71539ca42d08c89cfe # v1.1.3

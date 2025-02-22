@@ -228,18 +228,21 @@ jobs:
 
       - name: Populate Manifest
         env:
+          IMAGE_NAME: ${{ inputs.image-name }}
+          IMAGE_REGISTRY: ${{ env.IMAGE_REGISTRY }}
           MANIFEST: ${{ steps.create-manifest.outputs.MANIFEST }}
           DIGESTS_JSON: ${{ steps.load-outputs.outputs.DIGESTS_JSON }}
           LABELS: ${{ steps.metadata.outputs.labels }}
+          PLATFORMS: ${{ input.platforms }}
         run: |
           DIGESTS=$(echo "$DIGESTS_JSON" | jq -c '.')
           # turn the comma separated string into a list
           platforms=()
-          IFS=',' read -r -a platforms <<< "${{ inputs.platforms }}"
+          IFS=',' read -r -a platforms <<< "${PLATFORMS}"
           for platform in ${platforms[@]}; do
             digest=$(echo $DIGESTS | jq -r ".$platform")
-            echo "Adding ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}@$digest for $platform"
-            podman manifest add $MANIFEST ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}@$digest --arch $platform
+            echo "Adding ${IMAGE_REGISTRY}/${IMAGE_NAME}@$digest for $platform"
+            podman manifest add $MANIFEST ${IMAGE_REGISTRY}/${IMAGE_NAME}@$digest --arch $platform
           done
 
           # Apply the labels to the manifest (separated by newlines)

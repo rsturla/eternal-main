@@ -25,6 +25,7 @@ jobs:
       matrix:
         major-version: [41]
         kernel-flavor: [default, stable]
+    secrets: inherit
     with:
       image-name: main/silverblue
       desktop-environment: gnome
@@ -41,6 +42,7 @@ jobs:
       matrix:
         major-version: [41]
         kernel-flavor: [default, stable]
+    secrets: inherit
     with:
       image-name: main/cosmic
       rechunk: true
@@ -58,6 +60,7 @@ jobs:
       matrix:
         major-version: [41]
         kernel-flavor: [default, stable]
+    secrets: inherit
     with:
       image-name: main/kinoite
       desktop-environment: kde

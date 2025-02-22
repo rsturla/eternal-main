@@ -171,7 +171,7 @@ jobs:
         if: ${{ inputs.rechunk }}
         uses: ./.github/actions/rechunk
         with:
-          ref: ${{ env.IMAGE_REGISTRY }}/${{ steps.build.outputs.IMAGE_NAME }}:${{ steps.generate-image-tags.outputs.primary-tag }}
+          ref: ${{ env.IMAGE_REGISTRY }}/${{ steps.build.outputs.IMAGE_NAME }}:local
           prev-ref: ${{ env.IMAGE_REGISTRY }}/${{ steps.build.outputs.IMAGE_NAME }}:${{ steps.generate-image-tags.outputs.primary-tag }}
 
       - name: Login to GHCR

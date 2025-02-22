@@ -160,17 +160,25 @@ jobs:
           private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
 
       - name: Create Job Outputs
+        id: create-job-outputs
         env:
+          IMAGE_NAME: ${{ inputs.image-name }}
           DIGEST: ${{ steps.push.outputs.digest }}
           PLATFORM: ${{ matrix.platform }}
+          MAJOR_VERSION: ${{ inputs.major-version }}
+          KERNEL_FLAVOR: ${{ inputs.kernel-flavor }}
         run: |
+          OUTPUT_ARTIFACT_NAME=$(echo "$IMAGE_NAME-$MAJOR_VERSION-$PLATFORM" | tr '/' '-')
+
           mkdir -p /tmp/outputs/digests
           echo "${DIGEST}" > /tmp/outputs/digests/${PLATFORM}.txt
+
+          echo "OUTPUT_ARTIFACT_NAME=${OUTPUT_ARTIFACT_NAME}" >> $GITHUB_OUTPUT
 
       - name: Upload Output Artifacts
         uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4
         with:
-          name: ${{ inputs.image-name }}-${{ matrix.platform }}
+          name: ${{ steps.create-job-outputs.outputs.OUTPUT_ARTIFACT_NAME }}
           retention-days: 1
           if-no-files-found: error
           path: |

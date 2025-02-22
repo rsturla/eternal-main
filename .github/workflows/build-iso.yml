@@ -28,11 +28,10 @@ jobs:
         image-name:
           - silverblue
           - cosmic
+          - kinoite
         image-tag:
-          - 40
           - 41
           - stable
-          - 40-nvidia
           - 41-nvidia
           - stable-nvidia
     with:
@@ -42,4 +41,4 @@ jobs:
       flatpak-manifest-lists: |
         flatpaks/base
         flatpaks/${{ matrix.image-name }}
-      installer-version: 40
+      installer-version: 41

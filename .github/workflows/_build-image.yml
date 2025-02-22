@@ -99,7 +99,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
-      - name: Maximize build space
+      - name: Maximize Build Space
         if: inputs.maximize-build-space && matrix.platform == 'amd64'
         uses: ublue-os/remove-unwanted-software@v8
         with:
@@ -123,7 +123,8 @@ jobs:
         with:
           coreos-stream: ${{ inputs.kernel-flavor }}
 
-      - name: Build image
+      - name: Build Image
+        id: build
         env:
           IMAGE_REGISTRY: ${{ env.IMAGE_REGISTRY }}
           IMAGE_NAME: ${{ inputs.image-name }}
@@ -160,8 +161,52 @@ jobs:
           IMAGE_ID=$(cat /tmp/image-id)
           IMAGE_DIGEST=$($podman inspect --format '{{.Digest}}' ${IMAGE_ID})
 
+          echo "IMAGE_NAME=${IMAGE_NAME}" >> $GITHUB_OUTPUT
           echo "IMAGE_ID=${IMAGE_ID}" >> $GITHUB_OUTPUT
           echo "IMAGE_DIGEST=${IMAGE_DIGEST}" >> $GITHUB_OUTPUT
+          echo "TAGS=${IMAGE_REGISTRY}/${IMAGE_NAME}:local" >> $GITHUB_OUTPUT
+
+      - name: Rechunk
+        id: rechunk
+        uses: ./.github/actions/rechunk
+        with:
+          ref: ${{ steps.build.outputs.IMAGE_NAME }}:${{ steps.generate-image-tags.outputs.primary-tag }}
+          prev-ref: ${{ env.IMAGE_REGISTRY }}/${{ steps.build.outputs.image }}:${{ steps.generate-image-tags.outputs.primary-tag }}
+          tags: ${{ steps.build.outputs.TAGS }}
+
+      - name: Login to GHCR
+        env:
+          RECHUNK: ${{ inputs.rechunk }}
+        run: |
+          if [[ $RECHUNK == true ]]; then
+            podman="sudo podman"
+          else
+            podman="podman"
+          fi
+
+          echo "${{ secrets.GITHUB_TOKEN }}" | $podman login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Push Image
+        id: push
+        uses: ./.github/actions/push-image
+        with:
+          image-name: ${{ steps.build.outputs.image }}
+          image-tags: ${{ steps.build.outputs.tags }}
+          image-registry: ${{ env.IMAGE_REGISTRY }}
+          registry-username: ${{ github.actor }}
+          registry-password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Sign Image
+        uses: ./.github/actions/sign-image
+        if: github.event_name != 'pull_request'
+        with:
+          registry: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}
+          registry-provider: ghcr.io
+          registry-username: ${{ github.actor }}
+          registry-password: ${{ secrets.GITHUB_TOKEN }}
+          digest: ${{ steps.push.outputs.digest }}
+          private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
+          private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
 
   manifest-base:
     needs: 

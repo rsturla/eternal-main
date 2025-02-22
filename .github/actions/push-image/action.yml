@@ -11,10 +11,6 @@ inputs:
   image-registry:
     description: "The registry to push the image to"
     required: true
-  builder:
-    description: "The name of the builder to use (docker or podman)"
-    required: false
-    default: "podman"
 
 outputs:
   registry-path:
@@ -27,8 +23,7 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: Push (Podman)
-      if: ${{ inputs.builder == 'podman' }}
+    - name: Push
       id: push-podman
       shell: bash
       run: |
@@ -52,42 +47,9 @@ runs:
         echo "registry-path=${tags[0]}" >> $GITHUB_OUTPUT
         echo "digest=${digest}" >> $GITHUB_OUTPUT
 
-    - name: Push (Docker)
-      if: ${{ inputs.builder == 'docker' }}
-      id: push-docker
-      shell: bash
-      run: |
-        # Convert the tags to an array
-        IFS=' ' read -ra TAGS <<< "${{ inputs.image-tags }}"
-        tags=()
-
-        # Push the image with each tag
-        for tag in "${TAGS[@]}"; do
-          image="${{ inputs.image-registry }}/${{ inputs.image-name }}:${tag}"
-          echo "IMAGE=${image}"
-          tags+=("${image}")
-          docker image tag "${{ inputs.image-name }}:${tag}" "${image}"
-          docker image push "${image}"
-        done
-
-        docker pull quay.io/skopeo/stable:latest
-        digest=$(docker run quay.io/skopeo/stable:latest inspect docker://${tags[0]} --format '{{.Digest}}')
-
-        # Set the outputs
-        echo "registry-path=${tags[0]}" >> $GITHUB_OUTPUT
-        echo "tags=${tags[@]}" >> $GITHUB_OUTPUT
-        echo "digest=${digest}" >> $GITHUB_OUTPUT
-
     - name: Set Outputs
       id: set-outputs
       shell: bash
-      env:
-        BUILDER: ${{ inputs.builder }}
       run: |
-        if [ $BUILDER == 'podman' ]; then
-          echo "registry-path=${{ steps.push-podman.outputs.registry-path }}" >> $GITHUB_OUTPUT
-          echo "digest=${{ steps.push-podman.outputs.digest }}" >> $GITHUB_OUTPUT
-        else
-          echo "registry-path=${{ steps.push-docker.outputs.registry-path }}" >> $GITHUB_OUTPUT
-          echo "digest=${{ steps.push-docker.outputs.digest }}" >> $GITHUB_OUTPUT
-        fi
+        echo "registry-path=${{ steps.push-podman.outputs.registry-path }}" >> $GITHUB_OUTPUT
+        echo "digest=${{ steps.push-podman.outputs.digest }}" >> $GITHUB_OUTPUT

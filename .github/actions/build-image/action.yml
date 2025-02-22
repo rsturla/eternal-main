@@ -50,6 +50,8 @@ runs:
         TAG: ${{ inputs.image-tag }}
         RECHUNK: ${{ inputs.rechunk }}
       run: |
+        set -x
+
         # If RECHUNK is true, run podman with sudo
         if [[ $RECHUNK == true ]]; then
           podman="sudo podman"
@@ -71,12 +73,12 @@ runs:
           -f ${{ inputs.containerfile }} \
           ${{ inputs.context }}
 
-        digest=$(podman image inspect ${{ inputs.image-name }}:${TAG} --format "{{.Digest}}")
+        digest=$($podman image inspect ${{ inputs.image-name }}:${TAG} --format "{{.Digest}}")
         echo "digest=$digest" >> $GITHUB_OUTPUT
 
     - name: Rechunk
       id: rechunk
-      if: ${{ inputs.rechunk }}
+      if: inputs.rechunk == "true"
       uses: ./.github/actions/rechunk
       with:
         ref: ${{ inputs.image-name }}:${{ inputs.image-tag }}

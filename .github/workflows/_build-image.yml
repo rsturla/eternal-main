@@ -1,0 +1,160 @@
+name: Build Image
+
+on:
+  workflow_call:
+    inputs:
+      image-name:
+        required: true
+        type: string
+      platforms:
+        required: true
+        type: string
+      major-version:
+        required: true
+        type: string
+      desktop-environment:
+        required: true
+        type: string
+      kernel-flavor:
+        required: false
+        type: string
+        default: default
+      is-release:
+        required: true
+        type: boolean
+        default: false
+      rechunk:
+        required: false
+        type: boolean
+        default: false
+      containerfile:
+        required: false
+        type: string
+        default: ./Containerfile
+      build-context:
+        required: false
+        type: string
+        default: .
+      maximize-build-space:
+        required: false
+        type: boolean
+        default: false
+
+env:
+  IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
+
+jobs:
+  generate-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      MATRIX: ${{ steps.generate-matrix.outputs.MATRIX }}
+    steps:
+      - name: Generate Matrix
+        id: generate-matrix
+        env:
+          PLATFORMS: ${{ inputs.platforms }}
+        run: |
+          # Split inputs.platforms into an array
+          platforms=()
+          while IFS= read -r -d '' platform; do
+            [[ -n "$platform" ]] && platforms+=("$platform")
+          done < <(printf '%s\0' $PLATFORMS)
+
+          # Create an empty matrix
+          matrix="{\"include\": []}"
+
+          # Iterate over each platform
+          for platform in "${platforms[@]}"; do
+            # Add the platform to the matrix
+            matrix=$(jq ".include += [{\"platform\": \"${platform}\"}]" <<< "${matrix}")
+          done
+
+          # Output the matrix
+          MATRIX=$(echo "${matrix}" | jq -c .)
+          echo "MATRIX=${MATRIX}" >> $GITHUB_OUTPUT
+
+  build-base:
+    runs-on: ${{ matrix.platform == 'amd64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }}
+    needs: generate-matrix
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    strategy:
+      fail-fast: false
+      matrix: ${{fromJson(needs.generate-matrix.outputs.MATRIX)}}
+    steps:
+      - name: Install dependencies
+        if: matrix.platform == 'arm64'
+        run: |
+          sudo apt update -y
+          sudo apt install -y \
+            podman \
+            skopeo \
+            jq
+
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: Maximize build space
+        if: inputs.maximize-build-space && matrix.platform == 'amd64'
+        uses: ublue-os/remove-unwanted-software@v8
+        with:
+          remove-codeql: true
+
+      - name: Login to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | podman login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Generate Image Tags
+        uses: ./.github/actions/generate-image-tags
+        id: generate-image-tags
+        with:
+          image-name: ${{ env.IMAGE_REGISTRY}}/${{ inputs.image-name }}
+          major-version: ${{ inputs.major-version }}
+          is-release: ${{ inputs.is-release }}
+
+      - name: Get CoreOS Kernel Information
+        if: inputs.kernel-flavor != 'default'
+        uses: ./.github/actions/get-coreos-kernel
+        id: get-coreos-kernel
+        with:
+          coreos-stream: ${{ inputs.kernel-flavor }}
+
+      - name: Build image
+        env:
+          IMAGE_REGISTRY: ${{ env.IMAGE_REGISTRY }}
+          IMAGE_NAME: ${{ inputs.image-name }}
+          CONTAINERFILE: ${{ inputs.containerfile }}
+          BUILD_CONTEXT: ${{ inputs.build-context }}
+          RECHUNK: ${{ inputs.rechunk }}
+          BUILD_ARGS: |
+            MAJOR_VERSION=${{ inputs.major-version }}
+            DESKTOP_ENVIRONMENT=${{ inputs.desktop-environment }}
+            ${{ inputs.kernel-flavor != 'default' && format('COREOS_KERNEL={0}', steps.get-coreos-kernel.outputs.coreos-kernel-release) || '' }}
+        run: |
+          set -x
+
+          build_args=()
+          while IFS= read -r build_arg; do
+            [[ -n "$build_arg" ]] && build_args+=("--build-arg" "$build_arg")
+          done < <(printf '%s\n' $BUILD_ARGS)
+
+          # If RECHUNK is true, run podman with sudo
+          if [[ $RECHUNK == true ]]; then
+            podman="sudo podman"
+          else
+            podman="podman"
+          fi
+
+          $podman build \
+            --iidfile /tmp/image-id \
+            --file ${CONTAINERFILE} \
+            --tag ${IMAGE_REGISTRY}/${IMAGE_NAME}:local \
+            ${build_args[@]} \
+            ${BUILD_CONTEXT}
+
+          IMAGE_ID=$(cat /tmp/image-id)
+          IMAGE_DIGEST=$($podman inspect --format '{{.Digest}}' ${IMAGE_ID})
+
+          echo "IMAGE_ID=${IMAGE_ID}" >> $GITHUB_OUTPUT
+          echo "IMAGE_DIGEST=${IMAGE_DIGEST}" >> $GITHUB_OUTPUT

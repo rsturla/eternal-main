@@ -33,5 +33,5 @@ runs:
       env:
         KERNEL_RELEASE: ${{ steps.extract-kernel-release.outputs.kernel-release }}
       run: |
-        FEDORA_VERSION=$(echo $KERNEL_RELEASE | grep -oP 'fc\K[0-9]+')
-        echo "fedora-version=$FEDORA_VERSION" >> $GITHUB_OUTPUT
+        MAJOR_VERSION=$(echo $KERNEL_RELEASE | grep -oP 'fc\K[0-9]+')
+        echo "fedora-version=$MAJOR_VERSION" >> $GITHUB_OUTPUT

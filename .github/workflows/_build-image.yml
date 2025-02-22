@@ -128,8 +128,8 @@ jobs:
           BUILD_CONTEXT: ${{ inputs.build-context }}
           RECHUNK: ${{ inputs.rechunk }}
           BUILD_ARGS: |
-            FEDORA_VERSION=${{ inputs.major-version }}
-            FEDORA_EDITION=${{ inputs.desktop-environment }}
+            MAJOR_VERSION=${{ inputs.major-version }}
+            DESKTOP_ENVIRONMENT=${{ inputs.desktop-environment }}
             ${{ inputs.kernel-flavor != 'default' && format('COREOS_KERNEL={0}', steps.get-coreos-kernel.outputs.coreos-kernel-release) || '' }}
         run: |
           set -x

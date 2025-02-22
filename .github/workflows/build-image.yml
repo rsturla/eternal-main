@@ -43,6 +43,7 @@ jobs:
         kernel-flavor: [default, stable]
     with:
       image-name: main/cosmic
+      rechunk: true
       desktop-environment: cosmic
       major-version: ${{ matrix.major-version }}
       is-release: ${{ (github.event_name == 'schedule' || github.event_name == 'push') && startsWith(github.ref, 'refs/heads/main') }}

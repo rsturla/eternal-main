@@ -78,7 +78,7 @@ runs:
 
     - name: Rechunk
       id: rechunk
-      if: ${{ inputs.rechunk == "true" }}
+      if: ${{ inputs.rechunk == 'true' }}
       uses: ./.github/actions/rechunk
       with:
         ref: ${{ inputs.image-name }}:${{ inputs.image-tag }}

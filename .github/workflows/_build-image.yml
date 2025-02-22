@@ -144,7 +144,7 @@ jobs:
         id: push
         uses: ./.github/actions/push-image
         with:
-          image-ref: ${{ steps.build.outputs.tag }}
+          image-ref: ${{ steps.build.outputs.image }}:${{ steps.build.outputs.tag }}
           image-name: ${{ steps.build.outputs.image }}
           image-tags: ${{ steps.generate-image-tags.outputs.tags }}
           image-registry: ${{ env.IMAGE_REGISTRY }}

@@ -270,7 +270,7 @@ jobs:
 
       - name: Sign Manifest
         uses: ./.github/actions/sign-image
-        # if: github.event_name != 'pull_request'
+        if: inputs.is-release
         with:
           registry: ${{ steps.push-manifest.outputs.IMAGE }}
           digest: ${{ steps.push-manifest.outputs.digest }}
@@ -503,7 +503,7 @@ jobs:
 
       - name: Sign Manifest
         uses: ./.github/actions/sign-image
-        # if: github.event_name != 'pull_request'
+        if: inputs.is-release
         with:
           registry: ${{ steps.push-manifest.outputs.IMAGE }}
           digest: ${{ steps.push-manifest.outputs.digest }}

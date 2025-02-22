@@ -248,7 +248,9 @@ jobs:
           done
 
       - name: Login to GHCR
-        run: echo ${{ secrets.GITHUB_TOKEN }} | podman login -u ${{ github.actor }} --password-stdin ghcr.io
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | podman login -u ${{ github.actor }} --password-stdin ghcr.io
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login -u ${{ github.actor }} --password-stdin ghcr.io
 
       - name: Push Manifest
         id: push-manifest
@@ -479,7 +481,9 @@ jobs:
           done
 
       - name: Login to GHCR
-        run: echo ${{ secrets.GITHUB_TOKEN }} | podman login -u ${{ github.actor }} --password-stdin ghcr.io
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | podman login -u ${{ github.actor }} --password-stdin ghcr.io
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login -u ${{ github.actor }} --password-stdin ghcr.io
 
       - name: Push Manifest
         id: push-manifest

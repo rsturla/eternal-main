@@ -5,7 +5,7 @@ ARG BASE_IMAGE=ghcr.io/rsturla/eternal-linux/main/${DESKTOP_ENVIRONMENT}
 ARG BASE_TAG=${MAJOR_VERSION}
 ARG BASE_IMAGE_FULL=${BASE_IMAGE}:${BASE_TAG}
 
-ARG NVIDIA_AKMODS_IMAGE=ghcr.io/rsturla/akmods/nvidia
+ARG NVIDIA_AKMODS_IMAGE=ghcr.io/rsturla/akmods/nvidia-open
 ARG NVIDIA_AKMODS_TAG=${MAJOR_VERSION}
 
 

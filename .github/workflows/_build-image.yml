@@ -106,7 +106,15 @@ jobs:
           remove-codeql: true
 
       - name: Login to GitHub Container Registry
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | podman login ghcr.io -u ${{ github.actor }} --password-stdin
+        run: |
+          if [[ $RECHUNK == true ]]; then
+            podman="sudo podman"
+          else
+            podman="podman"
+          fi
+
+          echo "${{ secrets.GITHUB_TOKEN }}" | $podman login ghcr.io -u ${{ github.actor }} --password-stdin
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Generate Image Tags
         uses: ./.github/actions/generate-image-tags
@@ -173,18 +181,6 @@ jobs:
         with:
           ref: ${{ env.IMAGE_REGISTRY }}/${{ steps.build.outputs.IMAGE_NAME }}:local
           prev-ref: ${{ env.IMAGE_REGISTRY }}/${{ steps.build.outputs.IMAGE_NAME }}:${{ steps.generate-image-tags.outputs.primary-tag }}
-
-      - name: Login to GHCR
-        env:
-          RECHUNK: ${{ inputs.rechunk }}
-        run: |
-          if [[ $RECHUNK == true ]]; then
-            podman="sudo podman"
-          else
-            podman="podman"
-          fi
-
-          echo "${{ secrets.GITHUB_TOKEN }}" | $podman login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Push Image
         id: push

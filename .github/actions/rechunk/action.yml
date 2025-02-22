@@ -31,9 +31,5 @@ runs:
         IMAGE=$(sudo podman pull ${{ steps.rechunk.outputs.ref }})
         tags="${{ inputs.tags }}"
         sudo rm -rf ${{ steps.rechunk.outputs.location }}
-        IFS=' ' read -r -a tag_array <<< "$tags"
-        for tag in "${tag_array[@]}"; do
-          sudo podman tag $IMAGE ${{ inputs.ref }}
-        done
-
+        sudo podman tag $IMAGE ${{ inputs.ref }}
         sudo podman image ls

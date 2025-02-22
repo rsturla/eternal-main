@@ -320,6 +320,8 @@ jobs:
           done
           echo "DIGESTS_JSON=$(echo $DIGESTS_JSON | jq -c '.')"
           echo "DIGESTS_JSON=$(echo $DIGESTS_JSON | jq -c '.')" >> $GITHUB_OUTPUT
+
+          echo "DIGEST=$(echo $DIGESTS_JSON | jq -r --arg platform "$PLATFORM" '.[$platform]')"
           echo "DIGEST=$(echo $DIGESTS_JSON | jq -r --arg platform "$PLATFORM" '.[$platform]')" >> $GITHUB_OUTPUT
 
       - name: Install dependencies

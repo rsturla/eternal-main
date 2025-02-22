@@ -2,17 +2,9 @@ name: Sign OCI Image
 description: Signs an OCI image using cosign
 
 inputs:
-  cosign-version:
-    description: "The version of cosign to use"
-    required: false
-    default: "v2.2.2"
   registry:
     description: "The registry to push the signed image to"
     required: true
-  registry-provider:
-    description: "The provider of the registry (e.g. ghcr.io)"
-    required: false
-    default: "ghcr.io"
   digest:
     description: "The digest of the image to sign"
     required: true
@@ -28,8 +20,6 @@ runs:
   steps:
     - name: Setup Cosign
       uses: sigstore/cosign-installer@d7d6bc7722e3daa8354c50bcb52f4837da5e9b6a # v3.8.1
-      with:
-        cosign-release: ${{ inputs.cosign-version }}
 
     - name: Sign OCI Image
       shell: bash

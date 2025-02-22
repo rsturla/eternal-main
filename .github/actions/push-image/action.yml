@@ -43,7 +43,10 @@ runs:
           echo "IMAGE=${image}"
           tags+=("${image}")
           podman tag "${IMAGE_REF}" "${image}"
-          podman push --digestfile /tmp/digestfile "${image}"
+
+          for i in {1..3}; do
+            podman push --digestfile /tmp/digestfile "${image}" && break || sleep $((5 * i));
+          done
         done
 
         # Get the digest of the first tag

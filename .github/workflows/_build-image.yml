@@ -107,13 +107,8 @@ jobs:
 
       - name: Login to GitHub Container Registry
         run: |
-          if [[ $RECHUNK == true ]]; then
-            podman="sudo podman"
-          else
-            podman="podman"
-          fi
-
-          echo "${{ secrets.GITHUB_TOKEN }}" | $podman login ghcr.io -u ${{ github.actor }} --password-stdin
+          echo "${{ secrets.GITHUB_TOKEN }}" | sudo podman login ghcr.io -u ${{ github.actor }} --password-stdin
+          echo "${{ secrets.GITHUB_TOKEN }}" | podman login ghcr.io -u ${{ github.actor }} --password-stdin
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Generate Image Tags
@@ -133,54 +128,18 @@ jobs:
 
       - name: Build Image
         id: build
-        env:
-          IMAGE_REGISTRY: ${{ env.IMAGE_REGISTRY }}
-          IMAGE_NAME: ${{ inputs.image-name }}
-          CONTAINERFILE: ${{ inputs.containerfile }}
-          BUILD_CONTEXT: ${{ inputs.build-context }}
-          RECHUNK: ${{ inputs.rechunk }}
-          BUILD_ARGS: |
+        uses: ./.github/actions/build-image
+        with:
+          context: ${{ inputs.build-context }}
+          containerfile: ${{ inputs.containerfile }}
+          image-name: ${{ inputs.image-name }}
+          image-tag: local
+          build-args: |
             MAJOR_VERSION=${{ inputs.major-version }}
             DESKTOP_ENVIRONMENT=${{ inputs.desktop-environment }}
             ${{ inputs.kernel-flavor != 'default' && format('COREOS_KERNEL={0}', steps.get-coreos-kernel.outputs.coreos-kernel-release) || '' }}
             ${{ inputs.source-image != '' && format('IMAGE_REGISTRY={0}', inputs.source-image) || '' }}
-        run: |
-          set -x
-
-          build_args=()
-          while IFS= read -r build_arg; do
-            [[ -n "$build_arg" ]] && build_args+=("--build-arg" "$build_arg")
-          done < <(printf '%s\n' $BUILD_ARGS)
-
-          # If RECHUNK is true, run podman with sudo
-          if [[ $RECHUNK == true ]]; then
-            podman="sudo podman"
-          else
-            podman="podman"
-          fi
-
-          $podman build \
-            --iidfile /tmp/image-id \
-            --file ${CONTAINERFILE} \
-            --tag ${IMAGE_REGISTRY}/${IMAGE_NAME}:local \
-            ${build_args[@]} \
-            ${BUILD_CONTEXT}
-
-          IMAGE_ID=$(cat /tmp/image-id)
-          IMAGE_DIGEST=$($podman inspect --format '{{.Digest}}' ${IMAGE_ID})
-
-          echo "IMAGE_NAME=${IMAGE_NAME}" >> $GITHUB_OUTPUT
-          echo "IMAGE_ID=${IMAGE_ID}" >> $GITHUB_OUTPUT
-          echo "IMAGE_DIGEST=${IMAGE_DIGEST}" >> $GITHUB_OUTPUT
-          echo "TAG=${IMAGE_REGISTRY}/${IMAGE_NAME}:local" >> $GITHUB_OUTPUT
-
-      - name: Rechunk
-        id: rechunk
-        if: ${{ inputs.rechunk }}
-        uses: ./.github/actions/rechunk
-        with:
-          ref: ${{ env.IMAGE_REGISTRY }}/${{ steps.build.outputs.IMAGE_NAME }}:local
-          prev-ref: ${{ env.IMAGE_REGISTRY }}/${{ steps.build.outputs.IMAGE_NAME }}:${{ steps.generate-image-tags.outputs.primary-tag }}
+          rechunk: ${{ inputs.rechunk }}
 
       - name: Push Image
         id: push

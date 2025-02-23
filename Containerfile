@@ -19,5 +19,3 @@ RUN chmod +x /tmp/scripts/*.sh /tmp/scripts/_${DESKTOP_ENVIRONMENT}/*.sh && \
   /tmp/scripts/cleanup.sh --base ${DESKTOP_ENVIRONMENT}
 
 RUN tree -L 2 /usr/lib/modules
-RUN rpm -qa | grep kernel
-RUN dnf list installed | grep kernel

@@ -20,3 +20,4 @@ RUN chmod +x /tmp/scripts/*.sh /tmp/scripts/_${DESKTOP_ENVIRONMENT}/*.sh && \
 
 RUN tree -L 2 /usr/lib/modules
 RUN rpm -qa | grep kernel
+RUN dnf list installed | grep kernel

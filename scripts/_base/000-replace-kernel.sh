@@ -9,6 +9,7 @@ if [[ "$COREOS_KERNEL" == "N/A" ]]; then
 fi
 
 tree -L 2 /usr/lib/modules
+rpm -qa | grep kernel
 
 KERNEL_VERSION=$COREOS_KERNEL
 KERNEL_MAJOR_MINOR_PATCH=$(echo $KERNEL_VERSION | cut -d '-' -f 1)
@@ -25,3 +26,4 @@ dnf install -y \
     https://kojipkgs.fedoraproject.org//packages/kernel/$KERNEL_MAJOR_MINOR_PATCH/$KERNEL_RELEASE/$ARCH/kernel-modules-extra-$KERNEL_MAJOR_MINOR_PATCH-$KERNEL_RELEASE.$ARCH.rpm
 
 tree -L 2 /usr/lib/modules
+rpm -qa | grep kernel

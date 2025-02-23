@@ -35,3 +35,4 @@ RUN chmod +x /tmp/akmods/scripts/*.sh && \
   ./tmp/scripts/cleanup.sh
 
 RUN tree -L 2 /usr/lib/modules
+RUN rpm -qa | grep kernel

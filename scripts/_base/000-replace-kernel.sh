@@ -5,6 +5,7 @@ set -euox pipefail
 COREOS_KERNEL=${COREOS_KERNEL}
 
 if [[ "$COREOS_KERNEL" == "N/A" ]]; then
+  dnf versionlock add kernel*
   exit 0
 fi
 
@@ -21,3 +22,5 @@ dnf install -y \
     https://kojipkgs.fedoraproject.org//packages/kernel/$KERNEL_MAJOR_MINOR_PATCH/$KERNEL_RELEASE/$ARCH/kernel-modules-$KERNEL_MAJOR_MINOR_PATCH-$KERNEL_RELEASE.$ARCH.rpm \
     https://kojipkgs.fedoraproject.org//packages/kernel/$KERNEL_MAJOR_MINOR_PATCH/$KERNEL_RELEASE/$ARCH/kernel-modules-core-$KERNEL_MAJOR_MINOR_PATCH-$KERNEL_RELEASE.$ARCH.rpm \
     https://kojipkgs.fedoraproject.org//packages/kernel/$KERNEL_MAJOR_MINOR_PATCH/$KERNEL_RELEASE/$ARCH/kernel-modules-extra-$KERNEL_MAJOR_MINOR_PATCH-$KERNEL_RELEASE.$ARCH.rpm
+
+dnf versionlock add kernel*

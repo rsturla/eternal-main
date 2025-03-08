@@ -73,8 +73,17 @@ runs:
           -f ${{ inputs.containerfile }} \
           ${{ inputs.context }}
 
-        digest=$($podman image inspect ${{ inputs.image-name }}:${TAG} --format "{{.Digest}}")
-        echo "digest=$digest" >> $GITHUB_OUTPUT
+        DIGEST=$($podman image inspect ${{ inputs.image-name }}:${TAG} --format "{{.Digest}}")
+        mapfile -t IMAGES < <($podman images --format "{{.ID}} {{.Digest}}" | grep -v "$DIGEST")
+
+        # Loop through images and remove them
+        for IMAGE in "${IMAGES[@]}"; do
+            IMAGE_ID=$(echo "$IMAGE" | awk '{print $1}')
+            echo "Deleting image: $IMAGE_ID"
+            $podman rmi -f "$IMAGE_ID"
+        done
+
+        echo "digest=$DIGEST" >> $GITHUB_OUTPUT
 
     - name: Rechunk
       id: rechunk

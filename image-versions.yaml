@@ -1,6 +1,6 @@
 images:
   - name: cosmic
-    image: quay.io/fedora-ostree-desktops/cosmic
+    image: quay.io/fedora-ostree-desktops/cosmic-atomic
     versions:
       - version: 41
         digest: sha256:0f3a2b4c5d6e7f8a9b0c1d2e3f4g5h6i7j8k9l0m1n2o3p4q5r6s7t8u9v0w1x2y3z

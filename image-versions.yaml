@@ -1,0 +1,22 @@
+images:
+  - name: cosmic
+    image: quay.io/fedora-ostree-desktops/cosmic
+    versions:
+      - version: 41
+        digest: sha256:0f3a2b4c5d6e7f8a9b0c1d2e3f4g5h6i7j8k9l0m1n2o3p4q5r6s7t8u9v0w1x2y3z
+      - version: 40
+        digest: sha256:abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890
+  - name: silverblue
+    image: quay.io/fedora/fedora-silverblue
+    versions:
+      - version: 41
+        digest: sha256:1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t1u2v3w4x5y6z7a8b9c0d1e2f3g
+      - version: 40
+        digest: sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+  - name: kinoite
+    image: quay.io/fedora/fedora-kinoite
+    versions:
+      - version: 41
+        digest: sha256:2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t1u2v3w4x5y6z7a8b9c0d1e2f3g4
+      - version: 40
+        digest: sha256:7890abcdef1234567890abcdef1234567890abcdef1234567890abcdef123456

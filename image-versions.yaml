@@ -3,20 +3,18 @@ images:
     image: quay.io/fedora-ostree-desktops/cosmic-atomic
     versions:
       - version: 41
-        digest: sha256:0f3a2b4c5d6e7f8a9b0c1d2e3f4g5h6i7j8k9l0m1n2o3p4q5r6s7t8u9v0w1x2y3z
-      - version: 40
-        digest: sha256:abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890
+        digest: sha256:fda352bbf4352a4a5b00c00be1452fcd5831e0530a1911838c52f9ecf6939ca9
   - name: silverblue
     image: quay.io/fedora/fedora-silverblue
     versions:
       - version: 41
-        digest: sha256:1a2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t1u2v3w4x5y6z7a8b9c0d1e2f3g
+        digest: sha256:1d8812cfbc484b658af3e81da39fbe0ce5d27df111dbf5b1adeaba96ce39e49c
       - version: 40
-        digest: sha256:1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+        digest: sha256:2e299fb21a6012a65e44e4df3323223e24ec7fc8981be27650d4f61fd42397e0
   - name: kinoite
     image: quay.io/fedora/fedora-kinoite
     versions:
       - version: 41
-        digest: sha256:2b3c4d5e6f7g8h9i0j1k2l3m4n5o6p7q8r9s0t1u2v3w4x5y6z7a8b9c0d1e2f3g4
+        digest: sha256:247633131267d7a06bc160df27c90af6dabe9773e2d10828997503211ca0c4da
       - version: 40
-        digest: sha256:7890abcdef1234567890abcdef1234567890abcdef1234567890abcdef123456
+        digest: sha256:ca3a9cb83b016c29177c907db5654b9fcb3e9c4fb567b10eda0a83cb1ff73bb0

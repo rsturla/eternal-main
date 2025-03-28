@@ -40,7 +40,7 @@
         "image-versions.yaml"
       ],
       "matchStrings": [
-        "$map(images, function($v) { $map($v.versions, function($ver) { { \"depName\": $v.name, \"packageName\": $v.image, \"currentValue\": $ver.version, \"currentDigest\": $ver.digest } }) })"
+        "images.($name := name; $package := image; versions.{ \"depName\": $name, \"packageName\": $package, \"currentValue\": $string(version), \"currentDigest\": digest })"
       ],
       "datasourceTemplate": "docker"
     }

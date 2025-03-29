@@ -34,7 +34,7 @@
     {
       // Disable major version updates for Docker images
       "matchManagers": [
-        "docker"
+        "dockerfile"
       ],
       "matchUpdateTypes": [
         "major"

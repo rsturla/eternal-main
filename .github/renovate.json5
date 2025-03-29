@@ -33,8 +33,8 @@
     },
     {
       // Disable major version updates for Docker images
-      "matchManagers": [
-        "dockerfile"
+      "matchDatasources": [
+        "docker"
       ],
       "matchUpdateTypes": [
         "major"

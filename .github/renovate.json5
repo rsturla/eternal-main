@@ -30,6 +30,16 @@
         "jasonn3/build-container-installer"
       ],
       "enabled": false
+    },
+    {
+      // Disable major version updates for Docker images
+      "matchManagers": [
+        "docker"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "enabled": false
     }
   ],
   "customManagers": [

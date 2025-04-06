@@ -2,6 +2,8 @@
 
 set -euox pipefail
 
+dnf config-manager setopt fedora-multimedia.enabled=0
+
 # Generate initramfs
 mkdir -p /var/tmp
 KERNEL_SUFFIX=""

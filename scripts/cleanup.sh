@@ -2,7 +2,7 @@
 
 set -euox pipefail
 
-sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/rpmfusion-{free,nonfree}{,-updates,-updates-testing}.repo
+dnf config-manager setopt fedora-multimedia.enabled=0
 
 # Generate initramfs
 mkdir -p /var/tmp

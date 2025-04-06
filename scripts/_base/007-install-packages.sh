@@ -3,7 +3,6 @@
 set -euox pipefail
 
 dnf install -y \
-  bootc \
   direnv \
   distrobox \
   ffmpeg \

@@ -9,10 +9,10 @@ ARG NVIDIA_AKMODS_IMAGE=ghcr.io/rsturla/akmods/nvidia-open
 ARG NVIDIA_AKMODS_TAG=${MAJOR_VERSION}
 
 
-FROM ${NVIDIA_AKMODS_IMAGE}:${NVIDIA_AKMODS_TAG} as akmods-nvidia
+FROM ${NVIDIA_AKMODS_IMAGE}:${NVIDIA_AKMODS_TAG} AS akmods-nvidia
 
 
-FROM ${BASE_IMAGE_FULL} as base-nvidia
+FROM ${BASE_IMAGE_FULL} AS base-nvidia
 
 ARG MAJOR_VERSION
 

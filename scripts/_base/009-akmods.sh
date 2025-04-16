@@ -9,7 +9,7 @@ akmods=(
 # /tmp/akmods/scripts/v4l2loopback/*.sh
 for akmod in "${akmods[@]}"; do
   if [[ -f "/tmp/akmods/scripts/${akmod}.sh" ]]; then
-    source "/tmp/akmods/scripts/${akmod}.sh"
+    bash "/tmp/akmods/scripts/${akmod}.sh"
   else
     echo "Warning: /tmp/akmods/scripts/${akmod}.sh not found."
   fi

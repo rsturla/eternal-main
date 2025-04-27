@@ -19,7 +19,7 @@ runs:
       id: rechunk
       uses: hhd-dev/rechunk@ca77507401f8700bb0b25ebecbbf980a078cd180 # v1.2.2
       with:
-        rechunk: ghcr.io/hhd-dev/rechunk:v1.2.1
+        rechunk: ghcr.io/hhd-dev/rechunk:v1.2.2
         ref: ${{ inputs.ref }}
         skip_compression: false
         prev-ref: ${{ inputs.prev-ref }}

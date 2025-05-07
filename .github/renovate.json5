@@ -1,58 +1,54 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  // Use the basic Renovate preset, and allow settings to be overridden
-  "extends": [
-    "config:best-practices"
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: [
+    'config:best-practices',
   ],
-  "packageRules": [
+  packageRules: [
     {
-      // Automatically update any GitHub Actions packages through minor and patch upgrades
-      "automerge": true,
-      "matchUpdateTypes": [
-        "minor",
-        "patch",
-        "pin",
-        "digest",
-        "pinDigest"
+      automerge: true,
+      matchUpdateTypes: [
+        'minor',
+        'patch',
+        'pin',
+        'digest',
+        'pinDigest',
       ],
-      "matchManagers": [
-        "github-actions"
-      ]
+      matchManagers: [
+        'github-actions',
+      ],
     },
     {
-      // Do not pin digest for jasonn3/build-container-installer GitHub Action
-      "matchUpdateTypes": [
-        "pin",
-        "digest",
-        "pinDigest"
+      matchUpdateTypes: [
+        'pin',
+        'digest',
+        'pinDigest',
       ],
-      "matchPackageNames": [
-        "jasonn3/build-container-installer"
+      matchPackageNames: [
+        'jasonn3/build-container-installer',
       ],
-      "enabled": false
+      enabled: false,
     },
     {
-      // Disable major version updates for Docker images
-      "matchDatasources": [
-        "docker"
+      matchDatasources: [
+        'docker',
       ],
-      "matchUpdateTypes": [
-        "major"
+      matchUpdateTypes: [
+        'major',
       ],
-      "enabled": false
-    }
+      enabled: false,
+    },
   ],
-  "customManagers": [
+  customManagers: [
     {
-      "customType": "jsonata",
-      "fileFormat": "yaml",
-      "fileMatch": [
-        "image-versions.yaml"
+      customType: 'jsonata',
+      fileFormat: 'yaml',
+      managerFilePatterns: [
+        '/image-versions.yaml/',
       ],
-      "matchStrings": [
-        "images.($name := name; $package := image; versions.{ \"depName\": $name, \"packageName\": $package, \"currentValue\": $string(version), \"currentDigest\": digest })"
+      matchStrings: [
+        'images.($name := name; $package := image; versions.{ "depName": $name, "packageName": $package, "currentValue": $string(version), "currentDigest": digest })',
       ],
-      "datasourceTemplate": "docker"
-    }
-  ]
+      datasourceTemplate: 'docker',
+    },
+  ],
 }

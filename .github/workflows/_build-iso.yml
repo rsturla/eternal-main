@@ -51,10 +51,7 @@ jobs:
             cat "$manifest" >> "$MANIFESTS_FILE"
           done
 
-          echo "LIST: "
-          cat "$MANIFESTS_FILE"
-
-          echo "MANIFESTS_FILE=$MANIFESTS_FILE" >> $GITHUB_OUTPUTS
+          echo "MANIFESTS_FILE=$MANIFESTS_FILE" >> $GITHUB_OUTPUT
 
       - name: Build ISO
         uses: ublue-os/titanoboa@main

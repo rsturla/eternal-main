@@ -25,11 +25,12 @@ jobs:
           - kinoite
         image-tag:
           - 42
-          - 42-nvidia
+          - 42-nvidia-open
     with:
       image-name: ${{ matrix.image-name }}
       image-registry: ghcr.io/rsturla/eternal-linux/main
       image-tag: ${{ matrix.image-tag }}
+      rootfs-setup-hook-template: ./iso/configure.sh.tmpl
       flatpak-manifest-lists: |
-        flatpaks/base
-        flatpaks/${{ matrix.image-name }}
+        iso/flatpaks/base
+        iso/flatpaks/${{ matrix.image-name }}

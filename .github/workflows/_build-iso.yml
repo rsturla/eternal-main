@@ -26,9 +26,13 @@ on:
         required: false
         type: string
         default: x86_64
-      hook-post-rootfs:
+      rootfs-setup-hook-template:
         required: false
         type: string
+      secureboot-enrollment-password:
+        required: false
+        type: string
+        default: password
 
 jobs:
   build:
@@ -53,13 +57,35 @@ jobs:
 
           echo "MANIFESTS_FILE=$MANIFESTS_FILE" >> $GITHUB_OUTPUT
 
+      - name: Populate Setup Script
+        if: inputs.rootfs-setup-hook-template != ''
+        shell: bash
+        env:
+          SCRIPT: ${{ inputs.rootfs-setup-hook-template }}
+          IMAGE_REF: ${{ inputs.image-registry }}/${{ inputs.image-name }}:${{ inputs.image-tag }}
+          IMAGE_NAME: ${{ inputs.image-name }}
+          SECUREBOOT_ENROLLMENT_PASSWORD: ${{ inputs.SECUREBOOT_ENROLLMENT_PASSWORD }}
+        run: |
+          set -euox pipefail
+
+          # Populate the setup script template with the values from the environment
+          # and save it to the rootfs-setup-hook.sh file
+          # Values to be replaced are enclosed in double curly braces
+          cp "$SCRIPT" rootfs-setup-hook.sh
+          sed -i "s|{{IMAGE_REF}}|$IMAGE_REF|g" rootfs-setup-hook.sh
+          sed -i "s|{{IMAGE_NAME}}|$IMAGE_NAME|g" rootfs-setup-hook.sh
+          sed -i "s|{{SECUREBOOT_ENROLLMENT_PASSWORD}}|$SECUREBOOT_ENROLLMENT_PASSWORD|g" rootfs-setup-hook.sh
+          chmod +x rootfs-setup-hook.sh
+
+          echo "ROOTFS_SETUP_HOOK=./rootfs-setup-hook.sh" >> $GITHUB_OUTPUT
+
       - name: Build ISO
         uses: ublue-os/titanoboa@main
         id: build-iso
         with:
           image-ref: ${{ inputs.image-registry }}/${{ inputs.image-name }}:${{ inputs.image-tag }}
-          hook-post-rootfs: ${{ inputs.hook-post-rootfs }}
           flatpaks-list: ${{ steps.flatpak-manifest-list.outputs.MANIFESTS_FILE }}
+          hook-post-rootfs: ${{ inputs.rootfs-setup-hook != '' && steps.populate-setup-script.outputs.ROOTFS_SETUP_HOOK }}
 
       - name: Upload ISO to GitHub
         if: inputs.upload-to-cloudflare == false

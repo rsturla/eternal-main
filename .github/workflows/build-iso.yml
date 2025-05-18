@@ -1,16 +1,10 @@
 name: Build ISOs
 
 on:
-  # pull_request:
-  #   paths:
-  #     - ".github/workflows/*build-iso.yml"
-  #     - "flatpaks/**"
-  # push:
-  #   branches:
-  #     - main
-  #   paths:
-  #     - ".github/workflows/*build-iso.yml"
-  #     - "flatpaks/**"
+  pull_request:
+    paths:
+      - ".github/workflows/*build-iso.yml"
+      - "flatpaks/**"
   schedule:
     # Every week at midnight on Monday
     - cron: "0 0 * * 1"
@@ -30,10 +24,8 @@ jobs:
           - cosmic
           - kinoite
         image-tag:
-          - 41
-          - stable
-          - 41-nvidia
-          - stable-nvidia
+          - 42
+          - 42-nvidia
     with:
       image-name: ${{ matrix.image-name }}
       image-registry: ghcr.io/rsturla/eternal-linux/main
@@ -41,4 +33,3 @@ jobs:
       flatpak-manifest-lists: |
         flatpaks/base
         flatpaks/${{ matrix.image-name }}
-      installer-version: 41

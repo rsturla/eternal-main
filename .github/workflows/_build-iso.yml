@@ -27,7 +27,7 @@ on:
         type: string
         default: x86_64
       rootfs-setup-hook-template:
-        required: false
+        required: true
         type: string
       secureboot-enrollment-password:
         required: false
@@ -58,7 +58,6 @@ jobs:
           echo "MANIFESTS_FILE=$MANIFESTS_FILE" >> $GITHUB_OUTPUT
 
       - name: Populate Setup Script
-        if: inputs.rootfs-setup-hook-template != ''
         shell: bash
         env:
           SCRIPT: ${{ inputs.rootfs-setup-hook-template }}
@@ -85,7 +84,7 @@ jobs:
         with:
           image-ref: ${{ inputs.image-registry }}/${{ inputs.image-name }}:${{ inputs.image-tag }}
           flatpaks-list: ${{ steps.flatpak-manifest-list.outputs.MANIFESTS_FILE }}
-          hook-post-rootfs: ${{ inputs.rootfs-setup-hook != '' && steps.populate-setup-script.outputs.ROOTFS_SETUP_HOOK }}
+          hook-post-rootfs: ${{ steps.populate-setup-script.outputs.ROOTFS_SETUP_HOOK }}
 
       - name: Upload ISO to GitHub
         if: inputs.upload-to-cloudflare == false

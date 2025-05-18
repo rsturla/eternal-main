@@ -108,9 +108,10 @@ jobs:
           IMAGE_TAG=${{ inputs.image-tag }}
           ARCH=${{ inputs.arch }}
           NEW_ISO_NAME="${IMAGE_NAME}-${IMAGE_TAG}-${ARCH}-live"
-          mv "${{ steps.build-iso.outputs.iso-dest }}/${ISO_FILE}" "${{ steps.build-iso.outputs.iso-dest }}/${NEW_ISO_NAME}.iso"
+          NEW_ISO_DIR="$(dirname "${ISO_FILE}")"
+          mv "${ISO_FILE}" "${NEW_ISO_DIR}/${NEW_ISO_NAME}.iso"
 
-          echo "ISO_DEST=${{ steps.build-iso.outputs.iso-dest }}/${NEW_ISO_NAME}.iso" >> $GITHUB_OUTPUT
+          echo "ISO_DEST=${NEW_ISO_DIR}/${NEW_ISO_NAME}.iso" >> $GITHUB_OUTPUT
 
       - name: Upload ISO to GitHub
         if: inputs.upload-to-cloudflare == false

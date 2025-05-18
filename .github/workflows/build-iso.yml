@@ -27,7 +27,7 @@ jobs:
           - 42
           - 42-nvidia-open
         arch:
-          - x86_64
+          - amd64
           - arm64
     secrets: inherit
     with:

@@ -25,7 +25,7 @@ on:
       arch:
         required: false
         type: string
-        default: x86_64
+        default: amd64
       rootfs-setup-hook-template:
         required: true
         type: string
@@ -36,7 +36,7 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ inputs.arch == 'x86_64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }}
+    runs-on: ${{ inputs.arch == 'amd64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }}
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4

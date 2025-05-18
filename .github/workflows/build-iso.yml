@@ -29,6 +29,7 @@ jobs:
         arch:
           - x86_64
           # - arm64
+    secrets: inherit
     with:
       image-name: ${{ matrix.image-name }}
       image-registry: ghcr.io/rsturla/eternal-linux/main
@@ -36,6 +37,7 @@ jobs:
       rootfs-setup-hook-template: ./iso/configure.sh.tmpl
       arch: ${{ matrix.arch }}
       upload-to-cloudflare: true
+      r2-bucket: ${{ vars.R2_BUCKET_NAME }}
       flatpak-manifest-lists: |
         iso/flatpaks/base
         iso/flatpaks/${{ matrix.image-name }}

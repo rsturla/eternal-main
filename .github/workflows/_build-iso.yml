@@ -62,6 +62,7 @@ jobs:
 
       - name: Populate Setup Script
         shell: bash
+        id: populate-setup-script
         env:
           SCRIPT: ${{ inputs.rootfs-setup-hook-template }}
           IMAGE_REF: ${{ inputs.image-registry }}/${{ inputs.image-name }}:${{ inputs.image-tag }}

@@ -15,9 +15,6 @@ on:
       flatpak-manifest-lists:
         required: true
         type: string
-      installer-version:
-        required: true
-        type: number
       upload-to-cloudflare:
         required: false
         type: boolean
@@ -28,85 +25,93 @@ on:
       arch:
         required: false
         type: string
-        default: x86_64
+        default: amd64
+      rootfs-setup-hook-template:
+        required: true
+        type: string
+      secureboot-enrollment-password:
+        required: false
+        type: string
+        default: password
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.arch == 'amd64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }}
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
-      - name: Get Flatpak dependencies
-        id: flatpak-dependencies
+      - name: Maximize Build Space
+        uses: ublue-os/remove-unwanted-software@cc0becac701cf642c8f0a6613bbdaf5dc36b259e # v9
+
+      - name: Combine Flatpak Manifest Lists
+        id: flatpak-manifest-list
         env:
-          IMAGE_FULL: ${{ inputs.image-registry }}/${{ inputs.image-name }}:${{ inputs.image-tag }}
+          FLATPAK_MANIFEST_LISTS: ${{ inputs.flatpak-manifest-lists }}
         shell: bash
         run: |
           set -euox pipefail
 
-          IMAGE="${IMAGE_FULL}"
-
-          # Create temporary directory
-          TEMP_FLATPAK_INSTALL_DIR=$(mktemp -d -p /tmp flatpak-XXXXXX)
-          FLATPAK_REFS_DIR=./flatpak-refs
-          FLATPAK_REFS_DIR_ABS=$(realpath "${FLATPAK_REFS_DIR}")
-          mkdir -p "${FLATPAK_REFS_DIR}"
-
-          # Combine the list of Flatpak manifests into a single file
-          manifest_list=$(echo "${{ inputs.flatpak-manifest-lists }}" | sed '/^$/d')
-          for manifest in $manifest_list; do
-            cat "${manifest}" >> "${FLATPAK_REFS_DIR}/flatpaks.txt"
+          # Simply combine the Flatpak manifest lists into a single file
+          MANIFESTS_FILE=$(mktemp)
+          for manifest in $FLATPAK_MANIFEST_LISTS; do
+            cat "$manifest" >> "$MANIFESTS_FILE"
           done
 
-          echo "Flatpak manifests combined into ${FLATPAK_REFS_DIR}/flatpaks.txt"
-          cat "${FLATPAK_REFS_DIR}/flatpaks.txt"
+          echo "MANIFESTS_FILE=$MANIFESTS_FILE" >> $GITHUB_OUTPUT
 
-          # Read the list of Flatpak packages from the manifest
-          FLATPAK_REFS=()
-          while IFS= read -r line; do
-            FLATPAK_REFS+=("$line")
-          done < "${FLATPAK_REFS_DIR}/flatpaks.txt"
+      - name: Populate Setup Script
+        shell: bash
+        id: populate-setup-script
+        env:
+          SCRIPT: ${{ inputs.rootfs-setup-hook-template }}
+          IMAGE_REF: ${{ inputs.image-registry }}/${{ inputs.image-name }}:${{ inputs.image-tag }}
+          IMAGE_NAME: ${{ inputs.image-name }}
+          SECUREBOOT_ENROLLMENT_PASSWORD: ${{ inputs.SECUREBOOT_ENROLLMENT_PASSWORD }}
+          WORKSPACE_DIR: ${{ github.workspace }}
+        run: |
+          set -euox pipefail
 
-          # Generate installation script
-          cat <<EOF > "${TEMP_FLATPAK_INSTALL_DIR}/install-flatpaks.sh"
-          mkdir -p /flatpak/flatpak /flatpak/triggers
-          mkdir /var/tmp
-          chmod -R 1777 /var/tmp
-          flatpak config --system --set languages "*"
-          flatpak remote-add --system flathub https://flathub.org/repo/flathub.flatpakrepo
-          flatpak install --system -y flathub ${FLATPAK_REFS[@]}
-          ostree refs --repo=\${FLATPAK_SYSTEM_DIR}/repo | grep '^deploy/' | grep -v 'org\.freedesktop\.Platform\.openh264' | sed 's/^deploy\///g' > /output/flatpaks-with-deps
-          EOF
-          docker run --rm --privileged \
-            --entrypoint /bin/bash \
-            -e FLATPAK_SYSTEM_DIR=/flatpak/flatpak \
-            -e FLATPAK_TRIGGERS_DIR=/flatpak/triggers \
-            -v ${FLATPAK_REFS_DIR_ABS}:/output \
-            -v ${TEMP_FLATPAK_INSTALL_DIR}:/temp_flatpak_install_dir \
-            ${IMAGE} /temp_flatpak_install_dir/install-flatpaks.sh
-          docker rmi ${IMAGE}
-          cat ${FLATPAK_REFS_DIR}/flatpaks-with-deps
+          # Populate the setup script template with the values from the environment
+          # and save it to the rootfs-setup-hook.sh file
+          # Values to be replaced are enclosed in double curly braces
+          cp "$SCRIPT" rootfs-setup-hook.sh
+          sed -i "s|{{IMAGE_REF}}|$IMAGE_REF|g" rootfs-setup-hook.sh
+          sed -i "s|{{IMAGE_NAME}}|$IMAGE_NAME|g" rootfs-setup-hook.sh
+          sed -i "s|{{SECUREBOOT_ENROLLMENT_PASSWORD}}|$SECUREBOOT_ENROLLMENT_PASSWORD|g" rootfs-setup-hook.sh
+          chmod +x rootfs-setup-hook.sh
 
-          echo "FLATPAK_REFS_DIR=${FLATPAK_REFS_DIR}" >> $GITHUB_OUTPUT
+          echo "ROOTFS_SETUP_HOOK=${WORKSPACE_DIR}/rootfs-setup-hook.sh" >> $GITHUB_OUTPUT
 
       - name: Build ISO
-        uses: jasonn3/build-container-installer@d77e9563739921c2f93de778d4fbad854f52d389 # v1.3.0
+        uses: ublue-os/titanoboa@main
         id: build-iso
         with:
-          arch: ${{ inputs.arch }}
-          image_name: ${{ inputs.image-name }}
-          image_repo: ${{ inputs.image-registry }}
-          image_tag: ${{ inputs.image-tag }}
-          variant: Kinoite
-          version: ${{ inputs.installer-version }}
-          secure_boot_key_url: "https://github.com/rsturla/akmods/raw/main/_certs/public_key.der"
-          enrollment_password: "password"
-          iso_name: "${{ inputs.image-name }}-${{ inputs.image-tag }}-${{ inputs.arch }}.iso"
-          enable_cache_dnf: false
-          enable_cache_skopeo: false
-          flatpak_remote_refs_dir: ${{ steps.flatpak-dependencies.outputs.FLATPAK_REFS_DIR }}
-          enable_flatpak_dependencies: false
+          image-ref: ${{ inputs.image-registry }}/${{ inputs.image-name }}:${{ inputs.image-tag }}
+          flatpaks-list: ${{ steps.flatpak-manifest-list.outputs.MANIFESTS_FILE }}
+          hook-post-rootfs: ${{ steps.populate-setup-script.outputs.ROOTFS_SETUP_HOOK }}
+
+      - name: Rename ISO
+        id: rename-iso
+        shell: bash
+        env:
+          ISO_DEST: ${{ steps.build-iso.outputs.iso-dest }}
+          IMAGE_NAME: ${{ inputs.image-name }}
+          IMAGE_TAG: ${{ inputs.image-tag }}
+          ARCH: ${{ inputs.arch }}
+        run: |
+          set -euox pipefail
+
+          # Rename the ISO file to include the image name, tag, and architecture
+          ISO_FILE=$(ls ${{ steps.build-iso.outputs.iso-dest }} | grep -E '\.iso$')
+          IMAGE_NAME=${{ inputs.image-name }}
+          IMAGE_TAG=${{ inputs.image-tag }}
+          ARCH=${{ inputs.arch }}
+          NEW_ISO_NAME="${IMAGE_NAME}-${IMAGE_TAG}-${ARCH}-live"
+          NEW_ISO_DIR="$(dirname "${ISO_FILE}")"
+          mv "${ISO_FILE}" "${NEW_ISO_DIR}/${NEW_ISO_NAME}.iso"
+
+          echo "ISO_DEST=${NEW_ISO_DIR}/${NEW_ISO_NAME}.iso" >> $GITHUB_OUTPUT
 
       - name: Upload ISO to GitHub
         if: inputs.upload-to-cloudflare == false
@@ -114,7 +119,7 @@ jobs:
         with:
           name: ${{ inputs.image-name }}-${{ inputs.image-tag }}-${{ inputs.arch }}-iso
           path: |
-            ${{ steps.build-iso.outputs.iso_path }}/${{ steps.build-iso.outputs.iso_name }}
+            ${{ steps.rename-iso.outputs.ISO_DEST }}
 
       - name: Upload ISO to CloudFlare R2
         if: inputs.upload-to-cloudflare == true
@@ -126,7 +131,7 @@ jobs:
           RCLONE_CONFIG_R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           RCLONE_CONFIG_R2_REGION: auto
           RCLONE_CONFIG_R2_ENDPOINT: https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.r2.cloudflarestorage.com
-          SOURCE_FILE: ${{ steps.build-iso.outputs.iso_path }}/${{ steps.build-iso.outputs.iso_name }}
+          SOURCE_FILE: ${{ steps.rename-iso.outputs.ISO_DEST }}
           DEST_BUCKET: ${{ inputs.r2-bucket }}
         run: |
           sudo apt-get update

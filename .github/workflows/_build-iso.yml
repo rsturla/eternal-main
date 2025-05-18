@@ -68,6 +68,7 @@ jobs:
           IMAGE_REF: ${{ inputs.image-registry }}/${{ inputs.image-name }}:${{ inputs.image-tag }}
           IMAGE_NAME: ${{ inputs.image-name }}
           SECUREBOOT_ENROLLMENT_PASSWORD: ${{ inputs.SECUREBOOT_ENROLLMENT_PASSWORD }}
+          WORKSPACE_DIR: ${{ github.workspace }}
         run: |
           set -euox pipefail
 
@@ -80,7 +81,7 @@ jobs:
           sed -i "s|{{SECUREBOOT_ENROLLMENT_PASSWORD}}|$SECUREBOOT_ENROLLMENT_PASSWORD|g" rootfs-setup-hook.sh
           chmod +x rootfs-setup-hook.sh
 
-          echo "ROOTFS_SETUP_HOOK=./rootfs-setup-hook.sh" >> $GITHUB_OUTPUT
+          echo "ROOTFS_SETUP_HOOK=${WORKSPACE_DIR}/rootfs-setup-hook.sh" >> $GITHUB_OUTPUT
 
       - name: Build ISO
         uses: ublue-os/titanoboa@main

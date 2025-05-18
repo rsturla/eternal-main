@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - ".github/workflows/*build-iso.yml"
-      - "flatpaks/**"
+      - "iso/**"
   schedule:
     # Every week at midnight on Monday
     - cron: "0 0 * * 1"
@@ -25,10 +25,10 @@ jobs:
           - kinoite
         image-tag:
           - 42
-          # - 42-nvidia-open
+          - 42-nvidia-open
         arch:
           - x86_64
-          # - arm64
+          - arm64
     secrets: inherit
     with:
       image-name: ${{ matrix.image-name }}
@@ -36,7 +36,7 @@ jobs:
       image-tag: ${{ matrix.image-tag }}
       rootfs-setup-hook-template: ./iso/configure.sh.tmpl
       arch: ${{ matrix.arch }}
-      upload-to-cloudflare: true
+      upload-to-cloudflare: false
       r2-bucket: ${{ vars.R2_BUCKET_NAME }}
       flatpak-manifest-lists: |
         iso/flatpaks/base

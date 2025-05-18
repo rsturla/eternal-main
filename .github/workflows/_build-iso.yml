@@ -91,13 +91,34 @@ jobs:
           flatpaks-list: ${{ steps.flatpak-manifest-list.outputs.MANIFESTS_FILE }}
           hook-post-rootfs: ${{ steps.populate-setup-script.outputs.ROOTFS_SETUP_HOOK }}
 
+      - name: Rename ISO
+        id: rename-iso
+        shell: bash
+        env:
+          ISO_DEST: ${{ steps.build-iso.outputs.iso-dest }}
+          IMAGE_NAME: ${{ inputs.image-name }}
+          IMAGE_TAG: ${{ inputs.image-tag }}
+          ARCH: ${{ inputs.arch }}
+        run: |
+          set -euox pipefail
+
+          # Rename the ISO file to include the image name, tag, and architecture
+          ISO_FILE=$(ls ${{ steps.build-iso.outputs.iso-dest }} | grep -E '\.iso$')
+          IMAGE_NAME=${{ inputs.image-name }}
+          IMAGE_TAG=${{ inputs.image-tag }}
+          ARCH=${{ inputs.arch }}
+          NEW_ISO_NAME="${IMAGE_NAME}-${IMAGE_TAG}-${ARCH}-live"
+          mv "${{ steps.build-iso.outputs.iso-dest }}/${ISO_FILE}" "${{ steps.build-iso.outputs.iso-dest }}/${NEW_ISO_NAME}.iso"
+
+          echo "ISO_DEST=${{ steps.build-iso.outputs.iso-dest }}/${NEW_ISO_NAME}.iso" >> $GITHUB_OUTPUT
+
       - name: Upload ISO to GitHub
         if: inputs.upload-to-cloudflare == false
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: ${{ inputs.image-name }}-${{ inputs.image-tag }}-${{ inputs.arch }}-iso
           path: |
-            ${{ steps.build-iso.outputs.iso-dest }}
+            ${{ steps.rename-iso.outputs.ISO_DEST }}
 
       - name: Upload ISO to CloudFlare R2
         if: inputs.upload-to-cloudflare == true
@@ -109,7 +130,7 @@ jobs:
           RCLONE_CONFIG_R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           RCLONE_CONFIG_R2_REGION: auto
           RCLONE_CONFIG_R2_ENDPOINT: https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.r2.cloudflarestorage.com
-          SOURCE_FILE: ${{ steps.build-iso.outputs.iso-dest }}
+          SOURCE_FILE: ${{ steps.rename-iso.outputs.ISO_DEST }}
           DEST_BUCKET: ${{ inputs.r2-bucket }}
         run: |
           sudo apt-get update

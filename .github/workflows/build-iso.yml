@@ -25,16 +25,17 @@ jobs:
           - kinoite
         image-tag:
           - 42
-          - 42-nvidia-open
+          # - 42-nvidia-open
         arch:
           - x86_64
-          - arm64
+          # - arm64
     with:
       image-name: ${{ matrix.image-name }}
       image-registry: ghcr.io/rsturla/eternal-linux/main
       image-tag: ${{ matrix.image-tag }}
       rootfs-setup-hook-template: ./iso/configure.sh.tmpl
       arch: ${{ matrix.arch }}
+      upload-to-cloudflare: true
       flatpak-manifest-lists: |
         iso/flatpaks/base
         iso/flatpaks/${{ matrix.image-name }}

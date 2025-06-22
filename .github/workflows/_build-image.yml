@@ -276,8 +276,57 @@ jobs:
           private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
           private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
 
+  integration-test:
+    runs-on: ubuntu-24.04
+    needs: 
+      - build-nvidia
+    services:
+      openqa:
+        image: registry.opensuse.org/devel/openqa/containers/openqa-single-instance
+        options: >-
+          --device /dev/kvm
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: Fetch containers
+        run: docker container ls
+
+      - name: Determine Build Output Name
+        id: artifact-prefix
+        env:
+          IMAGE_NAME: ${{ inputs.image-name }}
+          MAJOR_VERSION: ${{ inputs.major-version }}
+          KERNEL_FLAVOR: ${{ inputs.kernel-flavor }}
+        run: |
+          OUTPUT_ARTIFACT_PREFIX=$(echo "$IMAGE_NAME-$MAJOR_VERSION-$KERNEL_FLAVOR-" | tr '/' '-')
+          echo "OUTPUT_ARTIFACT_PREFIX=${OUTPUT_ARTIFACT_PREFIX}" >> $GITHUB_OUTPUT
+
+      - name: Fetch Build Outputs
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: ${{ steps.artifact-prefix.outputs.OUTPUT_ARTIFACT_PREFIX }}*
+          merge-multiple: true
+          path: /tmp/artifacts
+
+      - name: Load Outputs
+        id: load-outputs
+        run: |
+          DIGESTS_JSON=$(jq -n '{}')
+          for digest_file in /tmp/artifacts/*; do
+            # Extract the platform from the file name
+            PLATFORM=$(basename $digest_file)
+            DIGEST=$(cat $digest_file)
+            # Add the platform and digest to the JSON object
+            DIGESTS_JSON=$(echo "$DIGESTS_JSON" | jq --arg key "$PLATFORM" --arg value "$DIGEST" '. + {($key): $value}')
+          done
+          echo "DIGESTS_JSON=$(echo $DIGESTS_JSON | jq -c '.')"
+          echo "DIGESTS_JSON=$(echo $DIGESTS_JSON | jq -c '.')" >> $GITHUB_OUTPUT
+
+
   build-nvidia:
     runs-on: ${{ matrix.platform == 'amd64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }}
+    if: false
     needs:
       - generate-matrix
       - build-base
@@ -408,6 +457,7 @@ jobs:
             /tmp/outputs/digests/*
 
   manifest-nvidia:
+    if: false
     needs:
       - build-nvidia
     runs-on: ubuntu-latest

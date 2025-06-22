@@ -278,8 +278,6 @@ jobs:
 
   integration-test:
     runs-on: ubuntu-24.04
-    needs: 
-      - build-base
     services:
       openqa:
         image: registry.opensuse.org/devel/openqa/containers/openqa-single-instance
@@ -289,8 +287,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
-      - name: Fetch containers
-        run: docker container ls
+      - name: Fetch container
+        id: fetch-container
+        run: |
+          docker container ls
+          CONTAINER_ID=$(docker container ls --filter ancestor=registry.opensuse.org/devel/openqa/containers/openqa-single-instance --format "{{.ID}}")
+          echo "CONTAINER_ID=$CONTAINER_ID" >> $GITHUB_OUTPUT
+
+      - name: Run sample test
+        env:
+          CONTAINER_ID: ${{ steps.fetch-container.outputs.CONTAINER_ID }}
+        run: |
+          docker exec $CONTAINER_ID openqa-cli schedule --monitor \
+            --param-file SCENARIO_DEFINITIONS_YAML=scenario-definitions.yaml \
+            DISTRI=example VERSION=0 FLAVOR=DVD ARCH=x86_64 \
+            TEST=simple_boot _GROUP_ID=0 BUILD=test \
+            CASEDIR=https://github.com/os-autoinst/os-autoinst-distri-example.git \
+            NEEDLES_DIR=%%CASEDIR%%/needles
 
       - name: Determine Build Output Name
         id: artifact-prefix

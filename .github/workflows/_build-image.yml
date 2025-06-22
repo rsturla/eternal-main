@@ -278,59 +278,24 @@ jobs:
 
   integration-test:
     runs-on: ubuntu-24.04
-    services:
-      openqa:
-        image: registry.opensuse.org/devel/openqa/containers/openqa-single-instance
-        options: >-
-          --device /dev/kvm
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
-      - name: Fetch container
-        id: fetch-container
-        run: |
-          docker container ls
-          CONTAINER_ID=$(docker container ls --filter ancestor=registry.opensuse.org/devel/openqa/containers/openqa-single-instance --format "{{.ID}}")
-          echo "CONTAINER_ID=$CONTAINER_ID" >> $GITHUB_OUTPUT
+      - name: Create pool directory
+        run: mkdir -p ./pool
 
-      - name: Run sample test
-        env:
-          CONTAINER_ID: ${{ steps.fetch-container.outputs.CONTAINER_ID }}
-        run: |
-          docker exec $CONTAINER_ID openqa-clone-job https://openqa.fedoraproject.org/tests/3503537
+      - name: qemu via podman
+        run: | 
+          podman run --rm -it -v .:/tests:Z -v ./pool:/opt/pool \
+            -w /opt/pool registry.opensuse.org/devel/openqa/containers/isotovideo:qemu-x86 \
+            qemu_no_kvm=1 casedir=./tests OPENQA_BASEDIR=/var/lib
 
-      - name: Determine Build Output Name
-        id: artifact-prefix
-        env:
-          IMAGE_NAME: ${{ inputs.image-name }}
-          MAJOR_VERSION: ${{ inputs.major-version }}
-          KERNEL_FLAVOR: ${{ inputs.kernel-flavor }}
-        run: |
-          OUTPUT_ARTIFACT_PREFIX=$(echo "$IMAGE_NAME-$MAJOR_VERSION-$KERNEL_FLAVOR-" | tr '/' '-')
-          echo "OUTPUT_ARTIFACT_PREFIX=${OUTPUT_ARTIFACT_PREFIX}" >> $GITHUB_OUTPUT
-
-      - name: Fetch Build Outputs
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+      - uses: actions/upload-artifact@v4
+        if: always()
         with:
-          pattern: ${{ steps.artifact-prefix.outputs.OUTPUT_ARTIFACT_PREFIX }}*
-          merge-multiple: true
-          path: /tmp/artifacts
-
-      - name: Load Outputs
-        id: load-outputs
-        run: |
-          DIGESTS_JSON=$(jq -n '{}')
-          for digest_file in /tmp/artifacts/*; do
-            # Extract the platform from the file name
-            PLATFORM=$(basename $digest_file)
-            DIGEST=$(cat $digest_file)
-            # Add the platform and digest to the JSON object
-            DIGESTS_JSON=$(echo "$DIGESTS_JSON" | jq --arg key "$PLATFORM" --arg value "$DIGEST" '. + {($key): $value}')
-          done
-          echo "DIGESTS_JSON=$(echo $DIGESTS_JSON | jq -c '.')"
-          echo "DIGESTS_JSON=$(echo $DIGESTS_JSON | jq -c '.')" >> $GITHUB_OUTPUT
-
+          name: Test results
+          path: .
 
   build-nvidia:
     runs-on: ${{ matrix.platform == 'amd64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }}

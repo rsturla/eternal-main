@@ -287,9 +287,12 @@ jobs:
 
       - name: qemu via podman
         run: | 
-          podman run --rm -it -v .:/tests:Z -v ./pool:/opt/pool \
-            -w /opt/pool registry.opensuse.org/devel/openqa/containers/isotovideo:qemu-x86 \
-            qemu_no_kvm=1 casedir=./tests OPENQA_BASEDIR=/var/lib
+          podman run --rm \
+            -v .:/repo:Z \
+            -v ./pool:/opt/pool \
+            -w /opt/pool \
+            registry.opensuse.org/devel/openqa/containers/isotovideo:qemu-x86 \
+            qemu_no_kvm=1 casedir=/repo/tests OPENQA_BASEDIR=/var/lib
 
       - uses: actions/upload-artifact@v4
         if: always()

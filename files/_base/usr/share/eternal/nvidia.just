@@ -9,8 +9,8 @@ nvidia-setup:
 [private]
 nvidia-disable-nouveau:
   rpm-ostree kargs \
-    --append-if-missing=rd.driver.blacklist=nouveau \
-    --append-if-missing=modprobe.blacklist=nouveau \
+    --append-if-missing=rd.driver.blacklist=nouveau,nova-core \
+    --append-if-missing=modprobe.blacklist=nouveau,nova-core \
     --append-if-missing=nvidia-drm.modeset=1
 
 [private]

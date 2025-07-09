@@ -134,7 +134,7 @@ jobs:
           image-name: ${{ inputs.image-name }}
           image-tag: local
           build-args: |
-            MAJOR_VERSION=${{ inputs.major-version }}
+            MAJOR_VERSION=${{ inputs.kernel-flavor == 'default' && inputs.major-version || inputs.kernel-flavor }}
             DESKTOP_ENVIRONMENT=${{ inputs.desktop-environment }}
             ${{ inputs.kernel-flavor != 'default' && format('COREOS_KERNEL={0}', steps.get-coreos-kernel.outputs.coreos-kernel-release) || '' }}
             ${{ inputs.source-image != '' && format('IMAGE_REGISTRY={0}', inputs.source-image) || '' }}
@@ -156,7 +156,7 @@ jobs:
           IMAGE_NAME: ${{ inputs.image-name }}
           DIGEST: ${{ steps.push.outputs.digest }}
           PLATFORM: ${{ matrix.platform }}
-          MAJOR_VERSION: ${{ inputs.major-version }}
+          MAJOR_VERSION: ${{ inputs.kernel-flavor == 'default' && inputs.major-version || inputs.kernel-flavor }}
           KERNEL_FLAVOR: ${{ inputs.kernel-flavor }}
         run: |
           OUTPUT_ARTIFACT_NAME=$(echo "$IMAGE_NAME-$MAJOR_VERSION-$KERNEL_FLAVOR-$PLATFORM" | tr '/' '-')
@@ -187,7 +187,7 @@ jobs:
         id: artifact-prefix
         env:
           IMAGE_NAME: ${{ inputs.image-name }}
-          MAJOR_VERSION: ${{ inputs.major-version }}
+          MAJOR_VERSION: ${{ inputs.kernel-flavor == 'default' && inputs.major-version || inputs.kernel-flavor }}
           KERNEL_FLAVOR: ${{ inputs.kernel-flavor }}
         run: |
           OUTPUT_ARTIFACT_PREFIX=$(echo "$IMAGE_NAME-$MAJOR_VERSION-$KERNEL_FLAVOR-" | tr '/' '-')
@@ -293,7 +293,7 @@ jobs:
         id: artifact-prefix
         env:
           IMAGE_NAME: ${{ inputs.image-name }}
-          MAJOR_VERSION: ${{ inputs.major-version }}
+          MAJOR_VERSION: ${{ inputs.kernel-flavor == 'default' && inputs.major-version || inputs.kernel-flavor }}
           KERNEL_FLAVOR: ${{ inputs.kernel-flavor }}
         run: |
           OUTPUT_ARTIFACT_PREFIX=$(echo "$IMAGE_NAME-$MAJOR_VERSION-$KERNEL_FLAVOR-" | tr '/' '-')
@@ -367,7 +367,7 @@ jobs:
           image-tag: local
           build-args: |
             BASE_IMAGE_FULL=${{ env.IMAGE_REGISTRY }}/${{ inputs.image-name }}@${{ steps.load-outputs.outputs.DIGEST }}
-            MAJOR_VERSION=${{ inputs.major-version }}
+            MAJOR_VERSION=${{ inputs.kernel-flavor == 'default' && inputs.major-version || inputs.kernel-flavor }}
             ${{ inputs.kernel-flavor != 'default' && format('NVIDIA_AKMODS_TAG={0}', inputs.kernel-flavor) || '' }}
           rechunk: ${{ inputs.rechunk }}
           rechunk-prev-ref: ${{ env.IMAGE_REGISTRY }}/${{ inputs.image-name }}:${{ steps.generate-image-tags.outputs.stable-tag }}
@@ -387,7 +387,7 @@ jobs:
           IMAGE_NAME: ${{ inputs.image-name }}
           DIGEST: ${{ steps.push.outputs.digest }}
           PLATFORM: ${{ matrix.platform }}
-          MAJOR_VERSION: ${{ inputs.major-version }}
+          MAJOR_VERSION: ${{ inputs.kernel-flavor == 'default' && inputs.major-version || inputs.kernel-flavor }}
           KERNEL_FLAVOR: ${{ inputs.kernel-flavor }}
         run: |
           OUTPUT_ARTIFACT_NAME=$(echo "$IMAGE_NAME-$MAJOR_VERSION-$KERNEL_FLAVOR-nvidia-$PLATFORM" | tr '/' '-')
@@ -418,7 +418,7 @@ jobs:
         id: artifact-prefix
         env:
           IMAGE_NAME: ${{ inputs.image-name }}
-          MAJOR_VERSION: ${{ inputs.major-version }}
+          MAJOR_VERSION: ${{ inputs.kernel-flavor == 'default' && inputs.major-version || inputs.kernel-flavor }}
           KERNEL_FLAVOR: ${{ inputs.kernel-flavor }}
         run: |
           OUTPUT_ARTIFACT_PREFIX=$(echo "$IMAGE_NAME-$MAJOR_VERSION-$KERNEL_FLAVOR-nvidia-" | tr '/' '-')

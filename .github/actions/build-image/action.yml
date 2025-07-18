@@ -20,6 +20,10 @@ inputs:
     description: "Build arguments to pass to the Podman build.  Newline separated list of key=value pairs."
     required: false
     default: ""
+  secrets:
+    description: "Secrets to pass to the Podman build"
+    required: false
+    default: ""
   rechunk:
     description: "Whether the image should be rechunked"
     required: false
@@ -47,6 +51,7 @@ runs:
       shell: bash
       env:
         BUILD_ARGS_INPUT: ${{ inputs.build-args }}
+        SECRETS_INPUT: ${{ inputs.secrets }}
         TAG: ${{ inputs.image-tag }}
         RECHUNK: ${{ inputs.rechunk }}
       run: |
@@ -67,11 +72,35 @@ runs:
           BUILD_ARGS+=("--build-arg $build_arg")
         done <<< "${BUILD_ARGS_INPUT}"
 
+        SECRETS=()
+        SECRET_DIR=$(mktemp -d)
+
+        while IFS= read -r line; do
+          if [ -z "$line" ]; then
+            continue
+          fi
+
+          # Extract key=value
+          SECRET_ID=$(echo "$line" | cut -d= -f1)
+          SECRET_VALUE=$(echo "$line" | cut -d= -f2-)
+
+          # Write secret value to temp file
+          SECRET_FILE="$SECRET_DIR/$SECRET_ID"
+          echo -n "$SECRET_VALUE" > "$SECRET_FILE"
+
+          # Add --secret option
+          SECRETS+=("--secret=id=${SECRET_ID},src=${SECRET_FILE}")
+        done <<< "${SECRETS_INPUT}"
+
         $podman build \
           ${BUILD_ARGS[@]} \
+          ${SECRETS[@]} \
           -t ${{ inputs.image-name }}:$TAG \
           -f ${{ inputs.containerfile }} \
           ${{ inputs.context }}
+
+        # Remove secrets directory
+        rm -rf "$SECRET_DIR"
 
         DIGEST=$($podman image inspect ${{ inputs.image-name }}:${TAG} --format "{{.Digest}}")
         mapfile -t IMAGES < <($podman images --format "{{.ID}} {{.Digest}}" | grep -v "$DIGEST")

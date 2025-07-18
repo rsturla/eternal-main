@@ -75,22 +75,27 @@ runs:
         SECRETS=()
         SECRET_DIR=$(mktemp -d)
 
-        while IFS= read -r line; do
-          if [ -z "$line" ]; then
-            continue
-          fi
+        # Temporarily disable debug output to avoid leaking secrets
+        {
+          set +x
+          while IFS= read -r line; do
+            if [ -z "$line" ]; then
+              continue
+            fi
 
-          # Extract key=value
-          SECRET_ID=$(echo "$line" | cut -d= -f1)
-          SECRET_VALUE=$(echo "$line" | cut -d= -f2-)
+            # Extract key=value
+            SECRET_ID=$(echo "$line" | cut -d= -f1)
+            SECRET_VALUE=$(echo "$line" | cut -d= -f2-)
 
-          # Write secret value to temp file
-          SECRET_FILE="$SECRET_DIR/$SECRET_ID"
-          echo -n "$SECRET_VALUE" > "$SECRET_FILE"
+            # Write secret value to temp file
+            SECRET_FILE="$SECRET_DIR/$SECRET_ID"
+            echo -n "$SECRET_VALUE" > "$SECRET_FILE"
 
-          # Add --secret option
-          SECRETS+=("--secret=id=${SECRET_ID},src=${SECRET_FILE}")
-        done <<< "${SECRETS_INPUT}"
+            # Add --secret option
+            SECRETS+=("--secret=id=${SECRET_ID},src=${SECRET_FILE}")
+          done <<< "${SECRETS_INPUT}"
+          set -x
+        } 2>/dev/null
 
         $podman build \
           ${BUILD_ARGS[@]} \

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DESKTOP_ENVIRONMENT="${1:-gnome}"  # default gnome
+# Accept desktop environment as argument, default to 'gnome' if not provided
+DESKTOP_ENVIRONMENT="${1:-gnome}"
 MAJOR_VERSION=42
 IMAGE_REGISTRY="quay.io/fedora/fedora-silverblue"
 FEDORA_IMAGE="${IMAGE_REGISTRY}:${MAJOR_VERSION}"

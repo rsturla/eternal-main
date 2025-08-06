@@ -39,6 +39,10 @@ inputs:
     description: "Cache source for Podman build (optional)"
     required: false
     default: ""
+  cache-ttl:
+    description: "Cache TTL for Podman build (optional)"
+    required: false
+    default: ""
 
 outputs:
   image:
@@ -64,6 +68,7 @@ runs:
         RECHUNK: ${{ inputs.rechunk }}
         CACHE_TO: ${{ inputs.cache-to }}
         CACHE_FROM: ${{ inputs.cache-from }}
+        CACHE_TTL: ${{ inputs.cache-ttl }}
       run: |
         set -x
 
@@ -112,6 +117,9 @@ runs:
           CACHE_ARGS+=("--cache-to=$CACHE_TO" "--layers")
           if [[ -n "$CACHE_FROM" ]]; then
             CACHE_ARGS+=("--cache-from=$CACHE_FROM")
+          fi
+          if [[ -n "$CACHE_TTL" ]]; then
+            CACHE_ARGS+=("--cache-ttl=$CACHE_TTL")
           fi
         fi
         $podman build \

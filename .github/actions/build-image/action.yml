@@ -31,6 +31,14 @@ inputs:
   rechunk-prev-ref:
     description: "Previous image reference to use when rechunking"
     required: false
+  cache-to:
+    description: "Cache destination for Podman build (optional)"
+    required: false
+    default: ""
+  cache-from:
+    description: "Cache source for Podman build (optional)"
+    required: false
+    default: ""
 
 outputs:
   image:
@@ -54,6 +62,8 @@ runs:
         SECRETS_INPUT: ${{ inputs.secrets }}
         TAG: ${{ inputs.image-tag }}
         RECHUNK: ${{ inputs.rechunk }}
+        CACHE_TO: ${{ inputs.cache-to }}
+        CACHE_FROM: ${{ inputs.cache-from }}
       run: |
         set -x
 
@@ -97,9 +107,17 @@ runs:
           set -x
         } 2>/dev/null
 
+        CACHE_ARGS=()
+        if [[ -n "$CACHE_TO" ]]; then
+          CACHE_ARGS+=("--cache-to=$CACHE_TO" "--layers")
+          if [[ -n "$CACHE_FROM" ]]; then
+            CACHE_ARGS+=("--cache-from=$CACHE_FROM")
+          fi
+        fi
         $podman build \
           ${BUILD_ARGS[@]} \
           ${SECRETS[@]} \
+          ${CACHE_ARGS[@]} \
           -t ${{ inputs.image-name }}:$TAG \
           -f ${{ inputs.containerfile }} \
           ${{ inputs.context }}

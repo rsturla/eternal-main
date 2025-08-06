@@ -123,6 +123,8 @@ jobs:
 
       - name: Generate Containerfile
         id: generate-containerfile
+        env:
+          DESKTOP_ENVIRONMENT: ${{ inputs.desktop-environment }}
         run: |
           ./generate.sh
 

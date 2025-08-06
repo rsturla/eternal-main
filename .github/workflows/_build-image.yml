@@ -27,10 +27,6 @@ on:
         required: false
         type: boolean
         default: false
-      containerfile:
-        required: false
-        type: string
-        default: ./Containerfile
       build-context:
         required: false
         type: string
@@ -125,12 +121,17 @@ jobs:
         with:
           coreos-stream: ${{ inputs.kernel-flavor }}
 
+      - name: Generate Containerfile
+        id: generate-containerfile
+        run: |
+          ./generate.sh
+
       - name: Build Image
         id: build
         uses: ./.github/actions/build-image
         with:
           context: ${{ inputs.build-context }}
-          containerfile: ${{ inputs.containerfile }}
+          containerfile: ./Containerfile.gen
           image-name: ${{ inputs.image-name }}
           image-tag: local
           build-args: |
@@ -363,7 +364,7 @@ jobs:
         uses: ./.github/actions/build-image
         with:
           context: ${{ inputs.build-context }}
-          containerfile: ${{ inputs.containerfile }}.nvidia
+          containerfile: ./Containerfile.nvidia
           image-name: ${{ inputs.image-name }}
           image-tag: local
           build-args: |

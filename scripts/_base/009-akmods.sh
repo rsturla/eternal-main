@@ -2,15 +2,17 @@
 
 set -euox pipefail
 
+AKMODS_DIR="/buildcontext/akmods"
+
 akmods=(
   v4l2loopback
 )
 
-# /tmp/akmods/scripts/v4l2loopback/*.sh
+# Loop through scripts for each akmod
 for akmod in "${akmods[@]}"; do
-  for script in /tmp/akmods/scripts/$akmod/*.sh; do
+  for script in "${AKMODS_DIR}/${akmod}/scripts/"*.sh; do
     if [[ -f "$script" ]]; then
-      bash "$script"
+      bash "$script" "${AKMODS_DIR}/${akmod}"
     fi
   done
 done

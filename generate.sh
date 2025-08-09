@@ -33,23 +33,22 @@ ARG COREOS_KERNEL
 COPY files/_base/ /
 COPY files/_${DESKTOP_ENVIRONMENT}* /
 
-COPY --from=ghcr.io/rsturla/akmods/v4l2loopback:\${AKMODS_TAG} /rpms /tmp/akmods/rpms
-COPY --from=ghcr.io/rsturla/akmods/v4l2loopback:\${AKMODS_TAG} /scripts /tmp/akmods/scripts/v4l2loopback
-
-RUN mkdir -p /scripts
+COPY --from=ghcr.io/rsturla/akmods/v4l2loopback:\${AKMODS_TAG} /rpms /buildcontext/akmods/v4l2loopback/rpms
+COPY --from=ghcr.io/rsturla/akmods/v4l2loopback:\${AKMODS_TAG} /scripts /buildcontext/akmods/v4l2loopback/scripts
 
 EOF
 
 # Add base scripts
 for script in scripts/_base/*.sh; do
   filename=$(basename "$script")
-  echo "COPY --chmod=755 scripts/_base/${filename} /scripts/${filename}" >> "$OUTPUT"
+  echo "COPY --chmod=755 scripts/_base/${filename} /buildcontext/scripts/${filename}" >> "$OUTPUT"
   echo "RUN --mount=type=cache,target=/var/cache \\" >> "$OUTPUT"
   echo "    --mount=type=cache,target=/var/lib \\" >> "$OUTPUT"
   echo "    --mount=type=cache,target=/var/log \\" >> "$OUTPUT"
-  echo "    --mount=type=cache,target=/var/tmp \\" >> "$OUTPUT"
+  echo "    --mount=type=tmpfs,target=/var/tmp \\" >> "$OUTPUT"
   echo "    --mount=type=tmpfs,target=/tmp \\" >> "$OUTPUT"
-  echo "    /bin/bash /scripts/${filename}" >> "$OUTPUT"
+  echo "    --mount=type=cache,target=/buildcontext \\" >> "$OUTPUT"
+  echo "    /bin/bash /buildcontext/scripts/${filename}" >> "$OUTPUT"
   echo "" >> "$OUTPUT"
 done
 
@@ -57,25 +56,27 @@ done
 if [[ "$DESKTOP_ENVIRONMENT" != "base" ]]; then
   for script in scripts/_${DESKTOP_ENVIRONMENT}/*.sh; do
     filename=$(basename "$script")
-    echo "COPY --chmod=755 scripts/_${DESKTOP_ENVIRONMENT}/${filename} /scripts/${filename}" >> "$OUTPUT"
+    echo "COPY --chmod=755 scripts/_${DESKTOP_ENVIRONMENT}/${filename} /buildcontext/scripts/${filename}" >> "$OUTPUT"
     echo "RUN --mount=type=cache,target=/var/cache \\" >> "$OUTPUT"
     echo "    --mount=type=cache,target=/var/lib \\" >> "$OUTPUT"
     echo "    --mount=type=cache,target=/var/log \\" >> "$OUTPUT"
-  echo "    --mount=type=cache,target=/var/tmp \\" >> "$OUTPUT"
+    echo "    --mount=type=tmpfs,target=/var/tmp \\" >> "$OUTPUT"
     echo "    --mount=type=tmpfs,target=/tmp \\" >> "$OUTPUT"
-    echo "    /bin/bash /scripts/${filename}" >> "$OUTPUT"
+    echo "    --mount=type=cache,target=/buildcontext \\" >> "$OUTPUT"
+    echo "    /bin/bash /buildcontext/scripts/${filename}" >> "$OUTPUT"
     echo "" >> "$OUTPUT"
   done
 fi
 
 # Add cleanup script
-echo "COPY --chmod=755 scripts/cleanup.sh /scripts/cleanup.sh" >> "$OUTPUT"
+echo "COPY --chmod=755 scripts/cleanup.sh /buildcontext/scripts/cleanup.sh" >> "$OUTPUT"
 echo "RUN --mount=type=cache,target=/var/cache \\" >> "$OUTPUT"
 echo "    --mount=type=cache,target=/var/lib \\" >> "$OUTPUT"
 echo "    --mount=type=cache,target=/var/log \\" >> "$OUTPUT"
-  echo "    --mount=type=cache,target=/var/tmp \\" >> "$OUTPUT"
+echo "    --mount=type=tmpfs,target=/var/tmp \\" >> "$OUTPUT"
 echo "    --mount=type=tmpfs,target=/tmp \\" >> "$OUTPUT"
-echo "    /bin/bash /scripts/cleanup.sh --base ${DESKTOP_ENVIRONMENT}" >> "$OUTPUT"
+echo "    --mount=type=cache,target=/buildcontext \\" >> "$OUTPUT"
+echo "    /bin/bash /buildcontext/scripts/cleanup.sh --base ${DESKTOP_ENVIRONMENT}" >> "$OUTPUT"
 
 echo ""
 echo "✅ $OUTPUT generated."

@@ -15,11 +15,11 @@ ARG AKMODS_TAG
 COPY files/_base files/_${DESKTOP_ENVIRONMENT}* /
 
 # Fetch akmods
-COPY --from=ghcr.io/rsturla/akmods/v4l2loopback:${AKMODS_TAG} /rpms /tmp/akmods/rpms
-COPY --from=ghcr.io/rsturla/akmods/v4l2loopback:${AKMODS_TAG} /scripts /tmp/akmods/scripts/v4l2loopback
+COPY --from=ghcr.io/rsturla/akmods/v4l2loopback:${AKMODS_TAG} /rpms /buildcontext/akmods/v4l2loopback/rpms
+COPY --from=ghcr.io/rsturla/akmods/v4l2loopback:${AKMODS_TAG} /scripts /buildcontext/akmods/v4l2loopback/scripts
 
-COPY scripts/ /tmp/scripts
+COPY scripts/ /buildcontext/scripts
 
-RUN chmod +x /tmp/scripts/*.sh /tmp/scripts/_${DESKTOP_ENVIRONMENT}/*.sh && \
-  /tmp/scripts/setup.sh --base ${DESKTOP_ENVIRONMENT} && \
-  /tmp/scripts/cleanup.sh --base ${DESKTOP_ENVIRONMENT}
+RUN chmod +x /buildcontext/scripts/*.sh /buildcontext/scripts/_${DESKTOP_ENVIRONMENT}/*.sh && \
+  /buildcontext/scripts/setup.sh --base ${DESKTOP_ENVIRONMENT} && \
+  /buildcontext/scripts/cleanup.sh --base ${DESKTOP_ENVIRONMENT}

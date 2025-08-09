@@ -26,9 +26,9 @@ COPY --from=akmods-nvidia /scripts /tmp/akmods/scripts
 RUN chmod +x /tmp/akmods/scripts/*.sh && \
   chmod +x /tmp/scripts/*.sh \
   && \
-  /tmp/akmods/scripts/00-preinstall.sh && \
-  /tmp/akmods/scripts/01-install.sh && \
-  /tmp/akmods/scripts/02-postinstall.sh \
+  /tmp/akmods/scripts/00-preinstall.sh /tmp/akmods && \
+  /tmp/akmods/scripts/01-install.sh /tmp/akmods && \
+  /tmp/akmods/scripts/02-postinstall.sh /tmp/akmods \
   && \
   echo "import '/usr/share/eternal/nvidia.just'" >> /usr/share/eternal/justfile \
   && \

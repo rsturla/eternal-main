@@ -32,4 +32,5 @@ RUN chmod +x /tmp/akmods/scripts/*.sh && \
   && \
   echo "import '/usr/share/eternal/nvidia.just'" >> /usr/share/eternal/justfile \
   && \
+  rm -rf /var/cache/* && \
   ./tmp/scripts/cleanup.sh

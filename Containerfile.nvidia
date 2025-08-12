@@ -32,7 +32,7 @@ RUN chmod +x /tmp/akmods/scripts/*.sh && \
   && \
   echo "import '/usr/share/eternal/nvidia.just'" >> /usr/share/eternal/justfile \
   && \
-  rm -rf /var/cache/* /var/log/* /var/tmp/* && \
-  ./tmp/scripts/cleanup.sh
+  ./tmp/scripts/cleanup.sh && \
+  rm -rf /var/cache/* /var/log/* /var/tmp/* /var/lib/*
 
 RUN bootc container lint --no-truncate --fatal-warnings

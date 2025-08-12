@@ -7,6 +7,10 @@ inputs:
   prev-ref:
     description: 'The reference to the previous image'
     required: false
+  max-layers:
+    description: 'The maximum number of layers to include in an image'
+    required: false
+    default: 64
 
 runs:
   using: 'composite'
@@ -23,6 +27,7 @@ runs:
         ref: ${{ inputs.ref }}
         skip_compression: false
         prev-ref: ${{ inputs.prev-ref }}
+        max-layers: ${{ inputs.max-layers }}
 
     - name: Load Image
       shell: bash

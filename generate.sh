@@ -82,5 +82,8 @@ echo "    --mount=type=tmpfs,target=/tmp \\" >> "$OUTPUT"
 echo "    --mount=type=bind,from=ctx,src=/,dst=/buildcontext \\" >> "$OUTPUT"
 echo "    /bin/bash /buildcontext/scripts/cleanup.sh --base ${DESKTOP_ENVIRONMENT}" >> "$OUTPUT"
 
+# Add final lint checks
+echo "RUN bootc container lint --no-truncate --fatal-warnings" >> "$OUTPUT"
+
 echo ""
 echo "✅ $OUTPUT generated."

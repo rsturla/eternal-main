@@ -31,6 +31,10 @@ inputs:
   rechunk-prev-ref:
     description: "Previous image reference to use when rechunking"
     required: false
+  rechunk-max-layers:
+    description: 'The maximum number of layers to include in an image'
+    required: false
+    default: 64
   cache-to:
     description: "Cache destination for Podman build (optional)"
     required: false
@@ -152,6 +156,7 @@ runs:
       with:
         ref: ${{ inputs.image-name }}:${{ inputs.image-tag }}
         prev-ref: ${{ inputs.rechunk-rev-ref }}
+        rechunk-max-layers: ${{ inputs.rechunk-max-layers }}
 
     - name: Set Outputs
       id: set-outputs

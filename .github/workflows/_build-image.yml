@@ -284,8 +284,33 @@ jobs:
           private-key: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY }}
           private-key-passphrase: ${{ secrets.ETERNAL_LINUX_SIGNING_KEY_PASSPHRASE }}
 
+  integration-test:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: Create pool directory
+        run: mkdir -p ./pool
+
+      - name: qemu via podman
+        run: | 
+          podman run --rm \
+            -v .:/repo:Z \
+            -v ./pool:/opt/pool \
+            -w /opt/pool \
+            registry.opensuse.org/devel/openqa/containers/isotovideo:qemu-x86 \
+            qemu_no_kvm=1 casedir=/repo/tests OPENQA_BASEDIR=/var/lib
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Test results
+          path: .
+
   build-nvidia:
     runs-on: ${{ matrix.platform == 'amd64' && 'ubuntu-24.04' || 'ubuntu-24.04-arm' }}
+    if: false
     needs:
       - generate-matrix
       - build-base
@@ -418,6 +443,7 @@ jobs:
             /tmp/outputs/digests/*
 
   manifest-nvidia:
+    if: false
     needs:
       - build-nvidia
     runs-on: ubuntu-latest

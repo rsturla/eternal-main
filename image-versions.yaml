@@ -17,4 +17,4 @@ images:
       - version: 41
         digest: sha256:247633131267d7a06bc160df27c90af6dabe9773e2d10828997503211ca0c4da
       - version: 40
-        digest: sha256:ca3a9cb83b016c29177c907db5654b9fcb3e9c4fb567b10eda0a83cb1ff73bb0
+        digest: sha256:ae5ab7bf373e09f3ac71c0c6d2b599d796dd187225bd50ab444f73b73284f51c

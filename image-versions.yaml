@@ -15,6 +15,6 @@ images:
     image: quay.io/fedora/fedora-kinoite
     versions:
       - version: 41
-        digest: sha256:247633131267d7a06bc160df27c90af6dabe9773e2d10828997503211ca0c4da
+        digest: sha256:0650b84c8997214e8069a6b594097e20915c13a242c2f2f51bb43c6932fdd633
       - version: 40
         digest: sha256:ca3a9cb83b016c29177c907db5654b9fcb3e9c4fb567b10eda0a83cb1ff73bb0

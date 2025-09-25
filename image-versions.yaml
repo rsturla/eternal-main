@@ -10,7 +10,7 @@ images:
       - version: 41
         digest: sha256:1d8812cfbc484b658af3e81da39fbe0ce5d27df111dbf5b1adeaba96ce39e49c
       - version: 40
-        digest: sha256:2e299fb21a6012a65e44e4df3323223e24ec7fc8981be27650d4f61fd42397e0
+        digest: sha256:2d2380f2f981c6c6c04f6a3c362078ece0f7d60ddb80cf8a85a6603fbcff44f2
   - name: kinoite
     image: quay.io/fedora/fedora-kinoite
     versions:

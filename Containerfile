@@ -32,5 +32,5 @@ RUN --mount=type=cache,target=/var/cache \
     --mount=type=tmpfs,target=/tmp \
     --mount=type=bind,from=ctx,src=/,dst=/buildcontext \
     --mount=type=bind,from=ctx,src=/akmods,dst=/buildcontext/akmods \
-    /buildcontext/scripts/setup.sh --base ${DESKTOP_ENVIRONMENT} && \
-    /buildcontext/scripts/cleanup.sh --base ${DESKTOP_ENVIRONMENT}
+    bash /buildcontext/scripts/setup.sh --base ${DESKTOP_ENVIRONMENT} && \
+    bash /buildcontext/scripts/cleanup.sh --base ${DESKTOP_ENVIRONMENT}

@@ -2,12 +2,12 @@
 set -euo pipefail
 
 # Accept desktop environment as argument, default to 'gnome' if not provided
-DESKTOP_ENVIRONMENT="${1:-gnome}"
-MAJOR_VERSION=42
-IMAGE_REGISTRY="quay.io/fedora/fedora-silverblue"
-FEDORA_IMAGE="${IMAGE_REGISTRY}:${MAJOR_VERSION}"
-AKMODS_TAG="${MAJOR_VERSION}"
-COREOS_KERNEL="N/A"
+DESKTOP_ENVIRONMENT="${DESKTOP_ENVIRONMENT:-gnome}"
+MAJOR_VERSION="${MAJOR_VERSION:-42}"
+IMAGE_REGISTRY="${IMAGE_REGISTRY:-quay.io/fedora-ostree-desktops/silverblue}"
+FEDORA_IMAGE="${FEDORA_IMAGE:-${IMAGE_REGISTRY}:${MAJOR_VERSION}}"
+AKMODS_TAG="${AKMODS_TAG:-${MAJOR_VERSION}}"
+COREOS_KERNEL="${COREOS_KERNEL:-N/A}"
 
 OUTPUT="Containerfile.gen"
 
@@ -40,7 +40,7 @@ ARG MAJOR_VERSION
 ARG COREOS_KERNEL
 
 COPY --from=ctx files/_base/ /
-COPY --from=ctx files/_${DESKTOP_ENVIRONMENT}* /
+COPY --from=ctx files/_\${DESKTOP_ENVIRONMENT}* /
 
 EOF
 
@@ -68,7 +68,7 @@ if [[ "$DESKTOP_ENVIRONMENT" != "base" ]]; then
     echo "    --mount=type=tmpfs,target=/var/tmp \\" >> "$OUTPUT"
     echo "    --mount=type=tmpfs,target=/tmp \\" >> "$OUTPUT"
     echo "    --mount=type=bind,from=ctx,src=/,dst=/buildcontext \\" >> "$OUTPUT"
-    echo "    /bin/bash /buildcontext/scripts/_${DESKTOP_ENVIRONMENT}/${filename}" >> "$OUTPUT"
+    echo "    /bin/bash /buildcontext/scripts/_\${DESKTOP_ENVIRONMENT}/${filename}" >> "$OUTPUT"
     echo "" >> "$OUTPUT"
   done
 fi
@@ -80,7 +80,7 @@ echo "    --mount=type=cache,target=/var/log \\" >> "$OUTPUT"
 echo "    --mount=type=tmpfs,target=/var/tmp \\" >> "$OUTPUT"
 echo "    --mount=type=tmpfs,target=/tmp \\" >> "$OUTPUT"
 echo "    --mount=type=bind,from=ctx,src=/,dst=/buildcontext \\" >> "$OUTPUT"
-echo "    /bin/bash /buildcontext/scripts/cleanup.sh --base ${DESKTOP_ENVIRONMENT}" >> "$OUTPUT"
+echo "    /bin/bash /buildcontext/scripts/cleanup.sh --base \${DESKTOP_ENVIRONMENT}" >> "$OUTPUT"
 
 # Add final lint checks
 echo "RUN bootc container lint --no-truncate --fatal-warnings" >> "$OUTPUT"

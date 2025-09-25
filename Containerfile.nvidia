@@ -5,25 +5,34 @@ ARG BASE_IMAGE=ghcr.io/rsturla/eternal-linux/main/${DESKTOP_ENVIRONMENT}
 ARG BASE_TAG=${MAJOR_VERSION}
 ARG BASE_IMAGE_FULL=${BASE_IMAGE}:${BASE_TAG}
 
-ARG NVIDIA_AKMODS_IMAGE=ghcr.io/rsturla/akmods/nvidia
 ARG NVIDIA_AKMODS_TAG=${MAJOR_VERSION}
 
+FROM scratch AS ctx
 
-FROM ${NVIDIA_AKMODS_IMAGE}:${NVIDIA_AKMODS_TAG} AS akmods-nvidia
+ARG NVIDIA_AKMODS_TAG
 
+COPY ./scripts /scripts
+COPY ./files /files
+
+COPY --from=ghcr.io/rsturla/akmods/nvidia:${NVIDIA_AKMODS_TAG} /rpms /akmods/rpms
+COPY --from=ghcr.io/rsturla/akmods/nvidia:${NVIDIA_AKMODS_TAG} /info /akmods/info
+COPY --from=ghcr.io/rsturla/akmods/nvidia:${NVIDIA_AKMODS_TAG} /scripts /akmods/scripts
 
 FROM ${BASE_IMAGE_FULL} AS base-nvidia
 
 ARG MAJOR_VERSION
 
-COPY files/_nvidia /
-COPY scripts /tmp/scripts
+COPY --from=ctx files/_nvidia /
+COPY --from=ctx scripts /tmp/scripts
+COPY --from=ctx /akmods /tmp/akmods
 
-COPY --from=akmods-nvidia /rpms /tmp/akmods/rpms
-COPY --from=akmods-nvidia /info /tmp/akmods/info
-COPY --from=akmods-nvidia /scripts /tmp/akmods/scripts
-
-RUN chmod +x /tmp/akmods/scripts/*.sh && \
+RUN --mount=type=cache,target=/var/cache \
+  --mount=type=cache,target=/var/lib \
+  --mount=type=cache,target=/var/log \
+  --mount=type=tmpfs,target=/var/tmp \
+  --mount=type=bind,from=ctx,src=/,dst=/buildcontext \
+  --mount=type=bind,from=ctx,src=/akmods,dst=/buildcontext/akmods \
+  chmod +x /tmp/akmods/scripts/*.sh && \
   chmod +x /tmp/scripts/*.sh \
   && \
   /tmp/akmods/scripts/00-preinstall.sh /tmp/akmods && \
@@ -33,6 +42,6 @@ RUN chmod +x /tmp/akmods/scripts/*.sh && \
   echo "import '/usr/share/eternal/nvidia.just'" >> /usr/share/eternal/justfile \
   && \
   ./tmp/scripts/cleanup.sh && \
-  rm -rf /var/cache/* /var/log/* /var/tmp/* /var/lib/* /tmp/*
+  rm -rf /tmp/*
 
 RUN bootc container lint --no-truncate --fatal-warnings

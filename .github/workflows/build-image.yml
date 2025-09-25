@@ -35,7 +35,7 @@ jobs:
       is-release: ${{ (github.event_name == 'schedule' || github.event_name == 'push') && startsWith(github.ref, 'refs/heads/main') }}
       platforms: amd64
       kernel-flavor: ${{ matrix.kernel-flavor }}
-      source-image: quay.io/fedora/fedora-silverblue
+      source-image: quay.io/fedora-ostree-desktops/silverblue
 
   build-cosmic:
     uses: ./.github/workflows/_build-image.yml
@@ -72,4 +72,4 @@ jobs:
   #     is-release: ${{ (github.event_name == 'schedule' || github.event_name == 'push') && startsWith(github.ref, 'refs/heads/main') }}
   #     platforms: amd64 arm64
   #     kernel-flavor: ${{ matrix.kernel-flavor }}
-  #     source-image: quay.io/fedora/fedora-kinoite
+  #     source-image: quay.io/fedora-ostree-desktops/fedora-kinoite

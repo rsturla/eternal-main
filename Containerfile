@@ -23,7 +23,7 @@ ARG MAJOR_VERSION
 ARG COREOS_KERNEL
 
 COPY --from=ctx files/_base/ /
-COPY --from=ctx files/_\${DESKTOP_ENVIRONMENT}* /
+COPY --from=ctx files/_${DESKTOP_ENVIRONMENT}* /
 
 RUN --mount=type=cache,target=/var/cache \
     --mount=type=cache,target=/var/lib \

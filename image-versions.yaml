@@ -3,7 +3,7 @@ images:
     image: quay.io/fedora-ostree-desktops/cosmic-atomic
     versions:
       - version: 41
-        digest: sha256:fda352bbf4352a4a5b00c00be1452fcd5831e0530a1911838c52f9ecf6939ca9
+        digest: sha256:9a3f2afe0a49ad364a6db8bcf09289e6a640c258d6823459bbfef99a1c740e1c
   - name: silverblue
     image: quay.io/fedora/fedora-silverblue
     versions:

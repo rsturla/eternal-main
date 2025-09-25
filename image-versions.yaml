@@ -8,7 +8,7 @@ images:
     image: quay.io/fedora/fedora-silverblue
     versions:
       - version: 41
-        digest: sha256:1d8812cfbc484b658af3e81da39fbe0ce5d27df111dbf5b1adeaba96ce39e49c
+        digest: sha256:b45b3f5b828fe8372752855948d52af5b04adb6f2bb36d183da8c660e859c38a
       - version: 40
         digest: sha256:2e299fb21a6012a65e44e4df3323223e24ec7fc8981be27650d4f61fd42397e0
   - name: kinoite

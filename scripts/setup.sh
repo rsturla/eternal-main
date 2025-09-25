@@ -4,7 +4,11 @@ set -euo pipefail
 
 DESKTOP_ENVIRONMENT=${DESKTOP_ENVIRONMENT}
 
-for script in /tmp/scripts/_base/*.sh; do
+# Get the directory of the current script
+SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
+
+# Run base scripts
+for script in "$SCRIPT_DIR"/_base/*.sh; do
   if [[ -f "$script" ]]; then
     echo "::group::===$(basename "$script")==="
     bash "$script"
@@ -17,7 +21,8 @@ if [[ "$DESKTOP_ENVIRONMENT" == "base" ]]; then
   exit 0
 fi
 
-for script in /tmp/scripts/_$DESKTOP_ENVIRONMENT/*.sh; do
+# Run environment-specific scripts
+for script in "$SCRIPT_DIR"/_"$DESKTOP_ENVIRONMENT"/*.sh; do
   if [[ -f "$script" ]]; then
     echo "::group::===$(basename "$script")==="
     bash "$script"

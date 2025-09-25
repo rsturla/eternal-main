@@ -122,20 +122,12 @@ jobs:
         with:
           coreos-stream: ${{ inputs.kernel-flavor }}
 
-      - name: Generate Containerfile
-        id: generate-containerfile
-        env:
-          DESKTOP_ENVIRONMENT: ${{ inputs.desktop-environment }}
-          MAJOR_VERSION: ${{ inputs.major-version }}
-        run: |
-          ./generate.sh
-
       - name: Build Image
         id: build
         uses: ./.github/actions/build-image
         with:
           context: ${{ inputs.build-context }}
-          containerfile: ./Containerfile.gen
+          containerfile: ./Containerfile
           image-name: ${{ inputs.image-name }}
           image-tag: local
           build-args: |

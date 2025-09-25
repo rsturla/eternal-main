@@ -5,21 +5,32 @@ ARG FEDORA_IMAGE=${IMAGE_REGISTRY}:${MAJOR_VERSION}
 ARG COREOS_KERNEL="N/A"
 ARG AKMODS_TAG=${MAJOR_VERSION}
 
-FROM ${FEDORA_IMAGE} AS base
+FROM scratch AS ctx
 
-ARG MAJOR_VERSION
-ARG DESKTOP_ENVIRONMENT
-ARG COREOS_KERNEL
 ARG AKMODS_TAG
 
-COPY files/_base files/_${DESKTOP_ENVIRONMENT}* /
+COPY ./scripts /scripts
+COPY ./files /files
 
-# Fetch akmods
-COPY --from=ghcr.io/rsturla/akmods/v4l2loopback:${AKMODS_TAG} /rpms /buildcontext/akmods/v4l2loopback/rpms
-COPY --from=ghcr.io/rsturla/akmods/v4l2loopback:${AKMODS_TAG} /scripts /buildcontext/akmods/v4l2loopback/scripts
+COPY --from=ghcr.io/rsturla/akmods/v4l2loopback:${AKMODS_TAG} /rpms /akmods/v4l2loopback/rpms
+COPY --from=ghcr.io/rsturla/akmods/v4l2loopback:${AKMODS_TAG} /scripts /akmods/v4l2loopback/scripts
 
-COPY scripts/ /buildcontext/scripts
 
-RUN chmod +x /buildcontext/scripts/*.sh /buildcontext/scripts/_${DESKTOP_ENVIRONMENT}/*.sh && \
-  /buildcontext/scripts/setup.sh --base ${DESKTOP_ENVIRONMENT} && \
-  /buildcontext/scripts/cleanup.sh --base ${DESKTOP_ENVIRONMENT}
+FROM ${FEDORA_IMAGE} AS base
+
+ARG DESKTOP_ENVIRONMENT
+ARG MAJOR_VERSION
+ARG COREOS_KERNEL
+
+COPY --from=ctx files/_base/ /
+COPY --from=ctx files/_\${DESKTOP_ENVIRONMENT}* /
+
+RUN --mount=type=cache,target=/var/cache \
+    --mount=type=cache,target=/var/lib \
+    --mount=type=cache,target=/var/log \
+    --mount=type=tmpfs,target=/var/tmp \
+    --mount=type=tmpfs,target=/tmp \
+    --mount=type=bind,from=ctx,src=/,dst=/buildcontext \
+    --mount=type=bind,from=ctx,src=/akmods,dst=/buildcontext/akmods \
+    /buildcontext/scripts/setup.sh --base ${DESKTOP_ENVIRONMENT} && \
+    /buildcontext/scripts/cleanup.sh --base ${DESKTOP_ENVIRONMENT}

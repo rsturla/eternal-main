@@ -34,3 +34,5 @@ RUN --mount=type=cache,target=/var/cache \
     --mount=type=bind,from=ctx,src=/akmods,dst=/buildcontext/akmods \
     bash /buildcontext/scripts/setup.sh --base ${DESKTOP_ENVIRONMENT} && \
     bash /buildcontext/scripts/cleanup.sh --base ${DESKTOP_ENVIRONMENT}
+
+RUN bootc container lint --no-truncate --fatal-warnings

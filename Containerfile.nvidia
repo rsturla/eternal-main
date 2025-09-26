@@ -22,14 +22,15 @@ FROM ${BASE_IMAGE_FULL} AS base-nvidia
 
 ARG MAJOR_VERSION
 
-COPY --from=ctx files/_nvidia /
-COPY --from=ctx scripts /tmp/scripts
+COPY --from=ctx /files/_nvidia /
+COPY --from=ctx /scripts /tmp/scripts
 COPY --from=ctx /akmods /tmp/akmods
 
 RUN --mount=type=cache,target=/var/cache \
   --mount=type=cache,target=/var/lib \
   --mount=type=cache,target=/var/log \
   --mount=type=tmpfs,target=/var/tmp \
+  --mount=type=tmpfs,target=/var \
   --mount=type=bind,from=ctx,src=/,dst=/buildcontext \
   --mount=type=bind,from=ctx,src=/akmods,dst=/buildcontext/akmods \
   chmod +x /tmp/akmods/scripts/*.sh && \

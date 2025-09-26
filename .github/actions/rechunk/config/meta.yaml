@@ -749,6 +749,7 @@ meta:
   monaspace-fonts:
     files:
       - /usr/share/fonts/monaspace/*
+    dedicated: False
   kind:
     files:
       - /usr/bin/kind
@@ -756,3 +757,4 @@ meta:
   twingate:
     packages:
       - twingate*
+    dedicated: False

@@ -28,6 +28,7 @@ runs:
         skip_compression: false
         prev-ref: ${{ inputs.prev-ref }}
         max-layers: ${{ inputs.max-layers }}
+        meta: ${{ github.action_path }}/config/meta.yaml
 
     - name: Load Image
       shell: bash

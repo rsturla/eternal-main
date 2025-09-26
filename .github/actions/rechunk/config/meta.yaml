@@ -746,6 +746,8 @@ meta:
   1password:
     packages:
       - 1password*
+    files:
+      - /usr/lib/1Password/*
   monaspace-fonts:
     files:
       - /usr/share/fonts/monaspace/*

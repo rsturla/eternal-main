@@ -23,11 +23,12 @@ runs:
       id: rechunk
       uses: hhd-dev/rechunk@ded27feba22df48134eece2c66ba0fca1289ff40 # v1.2.3
       with:
-        rechunk: ghcr.io/hhd-dev/rechunk:v1.2.2
+        rechunk: ghcr.io/hhd-dev/rechunk:v1.2.3
         ref: ${{ inputs.ref }}
         skip_compression: false
         prev-ref: ${{ inputs.prev-ref }}
         max-layers: ${{ inputs.max-layers }}
+        meta: ${{ github.action_path }}/config/meta.yaml
 
     - name: Load Image
       shell: bash

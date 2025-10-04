@@ -23,6 +23,7 @@ ARG MAJOR_VERSION
 COPY --from=ctx /files/_nvidia /
 COPY --from=ctx /scripts /tmp/scripts
 COPY --from=ctx /akmods /tmp/akmods
+COPY --from=ctx /certs /tmp/certs
 
 RUN --mount=type=cache,target=/var/cache \
   --mount=type=cache,target=/var/lib \

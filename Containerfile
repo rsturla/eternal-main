@@ -12,9 +12,7 @@ ARG AKMODS_TAG
 COPY ./scripts /scripts
 COPY ./files /files
 
-COPY --from=ghcr.io/rsturla/akmods/v4l2loopback:${AKMODS_TAG} /rpms /akmods/v4l2loopback/rpms
-COPY --from=ghcr.io/rsturla/akmods/v4l2loopback:${AKMODS_TAG} /scripts /akmods/v4l2loopback/scripts
-
+COPY --from=ghcr.io/rsturla/akmods/v4l2loopback:${AKMODS_TAG} / /akmods/v4l2loopback/
 
 FROM ${FEDORA_IMAGE} AS base
 

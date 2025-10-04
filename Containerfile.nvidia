@@ -14,9 +14,7 @@ ARG NVIDIA_AKMODS_TAG
 COPY ./scripts /scripts
 COPY ./files /files
 
-COPY --from=ghcr.io/rsturla/akmods/nvidia:${NVIDIA_AKMODS_TAG} /rpms /akmods/rpms
-COPY --from=ghcr.io/rsturla/akmods/nvidia:${NVIDIA_AKMODS_TAG} /info /akmods/info
-COPY --from=ghcr.io/rsturla/akmods/nvidia:${NVIDIA_AKMODS_TAG} /scripts /akmods/scripts
+COPY --from=ghcr.io/rsturla/akmods/nvidia:${NVIDIA_AKMODS_TAG} / /akmods/
 
 FROM ${BASE_IMAGE_FULL} AS base-nvidia
 
@@ -25,6 +23,7 @@ ARG MAJOR_VERSION
 COPY --from=ctx /files/_nvidia /
 COPY --from=ctx /scripts /tmp/scripts
 COPY --from=ctx /akmods /tmp/akmods
+COPY --from=ctx /akmods/certs /tmp/certs
 
 RUN --mount=type=cache,target=/var/cache \
   --mount=type=cache,target=/var/lib \

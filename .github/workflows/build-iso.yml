@@ -22,13 +22,11 @@ jobs:
         image-name:
           - silverblue
           - cosmic
-          - kinoite
         image-tag:
           - 42
           - 42-nvidia
         arch:
           - amd64
-          - arm64
     secrets: inherit
     with:
       image-name: ${{ matrix.image-name }}

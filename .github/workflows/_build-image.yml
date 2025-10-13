@@ -136,9 +136,6 @@ jobs:
             ${{ inputs.kernel-flavor != 'default' && format('COREOS_KERNEL={0}', steps.get-coreos-kernel.outputs.coreos-kernel-release) || '' }}
             ${{ inputs.kernel-flavor != 'default' && format('AKMODS_TAG={0}', inputs.kernel-flavor) || '' }}
             ${{ inputs.source-image != '' && format('IMAGE_REGISTRY={0}', inputs.source-image) || '' }}
-          cache-to: ghcr.io/${{ github.repository_owner }}/cache
-          cache-from: ghcr.io/${{ github.repository_owner }}/cache
-          cache-ttl: 24h
           rechunk: ${{ inputs.rechunk }}
           rechunk-prev-ref: ${{ env.IMAGE_REGISTRY }}/${{ inputs.image-name }}:${{ steps.generate-image-tags.outputs.stable-tag }}
           rechunk-max-layers: 256
@@ -371,9 +368,6 @@ jobs:
             BASE_IMAGE_FULL=${{ env.IMAGE_REGISTRY }}/${{ inputs.image-name }}@${{ steps.load-outputs.outputs.DIGEST }}
             MAJOR_VERSION=${{ inputs.major-version }}
             ${{ inputs.kernel-flavor != 'default' && format('NVIDIA_AKMODS_TAG={0}', inputs.kernel-flavor) || '' }}
-          cache-to: ghcr.io/${{ github.repository_owner }}/cache
-          cache-from: ghcr.io/${{ github.repository_owner }}/cache
-          cache-ttl: 24h
           rechunk: ${{ inputs.rechunk }}
           rechunk-prev-ref: ${{ env.IMAGE_REGISTRY }}/${{ inputs.image-name }}:${{ steps.generate-image-tags.outputs.stable-tag }}
 

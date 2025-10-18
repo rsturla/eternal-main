@@ -38,17 +38,15 @@ All images are also built with the `:<version>-nvidia` tag, which includes the N
 
 ### Using the Images Directly
 
-As mentioned above, these images are not intended to be used directly, however you are free to do so if you wish.  If you do, you will need to use the following commands in your host terminal:
+As mentioned above, these images are not intended to be used directly, however you are free to do so if you wish.  
+If you do, you will need to use the following commands in your host terminal:
 
 ```bash
-$ rpm-ostree rebase ostree-unverified-registry:ghcr.io/rsturla/eternal-linux/main/<type>:<version>
+$ bootc switch --enforce-container-sigpolicy ghcr.io/rsturla/eternal-linux/main/<type>:<version>
 $ reboot
-$ eternal sign
 ```
 
 Where `<type>` is the type of image you want to use (e.g. Silverblue), and `<version>` is the Fedora version of the image you want to use (e.g. 38).
-
-The `sign` command is provided by the Eternal CLI, which is installed by default in all images.  It contains convenience scripts for importing the Eternal GPG keys and requiring new images to be signed before they can be trusted and used.
 
 
 ## Building

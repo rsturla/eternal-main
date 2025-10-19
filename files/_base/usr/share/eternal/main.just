@@ -7,7 +7,7 @@ update-flatpak:
 
 [private]
 update-system:
-  bootc update
+  sudo bootc update
 
 [private]
 update-firmware:

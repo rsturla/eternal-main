@@ -11,6 +11,7 @@ dnf install -y \
   htop \
   just \
   openssl \
+  parallel \
   tmux \
   zsh \
   zstd

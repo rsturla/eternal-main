@@ -23,8 +23,8 @@ jobs:
           - silverblue
           - cosmic
         image-tag:
-          - 42
-          - 42-nvidia
+          - 43
+          - 43-nvidia
         arch:
           - amd64
     secrets: inherit

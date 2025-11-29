@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-set -euox pipefail
+set -euo pipefail
 
-# Add rsturla/devel COPR repo configuration, disabled by default
+# Add COPR repo (disabled by default)
 cat > /etc/yum.repos.d/rsturla-devel.repo <<'EOF'
 [copr:copr.fedorainfracloud.org:rsturla:devel]
 name=Copr repo for devel owned by rsturla
@@ -16,67 +16,52 @@ enabled=0
 enabled_metadata=1
 EOF
 
-dnf download --enablerepo=copr:copr.fedorainfracloud.org:rsturla:devel --from-repo=copr:copr.fedorainfracloud.org:rsturla:devel -y rpm --destdir=/tmp
-dnf download --enablerepo=copr:copr.fedorainfracloud.org:rsturla:devel --from-repo=copr:copr.fedorainfracloud.org:rsturla:devel -y rpm-libs --destdir=/tmp
-dnf download --enablerepo=copr:copr.fedorainfracloud.org:rsturla:devel --from-repo=copr:copr.fedorainfracloud.org:rsturla:devel -y rpm-sign-libs --destdir=/tmp
-dnf download --enablerepo=copr:copr.fedorainfracloud.org:rsturla:devel --from-repo=copr:copr.fedorainfracloud.org:rsturla:devel -y rpm-build-libs --destdir=/tmp
-dnf download --enablerepo=copr:copr.fedorainfracloud.org:rsturla:devel --from-repo=copr:copr.fedorainfracloud.org:rsturla:devel -y rpm-plugin-audit --destdir=/tmp
-dnf download --enablerepo=copr:copr.fedorainfracloud.org:rsturla:devel --from-repo=copr:copr.fedorainfracloud.org:rsturla:devel -y rpm-plugin-selinux --destdir=/tmp
+# Download and install new RPM with jsonzstd support
+dnf download \
+  --enablerepo=copr:copr.fedorainfracloud.org:rsturla:devel \
+  --from-repo=copr:copr.fedorainfracloud.org:rsturla:devel \
+  -y rpm rpm-libs rpm-sign-libs rpm-build-libs rpm-plugin-audit rpm-plugin-selinux \
+  --destdir=/tmp
+
 rm -f /tmp/*.src.rpm
 rpm -Uvh --force /tmp/rpm-*.rpm
 
-echo
+# Find actual RPM database directory
+for dir in /usr/lib/sysimage/rpm /usr/share/rpm /var/lib/rpm; do
+  if [ -d "$dir" ] && [ -f "$dir/rpmdb.sqlite" ]; then
+    RPM_DB_DIR="$dir"
+    break
+  fi
+done
 
-# Determine the actual RPM database location
-if [ -d /usr/lib/sysimage/rpm ]; then
-  RPM_DB_DIR=/usr/lib/sysimage/rpm
-elif [ -d /usr/share/rpm ]; then
-  RPM_DB_DIR=/usr/share/rpm
-else
-  RPM_DB_DIR=/var/lib/rpm
-fi
+echo "Using RPM database at: $RPM_DB_DIR"
 
-echo "=== RPM database location: $RPM_DB_DIR ==="
-echo "=== Before conversion ==="
-ls -lah "$RPM_DB_DIR/"
-
-# DON'T delete sqlite yet - we need it for the conversion!
-# Just run rebuild which will convert sqlite -> jsonzstd
-if ! rpm --rebuilddb 2>&1; then
-  echo "=== Handling overlayfs rename limitation ==="
-
-  # Find the rpmrebuilddb temporary directory
+# Rebuild database (convert sqlite -> jsonzstd)
+if ! rpm --rebuilddb 2>/dev/null; then
+  # Handle overlayfs limitation: manual rename
   REBUILD_DIR=$(find /usr/lib/sysimage /var/lib /usr/share -maxdepth 1 -name 'rpmrebuilddb.*' -type d 2>/dev/null | head -n1)
 
-  if [ -n "$REBUILD_DIR" ] && [ -d "$REBUILD_DIR" ]; then
-    echo "Found rebuild directory: $REBUILD_DIR"
-    echo "Replacing $RPM_DB_DIR with rebuilt database..."
-
+  if [ -n "$REBUILD_DIR" ]; then
     rm -rf "$RPM_DB_DIR"
     cp -a "$REBUILD_DIR" "$RPM_DB_DIR"
     rm -rf "$REBUILD_DIR"
-
-    echo "Database rebuild completed successfully"
   else
-    echo "ERROR: Could not find rpmrebuilddb directory"
+    echo "ERROR: Database rebuild failed"
     exit 1
   fi
 fi
 
-# Now clean up old sqlite files after successful conversion
-rm -f "$RPM_DB_DIR/rpmdb.sqlite" "$RPM_DB_DIR/rpmdb.sqlite-shm" "$RPM_DB_DIR/rpmdb.sqlite-wal"
+# Clean up old sqlite files from ALL possible locations
+for dir in /usr/lib/sysimage/rpm /usr/share/rpm /var/lib/rpm; do
+  if [ -d "$dir" ]; then
+    rm -f "$dir"/rpmdb.sqlite*
+  fi
+done
 
-# Verify database setup
-echo "=== Database Verification ==="
-ls -lah "$RPM_DB_DIR/"
-if [ -d "$RPM_DB_DIR/jsonzstd" ]; then
-  echo "=== JSON-ZSTD Backend (SUCCESS) ==="
-  ls -lah "$RPM_DB_DIR/jsonzstd/"
-  echo "=== Package count verification ==="
-  rpm -qa | wc -l
-elif [ -f "$RPM_DB_DIR/rpmdb.sqlite" ]; then
-  echo "=== WARNING: Still using sqlite backend ==="
-fi
+ls -la /usr/share/rpm/
+ls -la /usr/share/rpm/jsonzstd/
 
-# Clean up COPR repo config
+# Clean up COPR repo
 rm -f /etc/yum.repos.d/rsturla-devel.repo
+
+echo "RPM database converted to jsonzstd"

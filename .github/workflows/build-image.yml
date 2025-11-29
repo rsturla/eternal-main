@@ -26,7 +26,7 @@ jobs:
       fail-fast: false
       matrix:
         major-version: [43]
-        kernel-flavor: [default, stable]
+        kernel-flavor: [default]
     secrets: inherit
     with:
       image-name: eternal-linux/main/silverblue
@@ -43,7 +43,7 @@ jobs:
       fail-fast: false
       matrix:
         major-version: [43]
-        kernel-flavor: [default, stable]
+        kernel-flavor: [default]
     secrets: inherit
     with:
       image-name: eternal-linux/main/cosmic
@@ -60,7 +60,7 @@ jobs:
   #     fail-fast: false
   #     matrix:
   #       major-version: [43]
-  #       kernel-flavor: [default, stable]
+  #       kernel-flavor: [default]
   #   secrets: inherit
   #   with:
   #     image-name: eternal-linux/main/kinoite

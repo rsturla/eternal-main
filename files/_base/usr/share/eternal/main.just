@@ -24,3 +24,6 @@ cleanup:
   #!/usr/bin/env bash
   podman system prune -a
   flatpak uninstall --unused
+
+secure-boot-enable:
+  sudo mokutil --import /etc/pki/akmods/certs/eternal-akmods.der

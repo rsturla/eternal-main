@@ -1,7 +1,7 @@
 nvidia-setup:
   @echo "Configuring NVIDIA drivers..."
   @just nvidia-disable-nouveau
-  @just nvidia-secure-boot-enable
+  @just secure-boot-enable
   @just nvidia-firefox-vaapi
   @just nvidia-generate-cdi
   @echo "Configuring NVIDIA drivers... done"
@@ -12,10 +12,6 @@ nvidia-disable-nouveau:
     --append-if-missing=rd.driver.blacklist=nouveau,nova-core \
     --append-if-missing=modprobe.blacklist=nouveau,nova-core \
     --append-if-missing=nvidia-drm.modeset=1
-
-[private]
-nvidia-secure-boot-enable:
-  sudo mokutil --import /etc/pki/akmods/certs/eternal-akmods.der
 
 nvidia-test-cuda:
   podman run \

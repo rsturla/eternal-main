@@ -25,7 +25,7 @@ COPY --from=ctx /scripts /tmp/scripts
 COPY --from=ctx /akmods /tmp/akmods
 COPY --from=ctx /akmods/certs /tmp/certs
 
-RUN --mount=type=cache,target=/var \
+RUN --mount=type=tmpfs,target=/var \
   --mount=type=bind,from=ctx,src=/,dst=/buildcontext \
   --mount=type=bind,from=ctx,src=/akmods,dst=/buildcontext/akmods \
   chmod +x /tmp/akmods/scripts/*.sh && \

@@ -23,10 +23,7 @@ ARG COREOS_KERNEL
 COPY --from=ctx files/_base/ /
 COPY --from=ctx files/_${DESKTOP_ENVIRONMENT}* /
 
-RUN --mount=type=cache,target=/var/cache \
-    --mount=type=cache,target=/var/lib \
-    --mount=type=cache,target=/var/log \
-    --mount=type=tmpfs,target=/var/tmp \
+RUN --mount=type=tmpfs,target=/var/cache \
     --mount=type=tmpfs,target=/tmp \
     --mount=type=bind,from=ctx,src=/,dst=/buildcontext \
     --mount=type=bind,from=ctx,src=/akmods,dst=/buildcontext/akmods \

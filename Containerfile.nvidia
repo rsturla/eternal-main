@@ -25,8 +25,7 @@ COPY --from=ctx /scripts /tmp/scripts
 COPY --from=ctx /akmods /tmp/akmods
 COPY --from=ctx /akmods/certs /tmp/certs
 
-RUN --mount=type=tmpfs,target=/var \
-  --mount=type=tmpfs,target=/tmp \
+RUN --mount=type=cache,target=/var \
   --mount=type=bind,from=ctx,src=/,dst=/buildcontext \
   --mount=type=bind,from=ctx,src=/akmods,dst=/buildcontext/akmods \
   chmod +x /tmp/akmods/scripts/*.sh && \
@@ -38,6 +37,7 @@ RUN --mount=type=tmpfs,target=/var \
   && \
   echo "import '/usr/share/eternal/nvidia.just'" >> /usr/share/eternal/justfile \
   && \
-  ./tmp/scripts/cleanup.sh
+  ./tmp/scripts/cleanup.sh && \
+  rm -rf /tmp/*
 
 RUN bootc container lint --no-truncate --fatal-warnings

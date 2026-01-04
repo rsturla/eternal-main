@@ -84,7 +84,7 @@ jobs:
           echo "ROOTFS_SETUP_HOOK=${WORKSPACE_DIR}/rootfs-setup-hook.sh" >> $GITHUB_OUTPUT
 
       - name: Build ISO
-        uses: ublue-os/titanoboa@8a4e6f17e29687414d91627e6f977169c1d36939 # main
+        uses: ublue-os/titanoboa@840217d97bd0bc9a52466508c54d8dda5c5ba2fd # main
         id: build-iso
         with:
           image-ref: ${{ inputs.image-registry }}/${{ inputs.image-name }}:${{ inputs.image-tag }}

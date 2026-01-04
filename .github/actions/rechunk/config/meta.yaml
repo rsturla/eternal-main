@@ -756,3 +756,8 @@ meta:
     files:
       - /usr/bin/kind
       - /usr/bin/cloud-provider-kind
+  chrome:
+    files:
+      - /usr/lib/google/*
+    packages:
+      - google-chrome-stable

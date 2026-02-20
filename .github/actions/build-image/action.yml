@@ -130,6 +130,7 @@ runs:
           ${BUILD_ARGS[@]} \
           ${SECRETS[@]} \
           ${CACHE_ARGS[@]} \
+          --skip-unused-stages=false \
           -t ${{ inputs.image-name }}:$TAG \
           -f ${{ inputs.containerfile }} \
           ${{ inputs.context }}

@@ -259,7 +259,7 @@ jobs:
           IMAGE_NAME: ${{ inputs.image-name }}
         run: |
           while IFS=' ' read -ra tag; do
-            podman manifest push --all=false --digestfile=/tmp/digestfile $MANIFEST $IMAGE_REGISTRY/$IMAGE_NAME:$tag
+            podman manifest push --all=false --compression-format zstd --digestfile=/tmp/digestfile $MANIFEST $IMAGE_REGISTRY/$IMAGE_NAME:$tag
           done <<< "$TAGS"
 
           DIGEST=$(cat /tmp/digestfile)
@@ -491,7 +491,7 @@ jobs:
           IMAGE_NAME: ${{ inputs.image-name }}
         run: |
           while IFS=' ' read -ra tag; do
-            podman manifest push --all=false --digestfile=/tmp/digestfile $MANIFEST $IMAGE_REGISTRY/$IMAGE_NAME:$tag
+            podman manifest push --all=false --compression-format zstd --digestfile=/tmp/digestfile $MANIFEST $IMAGE_REGISTRY/$IMAGE_NAME:$tag
           done <<< "$TAGS"
 
           DIGEST=$(cat /tmp/digestfile)

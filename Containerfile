@@ -23,11 +23,13 @@ ARG COREOS_KERNEL
 COPY --from=ctx files/_base/ /
 COPY --from=ctx files/_${DESKTOP_ENVIRONMENT}* /
 
-RUN --mount=type=tmpfs,target=/var \
+RUN --mount=type=tmpfs,target=/run \
+    --mount=type=tmpfs,target=/var \
     --mount=type=tmpfs,target=/tmp \
     --mount=type=bind,from=ctx,src=/,dst=/buildcontext \
     --mount=type=bind,from=ctx,src=/akmods,dst=/buildcontext/akmods \
     bash /buildcontext/scripts/setup.sh --base ${DESKTOP_ENVIRONMENT} && \
     bash /buildcontext/scripts/cleanup.sh --base ${DESKTOP_ENVIRONMENT}
 
-RUN bootc container lint --no-truncate --fatal-warnings
+RUN --network=none \
+    bootc container lint --no-truncate --fatal-warnings

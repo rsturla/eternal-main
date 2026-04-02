@@ -38,6 +38,10 @@ on:
       source-image:
         required: false
         type: string
+      compression-format:
+        required: false
+        type: string
+        default: zstd
 
 env:
   IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
@@ -148,6 +152,7 @@ jobs:
           image-name: ${{ steps.build.outputs.image }}
           image-tags: ${{ steps.generate-image-tags.outputs.primary-tag }}
           image-registry: ${{ env.IMAGE_REGISTRY }}
+          compression-format: ${{ inputs.compression-format }}
 
       - name: Create Job Outputs
         id: create-job-outputs
@@ -234,15 +239,22 @@ jobs:
           MANIFEST: ${{ steps.create-manifest.outputs.MANIFEST }}
           DIGESTS_JSON: ${{ steps.load-outputs.outputs.DIGESTS_JSON }}
           PLATFORMS: ${{ inputs.platforms }}
+          COMPRESSION_FORMAT: ${{ inputs.compression-format }}
         run: |
           DIGESTS=$(echo "$DIGESTS_JSON" | jq -c '.')
           # turn the comma separated string into a list
           platforms=()
           IFS=',' read -r -a platforms <<< "${PLATFORMS}"
+
+          ANNOTATION_ARGS=()
+          if [[ "${COMPRESSION_FORMAT}" == "zstd:chunked" ]]; then
+            ANNOTATION_ARGS+=(--annotation "io.github.containers.compression.zstd=true")
+          fi
+
           for platform in ${platforms[@]}; do
             digest=$(echo $DIGESTS | jq -r ".$platform")
             echo "Adding ${IMAGE_REGISTRY}/${IMAGE_NAME}@$digest for $platform"
-            podman manifest add $MANIFEST ${IMAGE_REGISTRY}/${IMAGE_NAME}@$digest --arch $platform
+            podman manifest add $MANIFEST ${IMAGE_REGISTRY}/${IMAGE_NAME}@$digest --arch $platform "${ANNOTATION_ARGS[@]}"
           done
 
       - name: Login to GHCR
@@ -259,7 +271,7 @@ jobs:
           IMAGE_NAME: ${{ inputs.image-name }}
         run: |
           while IFS=' ' read -ra tag; do
-            podman manifest push --all=false --compression-format zstd --digestfile=/tmp/digestfile $MANIFEST $IMAGE_REGISTRY/$IMAGE_NAME:$tag
+            podman manifest push --all=false --digestfile=/tmp/digestfile $MANIFEST $IMAGE_REGISTRY/$IMAGE_NAME:$tag
           done <<< "$TAGS"
 
           DIGEST=$(cat /tmp/digestfile)
@@ -379,6 +391,7 @@ jobs:
           image-name: ${{ steps.build.outputs.image }}
           image-tags: ${{ steps.generate-image-tags.outputs.primary-tag }}
           image-registry: ${{ env.IMAGE_REGISTRY }}
+          compression-format: ${{ inputs.compression-format }}
 
       - name: Create Job Outputs
         id: create-job-outputs
@@ -466,15 +479,22 @@ jobs:
           MANIFEST: ${{ steps.create-manifest.outputs.MANIFEST }}
           DIGESTS_JSON: ${{ steps.load-outputs.outputs.DIGESTS_JSON }}
           PLATFORMS: ${{ inputs.platforms }}
+          COMPRESSION_FORMAT: ${{ inputs.compression-format }}
         run: |
           DIGESTS=$(echo "$DIGESTS_JSON" | jq -c '.')
           # turn the comma separated string into a list
           platforms=()
           IFS=',' read -r -a platforms <<< "${PLATFORMS}"
+
+          ANNOTATION_ARGS=()
+          if [[ "${COMPRESSION_FORMAT}" == "zstd:chunked" ]]; then
+            ANNOTATION_ARGS+=(--annotation "io.github.containers.compression.zstd=true")
+          fi
+
           for platform in ${platforms[@]}; do
             digest=$(echo $DIGESTS | jq -r ".$platform")
             echo "Adding ${IMAGE_REGISTRY}/${IMAGE_NAME}@$digest for $platform"
-            podman manifest add $MANIFEST ${IMAGE_REGISTRY}/${IMAGE_NAME}@$digest --arch $platform
+            podman manifest add $MANIFEST ${IMAGE_REGISTRY}/${IMAGE_NAME}@$digest --arch $platform "${ANNOTATION_ARGS[@]}"
           done
 
       - name: Login to GHCR
@@ -491,7 +511,7 @@ jobs:
           IMAGE_NAME: ${{ inputs.image-name }}
         run: |
           while IFS=' ' read -ra tag; do
-            podman manifest push --all=false --compression-format zstd --digestfile=/tmp/digestfile $MANIFEST $IMAGE_REGISTRY/$IMAGE_NAME:$tag
+            podman manifest push --all=false --digestfile=/tmp/digestfile $MANIFEST $IMAGE_REGISTRY/$IMAGE_NAME:$tag
           done <<< "$TAGS"
 
           DIGEST=$(cat /tmp/digestfile)

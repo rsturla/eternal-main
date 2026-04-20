@@ -153,7 +153,7 @@ runs:
     - name: Rechunk
       id: rechunk
       if: ${{ inputs.rechunk == 'true' }}
-      uses: rsturla/eternal-main/.github/actions/rechunk@2aacfd64bf1266b39e1b9e15d09373dfdfd3174b # main
+      uses: rsturla/eternal-main/.github/actions/rechunk@4397dc249d4cddeb75f9c8a57f58b6575e3cdde2 # main
       with:
         ref: ${{ inputs.image-name }}:${{ inputs.image-tag }}
         prev-ref: ${{ inputs.rechunk-rev-ref }}

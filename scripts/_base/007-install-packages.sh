@@ -8,8 +8,10 @@ dnf install -y \
   ffmpeg \
   ffmpeg-libs \
   fzf \
+  gstreamer1-plugin-openh264 \
   htop \
   just \
+  openh264 \
   openssl \
   parallel \
   tmux \

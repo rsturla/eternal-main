@@ -14,7 +14,7 @@ KERNEL_MAJOR_MINOR_PATCH=$(echo $KERNEL_VERSION | cut -d '-' -f 1)
 KERNEL_RELEASE=$(echo $KERNEL_VERSION | cut -d '-' -f 2 | rev | cut -d '.' -f 2- | rev)
 ARCH=$(uname -m)
 
-dnf remove -y kernel{,-core,-modules,-modules-core,-modules-extra,-tools,-tools-libs}
+dnf remove -y kernel{,-core,-modules,-modules-core,-modules-extra,-tools,-tools-libs,-uki-virt}
 rm -rf /usr/lib/modules/*
 dnf install -y \
     https://kojipkgs.fedoraproject.org//packages/kernel/$KERNEL_MAJOR_MINOR_PATCH/$KERNEL_RELEASE/$ARCH/kernel-$KERNEL_MAJOR_MINOR_PATCH-$KERNEL_RELEASE.$ARCH.rpm \

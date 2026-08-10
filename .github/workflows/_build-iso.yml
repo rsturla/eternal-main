@@ -83,6 +83,18 @@ jobs:
 
           echo "ROOTFS_SETUP_HOOK=${WORKSPACE_DIR}/rootfs-setup-hook.sh" >> $GITHUB_OUTPUT
 
+      # Titanoboa runs `sudo podman run --mount type=image,source=<ref>` which
+      # does not pull the image and reads from root podman storage. Pre-pull the
+      # image with sudo so it is present locally; otherwise the run fails with
+      # "image not known".
+      - name: Pull Image
+        shell: bash
+        env:
+          IMAGE_REF: ${{ inputs.image-registry }}/${{ inputs.image-name }}:${{ inputs.image-tag }}
+        run: |
+          set -euox pipefail
+          sudo podman pull "$IMAGE_REF"
+
       - name: Build ISO
         uses: ublue-os/titanoboa@5c457c3d0518bd17e754be0fd98a60d29d26abb4 # main
         id: build-iso

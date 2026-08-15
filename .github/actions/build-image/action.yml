@@ -126,11 +126,22 @@ runs:
             CACHE_ARGS+=("--cache-ttl=$CACHE_TTL")
           fi
         fi
+
+        # Bind the build context to /run/src so the chunkah "FROM oci-archive:"
+        # split trick works: the chunkah stage writes out.ociarchive via
+        # `--mount=type=bind,target=/run/src,rw` and the final stage reads it
+        # back from the context. On buildah < v1.44 that write-back only reaches
+        # the host context with an explicit -v mount + label=disable.
+        # See https://github.com/coreos/chunkah#splitting-an-image-at-build-time-buildahpodman-only
+        CONTEXT_DIR=$(realpath "${{ inputs.context }}")
+
         $podman build \
           ${BUILD_ARGS[@]} \
           ${SECRETS[@]} \
           ${CACHE_ARGS[@]} \
           --skip-unused-stages=false \
+          -v "${CONTEXT_DIR}:/run/src" \
+          --security-opt=label=disable \
           -t ${{ inputs.image-name }}:$TAG \
           -f ${{ inputs.containerfile }} \
           ${{ inputs.context }}

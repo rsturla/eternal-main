@@ -27,6 +27,8 @@ jobs:
           - 43-nvidia
           - 44
           - 44-nvidia
+          - 45
+          - 45-nvidia
         arch:
           - amd64
     secrets: inherit
